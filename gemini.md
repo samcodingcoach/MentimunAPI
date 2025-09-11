@@ -63,3 +63,4 @@ password	varchar(255)	YES
 aktif	tinyint(4)	YES		1	
 
 #berinama halaman pegawai.php
+

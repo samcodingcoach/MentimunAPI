@@ -1,18 +1,96 @@
 <?php
 session_start();
+require_once __DIR__ . '/../../config/koneksi.php';
 
-if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
-    header("location: login.php");
-    exit;
-    
+// Check if user is logged in
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header('Location: login.php');
+    exit();
+}
+
+$message = '';
+$error = '';
+
+// Handle form submissions
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (isset($_POST['action'])) {
+        switch ($_POST['action']) {
+            case 'create':
+                $nama_aplikasi = trim($_POST['nama_aplikasi']);
+                $alamat = trim($_POST['alamat']);
+                $no_hp = trim($_POST['no_hp']);
+                $serverkeymidtrans = trim($_POST['serverkeymidtrans']);
+                
+                if (!empty($nama_aplikasi) && !empty($alamat) && !empty($no_hp)) {
+                    $stmt = $conn->prepare("INSERT INTO perusahaan (nama_aplikasi, alamat, no_hp, serverkeymidtrans, update_time) VALUES (?, ?, ?, ?, NOW())");
+                    if ($stmt->execute([$nama_aplikasi, $alamat, $no_hp, $serverkeymidtrans])) {
+                        $message = 'Data resto berhasil ditambahkan!';
+                    } else {
+                        $error = 'Error: ' . $conn->error;
+                    }
+                } else {
+                    $error = 'Nama aplikasi, alamat, dan nomor HP harus diisi!';
+                }
+                break;
+                
+            case 'update':
+                $id_app = $_POST['id_app'];
+                $nama_aplikasi = trim($_POST['nama_aplikasi']);
+                $alamat = trim($_POST['alamat']);
+                $no_hp = trim($_POST['no_hp']);
+                $serverkeymidtrans = trim($_POST['serverkeymidtrans']);
+                
+                if (!empty($nama_aplikasi) && !empty($alamat) && !empty($no_hp)) {
+                    $stmt = $conn->prepare("UPDATE perusahaan SET nama_aplikasi = ?, alamat = ?, no_hp = ?, serverkeymidtrans = ?, update_time = NOW() WHERE id_app = ?");
+                    if ($stmt->execute([$nama_aplikasi, $alamat, $no_hp, $serverkeymidtrans, $id_app])) {
+                        $message = 'Data resto berhasil diperbarui!';
+                    } else {
+                        $error = 'Error: ' . $conn->error;
+                    }
+                } else {
+                    $error = 'Nama aplikasi, alamat, dan nomor HP harus diisi!';
+                }
+                break;
+                
+            case 'delete':
+                $id_app = $_POST['id_app'];
+                $stmt = $conn->prepare("DELETE FROM perusahaan WHERE id_app = ?");
+                if ($stmt->execute([$id_app])) {
+                    $message = 'Data resto berhasil dihapus!';
+                } else {
+                    $error = 'Error: ' . $conn->error;
+                }
+                break;
+        }
+    }
+}
+
+// Get all resto data
+$result = $conn->query("SELECT * FROM perusahaan ORDER BY id_app DESC");
+if ($result) {
+    $restos = $result->fetch_all(MYSQLI_ASSOC);
+} else {
+    $error = 'Error fetching data: ' . $conn->error;
+    $restos = [];
+}
+
+// Get single resto for editing
+$edit_resto = null;
+if (isset($_GET['edit'])) {
+    $stmt = $conn->prepare("SELECT * FROM perusahaan WHERE id_app = ?");
+    $stmt->bind_param("i", $_GET['edit']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $edit_resto = $result->fetch_assoc();
 }
 ?>
+
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Admin Dashboard - Resto007</title>
+    <title>Resto - Admin Dashboard</title>
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="../css/admin.css" rel="stylesheet">
@@ -47,7 +125,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
           <div class="position-sticky pt-3">
             <ul class="nav flex-column">
               <li class="nav-item">
-                <a class="nav-link active" href="#">
+                <a class="nav-link" href="index.php">
                   <i class="bi bi-house-door"></i>
                   <span>Beranda</span>
                 </a>
@@ -67,9 +145,9 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                   <span>Master</span>
                   <i class="bi bi-chevron-down ms-auto"></i>
                 </a>
-                <div class="collapse" id="masterMenu">
+                <div class="collapse show" id="masterMenu">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
                     <li class="nav-item"><a class="nav-link" href="pegawai.php"><i class="bi bi-people"></i> Pegawai</a></li>
                     <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-truck"></i> Vendor</a></li>
                     <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-table"></i> Meja</a></li>
@@ -188,7 +266,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
           <div class="offcanvas-body">
             <ul class="nav flex-column">
               <li class="nav-item">
-                <a class="nav-link active" href="#">
+                <a class="nav-link" href="index.php">
                   <i class="bi bi-house-door"></i>
                   <span>Beranda</span>
                 </a>
@@ -207,9 +285,9 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                   <span>Master</span>
                   <i class="bi bi-chevron-down ms-auto"></i>
                 </a>
-                <div class="collapse" id="masterMenuMobile">
+                <div class="collapse show" id="masterMenuMobile">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
                     <li class="nav-item"><a class="nav-link" href="pegawai.php"><i class="bi bi-people"></i> Pegawai</a></li>
                     <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-truck"></i> Vendor</a></li>
                     <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-table"></i> Meja</a></li>
@@ -316,17 +394,74 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
         <!-- Main Content -->
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Dashboard</h1>
+            <h1 class="h2">Manajemen Resto</h1>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#restoModal">
+              <i class="bi bi-plus-circle"></i> Tambah Resto
+            </button>
           </div>
-          
-          <div class="row">
-            <div class="col-12">
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title">Selamat Datang, <?php echo htmlspecialchars($_SESSION["nama_lengkap"]); ?>!</h5>
-                  <p class="card-text">Role Anda: <span class="badge bg-primary"><?php echo htmlspecialchars($_SESSION["jabatan"]); ?></span></p>
-                  <p class="card-text">Silakan pilih menu di sidebar untuk mulai menggunakan sistem.</p>
-                </div>
+
+          <!-- Alert Messages -->
+          <?php if ($message): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <?php echo htmlspecialchars($message); ?>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          <?php endif; ?>
+
+          <?php if ($error): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <?php echo htmlspecialchars($error); ?>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          <?php endif; ?>
+
+          <!-- Data Table -->
+          <div class="card">
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>ID</th>
+                      <th>Nama Aplikasi</th>
+                      <th>Alamat</th>
+                      <th>No HP</th>
+                      <th>Server Key Midtrans</th>
+                      <th>Update Time</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php if (empty($restos)): ?>
+                      <tr>
+                        <td colspan="7" class="text-center">Tidak ada data resto</td>
+                      </tr>
+                    <?php else: ?>
+                      <?php foreach ($restos as $resto): ?>
+                        <tr>
+                          <td><?php echo htmlspecialchars($resto['id_app']); ?></td>
+                          <td><?php echo htmlspecialchars($resto['nama_aplikasi']); ?></td>
+                          <td><?php echo htmlspecialchars($resto['alamat']); ?></td>
+                          <td><?php echo htmlspecialchars($resto['no_hp']); ?></td>
+                          <td><?php echo htmlspecialchars(substr($resto['serverkeymidtrans'], 0, 20) . '...'); ?></td>
+                          <td><?php echo htmlspecialchars($resto['update_time']); ?></td>
+                          <td>
+                            <a href="?edit=<?php echo $resto['id_app']; ?>" class="btn btn-sm btn-warning me-1">
+                              <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                              <input type="hidden" name="action" value="delete">
+                              <input type="hidden" name="id_app" value="<?php echo $resto['id_app']; ?>">
+                              <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="bi bi-trash"></i>
+                              </button>
+                            </form>
+                          </td>
+                        </tr>
+                      <?php endforeach; ?>
+                    <?php endif; ?>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -334,6 +469,60 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
       </div>
     </div>
 
+    <!-- Modal for Add/Edit Resto -->
+    <div class="modal fade" id="restoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><?php echo $edit_resto ? 'Edit Resto' : 'Tambah Resto'; ?></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="<?php echo $edit_resto ? 'update' : 'create'; ?>">
+                        <?php if ($edit_resto): ?>
+                            <input type="hidden" name="id_app" value="<?php echo $edit_resto['id_app']; ?>">
+                        <?php endif; ?>
+                        
+                        <div class="mb-3">
+                            <label for="nama_aplikasi" class="form-label">Nama Aplikasi *</label>
+                            <input type="text" class="form-control" id="nama_aplikasi" name="nama_aplikasi" 
+                                   value="<?php echo $edit_resto ? htmlspecialchars($edit_resto['nama_aplikasi']) : ''; ?>" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="alamat" class="form-label">Alamat *</label>
+                            <textarea class="form-control" id="alamat" name="alamat" rows="3" required><?php echo $edit_resto ? htmlspecialchars($edit_resto['alamat']) : ''; ?></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="no_hp" class="form-label">No HP *</label>
+                            <input type="text" class="form-control" id="no_hp" name="no_hp" 
+                                   value="<?php echo $edit_resto ? htmlspecialchars($edit_resto['no_hp']) : ''; ?>" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="serverkeymidtrans" class="form-label">Server Key Midtrans</label>
+                            <input type="text" class="form-control" id="serverkeymidtrans" name="serverkeymidtrans" 
+                                   value="<?php echo $edit_resto ? htmlspecialchars($edit_resto['serverkeymidtrans']) : ''; ?>">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary"><?php echo $edit_resto ? 'Update' : 'Simpan'; ?></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="../js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto show modal if editing
+        <?php if ($edit_resto): ?>
+            var modal = new bootstrap.Modal(document.getElementById('restoModal'));
+            modal.show();
+        <?php endif; ?>
+    </script>
   </body>
 </html>
