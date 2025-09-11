@@ -69,12 +69,12 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 </a>
                 <div class="collapse" id="masterMenu">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#">Resto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Pegawai</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Vendor</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Meja</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Metode Pembayaran</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Bayar</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-building"></i> Resto</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people"></i> Pegawai</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-truck"></i> Vendor</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-table"></i> Meja</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-wallet2"></i> Bayar</a></li>
                   </ul>
                 </div>
               </li>
@@ -90,11 +90,11 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 </a>
                 <div class="collapse" id="produkMenu">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#">Kategori Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Kategori Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Resep</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-tags"></i> Kategori Menu</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-card-list"></i> Menu</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-collection"></i> Kategori Bahan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-basket"></i> Bahan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-journal-text"></i> Resep</a></li>
                   </ul>
                 </div>
               </li>
@@ -108,8 +108,8 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 </a>
                 <div class="collapse" id="pembelianMenu">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#">Pesanan Pembelian</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Pembayaran</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-clipboard-check"></i> Pesanan Pembelian</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-currency-dollar"></i> Pembayaran</a></li>
                   </ul>
                 </div>
               </li>
@@ -125,11 +125,11 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 </a>
                 <div class="collapse" id="penjualanMenu">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#">Shift Kasir</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Biaya Lain</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Harga Pokok Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Harga Rilis</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Pembatalan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-clock"></i> Shift Kasir</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-tag"></i> Harga Rilis</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
                   </ul>
                 </div>
               </li>
@@ -145,8 +145,8 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 </a>
                 <div class="collapse" id="inventoryMenu">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#">Inventory</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Transaksi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-box-seam"></i> Inventory</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
                   </ul>
                 </div>
               </li>
@@ -161,9 +161,9 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 </a>
                 <div class="collapse" id="laporanMenu">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#">Transaksi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Pengeluaran vs Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Kuantitas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-list-ul"></i> Transaksi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-bar-chart"></i> Pengeluaran vs Penjualan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-pie-chart"></i> Kuantitas</a></li>
                   </ul>
                 </div>
               </li>
@@ -209,12 +209,12 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 </a>
                 <div class="collapse" id="masterMenuMobile">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#">Resto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Pegawai</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Vendor</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Meja</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Metode Pembayaran</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Bayar</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-building"></i> Resto</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people"></i> Pegawai</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-truck"></i> Vendor</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-table"></i> Meja</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-wallet2"></i> Bayar</a></li>
                   </ul>
                 </div>
               </li>
@@ -229,11 +229,11 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 </a>
                 <div class="collapse" id="produkMenuMobile">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#">Kategori Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Kategori Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Resep</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-tags"></i> Kategori Menu</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-card-list"></i> Menu</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-collection"></i> Kategori Bahan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-basket"></i> Bahan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-journal-text"></i> Resep</a></li>
                   </ul>
                 </div>
               </li>
@@ -246,8 +246,8 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 </a>
                 <div class="collapse" id="pembelianMenuMobile">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#">Pesanan Pembelian</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Pembayaran</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-clipboard-check"></i> Pesanan Pembelian</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-currency-dollar"></i> Pembayaran</a></li>
                   </ul>
                 </div>
               </li>
@@ -262,11 +262,11 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 </a>
                 <div class="collapse" id="penjualanMenuMobile">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#">Shift Kasir</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Biaya Lain</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Harga Pokok Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Harga Rilis</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Pembatalan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-clock"></i> Shift Kasir</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-tag"></i> Harga Rilis</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
                   </ul>
                 </div>
               </li>
@@ -281,8 +281,8 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 </a>
                 <div class="collapse" id="inventoryMenuMobile">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#">Inventory</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Transaksi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-box-seam"></i> Inventory</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
                   </ul>
                 </div>
               </li>
@@ -296,9 +296,9 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 </a>
                 <div class="collapse" id="laporanMenuMobile">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#">Transaksi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Pengeluaran vs Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Kuantitas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-list-ul"></i> Transaksi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-bar-chart"></i> Pengeluaran vs Penjualan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-pie-chart"></i> Kuantitas</a></li>
                   </ul>
                 </div>
               </li>
