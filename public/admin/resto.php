@@ -65,13 +65,62 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Get all resto data
-$result = $conn->query("SELECT * FROM perusahaan ORDER BY id_app DESC");
-if ($result) {
+// Pagination and Search parameters
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$limit = 20;
+$offset = ($page - 1) * $limit;
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$filter = isset($_GET['filter']) ? trim($_GET['filter']) : '';
+
+// Build WHERE clause for search and filter
+$where_conditions = [];
+$params = [];
+$types = '';
+
+if (!empty($search)) {
+    $where_conditions[] = "(nama_aplikasi LIKE ? OR alamat LIKE ? OR no_hp LIKE ?)";
+    $search_param = "%$search%";
+    $params[] = $search_param;
+    $params[] = $search_param;
+    $params[] = $search_param;
+    $types .= 'sss';
+}
+
+if (!empty($filter)) {
+    // Add filter logic here if needed
+}
+
+$where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+
+// Get total count for pagination
+$count_sql = "SELECT COUNT(*) as total FROM perusahaan $where_clause";
+if (!empty($params)) {
+    $count_stmt = $conn->prepare($count_sql);
+    $count_stmt->bind_param($types, ...$params);
+    $count_stmt->execute();
+    $count_result = $count_stmt->get_result();
+} else {
+    $count_result = $conn->query($count_sql);
+}
+$total_records = $count_result->fetch_assoc()['total'];
+$total_pages = ceil($total_records / $limit);
+
+// Get resto data with pagination
+$sql = "SELECT * FROM perusahaan $where_clause ORDER BY id_app DESC LIMIT $limit OFFSET $offset";
+if (!empty($params)) {
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $result = $stmt->get_result();
     $restos = $result->fetch_all(MYSQLI_ASSOC);
 } else {
-    $error = 'Error fetching data: ' . $conn->error;
-    $restos = [];
+    $result = $conn->query($sql);
+    if ($result) {
+        $restos = $result->fetch_all(MYSQLI_ASSOC);
+    } else {
+        $error = 'Error fetching data: ' . $conn->error;
+        $restos = [];
+    }
 }
 
 // Get single resto for editing
@@ -415,56 +464,143 @@ if (isset($_GET['edit'])) {
             </div>
           <?php endif; ?>
 
-          <!-- Data Table -->
-          <div class="card">
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                  <thead class="table-dark">
-                    <tr>
-                      <th>ID</th>
-                      <th>Nama Aplikasi</th>
-                      <th>Alamat</th>
-                      <th>No HP</th>
-                      <th>Server Key Midtrans</th>
-                      <th>Update Time</th>
-                      <th>Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php if (empty($restos)): ?>
-                      <tr>
-                        <td colspan="7" class="text-center">Tidak ada data resto</td>
-                      </tr>
-                    <?php else: ?>
-                      <?php foreach ($restos as $resto): ?>
-                        <tr>
-                          <td><?php echo htmlspecialchars($resto['id_app']); ?></td>
-                          <td><?php echo htmlspecialchars($resto['nama_aplikasi']); ?></td>
-                          <td><?php echo htmlspecialchars($resto['alamat']); ?></td>
-                          <td><?php echo htmlspecialchars($resto['no_hp']); ?></td>
-                          <td><?php echo htmlspecialchars(substr($resto['serverkeymidtrans'], 0, 20) . '...'); ?></td>
-                          <td><?php echo htmlspecialchars($resto['update_time']); ?></td>
-                          <td>
-                            <a href="?edit=<?php echo $resto['id_app']; ?>" class="btn btn-sm btn-warning me-1">
-                              <i class="bi bi-pencil"></i>
-                            </a>
-                            <form method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-                              <input type="hidden" name="action" value="delete">
-                              <input type="hidden" name="id_app" value="<?php echo $resto['id_app']; ?>">
-                              <button type="submit" class="btn btn-sm btn-danger">
-                                <i class="bi bi-trash"></i>
-                              </button>
-                            </form>
-                          </td>
-                        </tr>
-                      <?php endforeach; ?>
-                    <?php endif; ?>
-                  </tbody>
-                </table>
-              </div>
+          <!-- Search and Filter -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <form method="GET" class="d-flex">
+                <input type="text" class="form-control me-2" name="search" placeholder="Cari nama, alamat, atau no HP..." value="<?php echo htmlspecialchars($search); ?>">
+                <button type="submit" class="btn btn-outline-primary">
+                  <i class="bi bi-search"></i>
+                </button>
+                <?php if (!empty($search)): ?>
+                  <a href="?" class="btn btn-outline-secondary ms-2">
+                    <i class="bi bi-x-circle"></i>
+                  </a>
+                <?php endif; ?>
+              </form>
+            </div>
+            <div class="col-md-6 text-end">
+              <small class="text-muted">
+                Menampilkan <?php echo count($restos); ?> dari <?php echo $total_records; ?> data
+              </small>
             </div>
           </div>
+
+          <!-- Data Table -->
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead class="table-dark">
+                <tr>
+                  <th>No</th>
+                  <th>Nama Aplikasi</th>
+                  <th class="d-none d-md-table-cell">Alamat</th>
+                  <th>No HP</th>
+                  <th class="d-none d-lg-table-cell">Server Key Midtrans</th>
+                  <th class="d-none d-md-table-cell">Update Time</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if (empty($restos)): ?>
+                  <tr>
+                    <td colspan="7" class="text-center">Tidak ada data resto</td>
+                  </tr>
+                <?php else: ?>
+                  <?php 
+                  $no = $offset + 1;
+                  foreach ($restos as $resto): 
+                  ?>
+                    <tr>
+                      <td><?php echo $no++; ?></td>
+                      <td><?php echo htmlspecialchars($resto['nama_aplikasi']); ?></td>
+                      <td class="d-none d-md-table-cell"><?php echo htmlspecialchars($resto['alamat']); ?></td>
+                      <td><?php echo htmlspecialchars($resto['no_hp']); ?></td>
+                      <td class="d-none d-lg-table-cell"><?php echo htmlspecialchars(substr($resto['serverkeymidtrans'], 0, 20) . '...'); ?></td>
+                      <td class="d-none d-md-table-cell"><?php echo htmlspecialchars($resto['update_time']); ?></td>
+                      <td>
+                        <div class="btn-group" role="group">
+                          <a href="?edit=<?php echo $resto['id_app']; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>&page=<?php echo $page; ?>" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil"></i>
+                          </a>
+                          <form method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="id_app" value="<?php echo $resto['id_app']; ?>">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
+                <?php endif; ?>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <?php if ($total_pages > 1): ?>
+            <nav aria-label="Page navigation">
+              <ul class="pagination justify-content-center">
+                <!-- Previous Page -->
+                <?php if ($page > 1): ?>
+                  <li class="page-item">
+                    <a class="page-link" href="?page=<?php echo ($page - 1); ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>">
+                      <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                  </li>
+                <?php else: ?>
+                  <li class="page-item disabled">
+                    <span class="page-link"><i class="bi bi-chevron-left"></i> Previous</span>
+                  </li>
+                <?php endif; ?>
+
+                <!-- Page Numbers -->
+                <?php
+                $start_page = max(1, $page - 2);
+                $end_page = min($total_pages, $page + 2);
+                
+                if ($start_page > 1): ?>
+                  <li class="page-item">
+                    <a class="page-link" href="?page=1<?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>">1</a>
+                  </li>
+                  <?php if ($start_page > 2): ?>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                  <?php endif; ?>
+                <?php endif; ?>
+
+                <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                  <li class="page-item <?php echo ($i == $page) ? 'active' : ''; ?>">
+                    <a class="page-link" href="?page=<?php echo $i; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>"><?php echo $i; ?></a>
+                  </li>
+                <?php endfor; ?>
+
+                <?php if ($end_page < $total_pages): ?>
+                  <?php if ($end_page < $total_pages - 1): ?>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                  <?php endif; ?>
+                  <li class="page-item">
+                    <a class="page-link" href="?page=<?php echo $total_pages; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>"><?php echo $total_pages; ?></a>
+                  </li>
+                <?php endif; ?>
+
+                <!-- Next Page -->
+                <?php if ($page < $total_pages): ?>
+                  <li class="page-item">
+                    <a class="page-link" href="?page=<?php echo ($page + 1); ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>">
+                      Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                  </li>
+                <?php else: ?>
+                  <li class="page-item disabled">
+                    <span class="page-link">Next <i class="bi bi-chevron-right"></i></span>
+                  </li>
+                <?php endif; ?>
+              </ul>
+            </nav>
+          <?php endif; ?>
+          
+          
         </main>
       </div>
     </div>

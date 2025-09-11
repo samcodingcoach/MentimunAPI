@@ -1,13 +1,7 @@
 <?php
 session_start();
 include '../../config/koneksi.php';
-
-function decryptPassword($encryptedPassword, $key) {
-    $cipher = "AES-256-CBC";
-    $iv = substr(hash('sha256', $key), 0, 16);
-    $decrypted = openssl_decrypt($encryptedPassword, $cipher, $key, 0, $iv);
-    return $decrypted;
-}
+include '../../config/encryption.php';
 
 $error = '';
 
@@ -26,9 +20,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($result->num_rows == 1) {
             $row = $result->fetch_assoc();
-            $decrypted_password = decryptPassword($row['password'], $row['nomor_hp']);
-
-            if ($password === $decrypted_password) {
+            
+            // Verify password using encryption function
+            if (verifyPassword($password, $row['password'], $row['nomor_hp'])) {
                 $_SESSION['loggedin'] = true;
                 $_SESSION['id_user'] = $row['id_user'];
                 $_SESSION['nama_lengkap'] = $row['nama_lengkap'];

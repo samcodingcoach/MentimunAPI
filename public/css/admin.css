@@ -263,6 +263,29 @@ main {
   .card-body {
     padding: 1.5rem;
   }
+  
+  /* Responsive Table */
+  .table-responsive {
+    border: none;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .table {
+    min-width: 600px;
+    font-size: 0.875rem;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.5rem;
+    white-space: nowrap;
+  }
+  
+  /* Hide certain columns on mobile */
+  .table .d-none-mobile {
+    display: none !important;
+  }
 }
 
 @media (max-width: 576px) {

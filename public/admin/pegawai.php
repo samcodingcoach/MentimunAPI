@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../../config/koneksi.php';
+require_once __DIR__ . '/../../config/encryption.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
@@ -32,9 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     if ($result->fetch_assoc()) {
                         $error = 'Email sudah digunakan!';
                     } else {
-                        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                        // Encrypt password using nomor_hp as key
+                        $encrypted_password = encryptPassword($password, $nomor_hp);
                         $stmt = $conn->prepare("INSERT INTO pegawai (nama_lengkap, jabatan, nomor_hp, email, password, aktif) VALUES (?, ?, ?, ?, ?, ?)");
-                        $stmt->bind_param("sssssi", $nama_lengkap, $jabatan, $nomor_hp, $email, $hashed_password, $aktif);
+                        $stmt->bind_param("sssssi", $nama_lengkap, $jabatan, $nomor_hp, $email, $encrypted_password, $aktif);
                         if ($stmt->execute()) {
                             $message = 'Data pegawai berhasil ditambahkan!';
                         } else {
@@ -65,9 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         $error = 'Email sudah digunakan oleh pegawai lain!';
                     } else {
                         if (!empty($password)) {
-                            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                            // Encrypt password using nomor_hp as key
+                            $encrypted_password = encryptPassword($password, $nomor_hp);
                             $stmt = $conn->prepare("UPDATE pegawai SET nama_lengkap = ?, jabatan = ?, nomor_hp = ?, email = ?, password = ?, aktif = ? WHERE id_user = ?");
-                            $stmt->bind_param("sssssii", $nama_lengkap, $jabatan, $nomor_hp, $email, $hashed_password, $aktif, $id_user);
+                            $stmt->bind_param("sssssii", $nama_lengkap, $jabatan, $nomor_hp, $email, $encrypted_password, $aktif, $id_user);
                         } else {
                             $stmt = $conn->prepare("UPDATE pegawai SET nama_lengkap = ?, jabatan = ?, nomor_hp = ?, email = ?, aktif = ? WHERE id_user = ?");
                             $stmt->bind_param("ssssii", $nama_lengkap, $jabatan, $nomor_hp, $email, $aktif, $id_user);
@@ -97,13 +100,64 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Get all pegawai data
-$result = $conn->query("SELECT * FROM pegawai ORDER BY id_user DESC");
-if ($result) {
+// Pagination and Search parameters
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$limit = 20;
+$offset = ($page - 1) * $limit;
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$filter = isset($_GET['filter']) ? trim($_GET['filter']) : '';
+
+// Build WHERE clause for search and filter
+$where_conditions = [];
+$params = [];
+$types = '';
+
+if (!empty($search)) {
+    $where_conditions[] = "(nama_lengkap LIKE ? OR email LIKE ? OR nomor_hp LIKE ?)";
+    $search_param = "%$search%";
+    $params[] = $search_param;
+    $params[] = $search_param;
+    $params[] = $search_param;
+    $types .= 'sss';
+}
+
+if (!empty($filter) && in_array($filter, ['Admin', 'Kasir', 'Koki', 'Pelayan'])) {
+    $where_conditions[] = "jabatan = ?";
+    $params[] = $filter;
+    $types .= 's';
+}
+
+$where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+
+// Get total count for pagination
+$count_sql = "SELECT COUNT(*) as total FROM pegawai $where_clause";
+if (!empty($params)) {
+    $count_stmt = $conn->prepare($count_sql);
+    $count_stmt->bind_param($types, ...$params);
+    $count_stmt->execute();
+    $count_result = $count_stmt->get_result();
+} else {
+    $count_result = $conn->query($count_sql);
+}
+$total_records = $count_result->fetch_assoc()['total'];
+$total_pages = ceil($total_records / $limit);
+
+// Get pegawai data with pagination
+$sql = "SELECT * FROM pegawai $where_clause ORDER BY id_user DESC LIMIT $limit OFFSET $offset";
+if (!empty($params)) {
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $result = $stmt->get_result();
     $pegawais = $result->fetch_all(MYSQLI_ASSOC);
 } else {
-    $error = 'Error fetching data: ' . $conn->error;
-    $pegawais = [];
+    $result = $conn->query($sql);
+    if ($result) {
+        $pegawais = $result->fetch_all(MYSQLI_ASSOC);
+    } else {
+        $error = 'Error fetching data: ' . $conn->error;
+        $pegawais = [];
+    }
 }
 
 // Get single pegawai for editing
@@ -450,17 +504,58 @@ $jabatan_options = ['admin', 'kasir', 'koki', 'pelayan'];
             </div>
           <?php endif; ?>
 
+          <!-- Search and Filter -->
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <form method="GET" class="d-flex">
+                <input type="text" class="form-control me-2" name="search" placeholder="Cari nama, email, atau HP..." value="<?php echo htmlspecialchars($search); ?>">
+                <button type="submit" class="btn btn-outline-primary">
+                  <i class="bi bi-search"></i>
+                </button>
+                <?php if (!empty($search)): ?>
+                  <a href="?" class="btn btn-outline-secondary ms-2">
+                    <i class="bi bi-x-circle"></i>
+                  </a>
+                <?php endif; ?>
+              </form>
+            </div>
+            <div class="col-md-4">
+              <form method="GET" class="d-flex">
+                <?php if (!empty($search)): ?>
+                  <input type="hidden" name="search" value="<?php echo htmlspecialchars($search); ?>">
+                <?php endif; ?>
+                <select class="form-select me-2" name="filter" onchange="this.form.submit()">
+                  <option value="">Semua Jabatan</option>
+                  <option value="Admin" <?php echo $filter == 'Admin' ? 'selected' : ''; ?>>Admin</option>
+                  <option value="Kasir" <?php echo $filter == 'Kasir' ? 'selected' : ''; ?>>Kasir</option>
+                  <option value="Koki" <?php echo $filter == 'Koki' ? 'selected' : ''; ?>>Koki</option>
+                  <option value="Pelayan" <?php echo $filter == 'Pelayan' ? 'selected' : ''; ?>>Pelayan</option>
+                </select>
+                <?php if (!empty($filter)): ?>
+                  <a href="?<?php echo !empty($search) ? 'search=' . urlencode($search) : ''; ?>" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i>
+                  </a>
+                <?php endif; ?>
+              </form>
+            </div>
+            <div class="col-md-4 text-end">
+              <small class="text-muted">
+                Menampilkan <?php echo count($pegawais); ?> dari <?php echo $total_records; ?> data
+              </small>
+            </div>
+          </div>
+
           <!-- Data Table -->
           <div class="table-responsive">
             <table class="table table-striped table-hover">
               <thead class="table-dark">
                 <tr>
-                  <th>ID</th>
+                  <th>No</th>
                   <th>Nama Lengkap</th>
                   <th>Jabatan</th>
-                  <th>Nomor HP</th>
-                  <th>Email</th>
-                  <th>Status</th>
+                  <th class="d-none d-md-table-cell">Nomor HP</th>
+                  <th class="d-none d-lg-table-cell">Email</th>
+                  <th class="d-none d-md-table-cell">Status</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -470,33 +565,38 @@ $jabatan_options = ['admin', 'kasir', 'koki', 'pelayan'];
                     <td colspan="7" class="text-center">Tidak ada data pegawai</td>
                   </tr>
                 <?php else: ?>
-                  <?php foreach ($pegawais as $pegawai): ?>
+                  <?php 
+                  $no = $offset + 1;
+                  foreach ($pegawais as $pegawai): 
+                  ?>
                     <tr>
-                      <td><?php echo htmlspecialchars($pegawai['id_user']); ?></td>
+                      <td><?php echo $no++; ?></td>
                       <td><?php echo htmlspecialchars($pegawai['nama_lengkap']); ?></td>
                       <td>
                         <span class="badge bg-<?php echo $pegawai['jabatan'] == 'admin' ? 'danger' : ($pegawai['jabatan'] == 'kasir' ? 'primary' : ($pegawai['jabatan'] == 'koki' ? 'warning' : 'info')); ?>">
                           <?php echo ucfirst(htmlspecialchars($pegawai['jabatan'])); ?>
                         </span>
                       </td>
-                      <td><?php echo htmlspecialchars($pegawai['nomor_hp']); ?></td>
-                      <td><?php echo htmlspecialchars($pegawai['email']); ?></td>
-                      <td>
+                      <td class="d-none d-md-table-cell"><?php echo htmlspecialchars($pegawai['nomor_hp']); ?></td>
+                      <td class="d-none d-lg-table-cell"><?php echo htmlspecialchars($pegawai['email']); ?></td>
+                      <td class="d-none d-md-table-cell">
                         <span class="badge bg-<?php echo $pegawai['aktif'] ? 'success' : 'secondary'; ?>">
                           <?php echo $pegawai['aktif'] ? 'Aktif' : 'Tidak Aktif'; ?>
                         </span>
                       </td>
                       <td>
-                        <a href="?edit=<?php echo $pegawai['id_user']; ?>" class="btn btn-sm btn-warning me-1">
-                          <i class="bi bi-pencil"></i>
-                        </a>
-                        <form method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-                          <input type="hidden" name="action" value="delete">
-                          <input type="hidden" name="id_user" value="<?php echo $pegawai['id_user']; ?>">
-                          <button type="submit" class="btn btn-sm btn-danger">
-                            <i class="bi bi-trash"></i>
-                          </button>
-                        </form>
+                        <div class="btn-group" role="group">
+                          <a href="?edit=<?php echo $pegawai['id_user']; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>&page=<?php echo $page; ?>" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil"></i>
+                          </a>
+                          <form method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="id_user" value="<?php echo $pegawai['id_user']; ?>">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </form>
+                        </div>
                       </td>
                     </tr>
                   <?php endforeach; ?>
@@ -504,6 +604,68 @@ $jabatan_options = ['admin', 'kasir', 'koki', 'pelayan'];
               </tbody>
             </table>
           </div>
+
+          <!-- Pagination -->
+          <?php if ($total_pages > 1): ?>
+            <nav aria-label="Page navigation">
+              <ul class="pagination justify-content-center">
+                <!-- Previous Page -->
+                <?php if ($page > 1): ?>
+                  <li class="page-item">
+                    <a class="page-link" href="?page=<?php echo ($page - 1); ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>">
+                      <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                  </li>
+                <?php else: ?>
+                  <li class="page-item disabled">
+                    <span class="page-link"><i class="bi bi-chevron-left"></i> Previous</span>
+                  </li>
+                <?php endif; ?>
+
+                <!-- Page Numbers -->
+                <?php
+                $start_page = max(1, $page - 2);
+                $end_page = min($total_pages, $page + 2);
+                
+                if ($start_page > 1): ?>
+                  <li class="page-item">
+                    <a class="page-link" href="?page=1<?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>">1</a>
+                  </li>
+                  <?php if ($start_page > 2): ?>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                  <?php endif; ?>
+                <?php endif; ?>
+
+                <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                  <li class="page-item <?php echo ($i == $page) ? 'active' : ''; ?>">
+                    <a class="page-link" href="?page=<?php echo $i; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>"><?php echo $i; ?></a>
+                  </li>
+                <?php endfor; ?>
+
+                <?php if ($end_page < $total_pages): ?>
+                  <?php if ($end_page < $total_pages - 1): ?>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                  <?php endif; ?>
+                  <li class="page-item">
+                    <a class="page-link" href="?page=<?php echo $total_pages; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>"><?php echo $total_pages; ?></a>
+                  </li>
+                <?php endif; ?>
+
+                <!-- Next Page -->
+                <?php if ($page < $total_pages): ?>
+                  <li class="page-item">
+                    <a class="page-link" href="?page=<?php echo ($page + 1); ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>">
+                      Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                  </li>
+                <?php else: ?>
+                  <li class="page-item disabled">
+                    <span class="page-link">Next <i class="bi bi-chevron-right"></i></span>
+                  </li>
+                <?php endif; ?>
+              </ul>
+            </nav>
+          <?php endif; ?>
         </main>
        </div>
      </div>
