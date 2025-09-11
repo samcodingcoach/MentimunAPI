@@ -119,3 +119,12 @@ id_users	int(11)	YES
 created_time	datetime	YES		current_timestamp()	on update current_timestamp()
 
 mengikuti pattern ui dan backend vendor.php pastikan koneksiny mysqli bukan pdo. 
+
+perintah 11 CRUD Kategori Menu 
+table kategori_menu
+id_kategori	int(11)	NO	PRI		auto_increment
+nama_kategori	varchar(25)	NO			
+aktif	varchar(1)	NO		1	
+
+mengikuti pattern ui dan backend vendor.php pastikan koneksiny mysqli bukan pdo. 
+pada kolom aksi hanya ada edit

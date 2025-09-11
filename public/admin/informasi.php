@@ -444,6 +444,21 @@ if (!empty($params)) {
           </div>
           <?php endif; ?>
 
+          <!-- Data Count Info -->
+          <div class="mb-3">
+            <small class="text-muted">
+              <?php 
+                $start = ($page - 1) * $limit + 1;
+                $end = min($page * $limit, $total_records);
+                if ($total_records > 0) {
+                  echo "Showing $start to $end of $total_records entries";
+                } else {
+                  echo "Showing 0 to 0 of 0 entries";
+                }
+              ?>
+            </small>
+          </div>
+
           <!-- Search and Filter -->
           <div class="row mb-3">
             <div class="col-md-6">
@@ -755,7 +770,7 @@ if (!empty($params)) {
 
     <!-- Edit Modal -->
     <div class="modal fade" id="editModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Edit Informasi</h5>
@@ -766,33 +781,61 @@ if (!empty($params)) {
                         <input type="hidden" name="action" value="update">
                         <input type="hidden" name="id_info" id="edit_id_info">
 
-                        <div class="mb-3">
-                            <label for="edit_judul" class="form-label">Judul <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="edit_judul" name="judul" required maxlength="50">
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit_isi" class="form-label">Isi <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="edit_isi" name="isi" rows="5" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit_divisi" class="form-label">Divisi <span class="text-danger">*</span></label>
-                            <select class="form-select" id="edit_divisi" name="divisi" required>
-                                <option value="">Pilih Divisi</option>
-                                <option value="All">All</option>
-                                <option value="Admin">Admin</option>
-                                <option value="Kasir">Kasir</option>
-                                <option value="Pramusaji">Pramusaji</option>
-                                <option value="Dapur">Dapur</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit_gambar" class="form-label">Gambar</label>
-                            <input type="file" class="form-control" id="edit_gambar" name="gambar" accept="image/*">
-                            <input type="hidden" name="gambar_lama" id="edit_gambar_lama">
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit_link" class="form-label">Link</label>
-                            <input type="url" class="form-control" id="edit_link" name="link">
+                        <!-- Nav tabs -->
+                        <ul class="nav nav-tabs" id="editTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab">Informasi Dasar</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="media-tab" data-bs-toggle="tab" data-bs-target="#media" type="button" role="tab">Gambar & Link</button>
+                            </li>
+                        </ul>
+
+                        <!-- Tab content -->
+                        <div class="tab-content" id="editTabContent">
+                            <div class="tab-pane fade show active" id="basic" role="tabpanel">
+                                <div class="mt-3">
+                                    <div class="mb-3">
+                                        <label for="edit_judul" class="form-label">Judul <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="edit_judul" name="judul" required maxlength="50">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="edit_isi" class="form-label">Isi <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" id="edit_isi" name="isi" rows="4" required></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="edit_divisi" class="form-label">Divisi <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="edit_divisi" name="divisi" required>
+                                            <option value="">Pilih Divisi</option>
+                                            <option value="All">All</option>
+                                            <option value="Admin">Admin</option>
+                                            <option value="Kasir">Kasir</option>
+                                            <option value="Pramusaji">Pramusaji</option>
+                                            <option value="Dapur">Dapur</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="media" role="tabpanel">
+                                <div class="mt-3">
+                                    <div class="mb-3">
+                                        <label for="edit_gambar" class="form-label">Gambar</label>
+                                        <input type="file" class="form-control" id="edit_gambar" name="gambar" accept="image/*">
+                                        <input type="hidden" name="gambar_lama" id="edit_gambar_lama">
+                                        <div id="edit_current_image" class="mt-2" style="display: none;">
+                                            <small class="text-muted">Gambar saat ini:</small><br>
+                                            <img id="edit_image_preview" src="" alt="Current Image" class="img-thumbnail" style="max-width: 150px; max-height: 100px;">
+                                            <div class="mt-1">
+                                                <small class="text-info">Pilih file baru untuk mengganti gambar.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="edit_link" class="form-label">Link</label>
+                                        <input type="url" class="form-control" id="edit_link" name="link">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
@@ -838,6 +881,20 @@ if (!empty($params)) {
             document.getElementById('edit_divisi').value = divisi;
             document.getElementById('edit_gambar_lama').value = gambar || '';
             document.getElementById('edit_link').value = link || '';
+            
+            // Show/hide current image preview
+            const currentImageDiv = document.getElementById('edit_current_image');
+            const imagePreview = document.getElementById('edit_image_preview');
+            
+            if (gambar && gambar.trim() !== '') {
+                imagePreview.src = '../images/' + gambar;
+                currentImageDiv.style.display = 'block';
+            } else {
+                currentImageDiv.style.display = 'none';
+            }
+            
+            // Reset file input
+            document.getElementById('edit_gambar').value = '';
             
             var editModal = new bootstrap.Modal(document.getElementById('editModal'));
             editModal.show();
