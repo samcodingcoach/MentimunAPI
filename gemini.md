@@ -106,3 +106,16 @@ aktif	varchar(1)	YES		0
 
 catatan= tidak ada hapus dan create new
 mengikuti pattern ui dan backend vendor.php
+
+perintah 10 CRUD informasi untuk halaman informasi
+table informasi
+id_info	int(11)	NO	PRI		auto_increment
+judul	varchar(50)	YES			
+isi	text	YES			
+divisi	varchar(20)	YES			    All,Admin,Kasir,Pramusaji,Dapur
+gambar	varchar(255)	YES			ini pakai browser upload gambar minimal 1280x720 dan max 500kb
+link	varchar(255)	YES			ini pakai link copy paste
+id_users	int(11)	YES			
+created_time	datetime	YES		current_timestamp()	on update current_timestamp()
+
+mengikuti pattern ui dan backend vendor.php pastikan koneksiny mysqli bukan pdo. 
