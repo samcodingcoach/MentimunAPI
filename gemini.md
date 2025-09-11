@@ -80,3 +80,29 @@ keterangan	text	YES
 kode_vendor	varchar(15)	YES			Buat Kode Auto VD25-0001  atau VD25-0002 dst , 25 adalah 2 digit akhir tahun
 
 mengikuti pattern ui dan backend pegawai.php
+
+perintah 8 CRUD Meja untuk halaman meja
+table meja
+id_meja	int(11)	NO	PRI		auto_increment
+nomor_meja	int(11)	YES			
+aktif	varchar(1)	YES		1	
+in_used	varchar(1)	YES		0	
+pos_x	float	YES			
+pos_y	float	YES			
+update_at	datetime	YES		current_timestamp()	on update current_timestamp()
+
+mengikuti pattern ui dan backend vendor.php
+
+
+perintah 9 CRUD Metode Pembayaran untuk halaman metode pembayaran
+table metode_pembayaran
+id_bayar	int(11)	NO	PRI		auto_increment
+kategori	varchar(20)	YES			
+no_rek	varchar(25)	YES			
+biaya_admin	double	YES			
+keterangan	text	YES			
+pramusaji	varchar(1)	YES		0	0=Tidak, 1=Ya
+aktif	varchar(1)	YES		0	
+
+catatan= tidak ada hapus dan create new
+mengikuti pattern ui dan backend vendor.php

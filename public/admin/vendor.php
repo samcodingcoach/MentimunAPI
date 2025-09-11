@@ -109,16 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
                 break;
                 
-            case 'delete':
-                $id_vendor = $_POST['id_vendor'];
-                $stmt = $conn->prepare("DELETE FROM vendor WHERE id_vendor = ?");
-                $stmt->bind_param("i", $id_vendor);
-                if ($stmt->execute()) {
-                    $message = 'Data vendor berhasil dihapus!';
-                } else {
-                    $error = 'Error: ' . $conn->error;
-                }
-                break;
+            // Delete action removed for security
         }
     }
 }
@@ -586,18 +577,9 @@ if (isset($_GET['edit'])) {
                         </span>
                       </td>
                       <td>
-                        <div class="btn-group" role="group">
-                          <a href="?edit=<?php echo $vendor['id_vendor']; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>&page=<?php echo $page; ?>" class="btn btn-sm btn-warning">
-                            <i class="bi bi-pencil"></i>
-                          </a>
-                          <form method="POST" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-                            <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="id_vendor" value="<?php echo $vendor['id_vendor']; ?>">
-                            <button type="submit" class="btn btn-sm btn-danger">
-                              <i class="bi bi-trash"></i>
-                            </button>
-                          </form>
-                        </div>
+                        <a href="?edit=<?php echo $vendor['id_vendor']; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>&page=<?php echo $page; ?>" class="btn btn-sm btn-warning">
+                          <i class="bi bi-pencil"></i> Edit
+                        </a>
                       </td>
                     </tr>
                   <?php endforeach; ?>
@@ -831,6 +813,24 @@ if (isset($_GET['edit'])) {
         document.addEventListener('DOMContentLoaded', function() {
             var vendorModal = new bootstrap.Modal(document.getElementById('vendorModal'));
             vendorModal.show();
+        });
+    </script>
+    <?php endif; ?>
+    
+    <!-- Auto close modal after successful update -->
+    <?php if ($message && !$error): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var vendorModal = bootstrap.Modal.getInstance(document.getElementById('vendorModal'));
+            if (vendorModal) {
+                vendorModal.hide();
+            }
+            // Remove edit parameter from URL
+            if (window.location.search.includes('edit=')) {
+                const url = new URL(window.location);
+                url.searchParams.delete('edit');
+                window.history.replaceState({}, document.title, url.pathname + url.search);
+            }
         });
     </script>
     <?php endif; ?>
