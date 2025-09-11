@@ -690,79 +690,126 @@ if (isset($_GET['edit'])) {
                             <input type="hidden" name="id_vendor" value="<?php echo $edit_vendor['id_vendor']; ?>">
                         <?php endif; ?>
                         
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="nama_vendor" class="form-label">Nama Vendor *</label>
-                                    <input type="text" class="form-control" id="nama_vendor" name="nama_vendor" 
-                                           value="<?php echo $edit_vendor ? htmlspecialchars($edit_vendor['nama_vendor']) : ''; ?>" required>
+                        <!-- Tab Navigation -->
+                        <ul class="nav nav-tabs" id="vendorTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab">
+                                    <i class="bi bi-person"></i> Data Dasar
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab">
+                                    <i class="bi bi-telephone"></i> Kontak
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="payment-tab" data-bs-toggle="tab" data-bs-target="#payment" type="button" role="tab">
+                                    <i class="bi bi-credit-card"></i> Pembayaran
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="other-tab" data-bs-toggle="tab" data-bs-target="#other" type="button" role="tab">
+                                    <i class="bi bi-gear"></i> Lainnya
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <!-- Tab Content -->
+                        <div class="tab-content" id="vendorTabsContent">
+                            <!-- Basic Info Tab -->
+                            <div class="tab-pane fade show active" id="basic" role="tabpanel">
+                                <div class="mt-3">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="nama_vendor" class="form-label">Nama Vendor *</label>
+                                                <input type="text" class="form-control" id="nama_vendor" name="nama_vendor" 
+                                                       value="<?php echo $edit_vendor ? htmlspecialchars($edit_vendor['nama_vendor']) : ''; ?>" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="kota" class="form-label">Kota *</label>
+                                                <input type="text" class="form-control" id="kota" name="kota" 
+                                                       value="<?php echo $edit_vendor ? htmlspecialchars($edit_vendor['kota']) : ''; ?>" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="alamat" class="form-label">Alamat *</label>
+                                        <textarea class="form-control" id="alamat" name="alamat" rows="3" required><?php echo $edit_vendor ? htmlspecialchars($edit_vendor['alamat']) : ''; ?></textarea>
+                                    </div>
+                                    
+                                    <div class="mb-3 form-check">
+                                        <input type="checkbox" class="form-check-input" id="status" name="status" 
+                                               <?php echo ($edit_vendor && $edit_vendor['status'] == '1') || !$edit_vendor ? 'checked' : ''; ?>>
+                                        <label class="form-check-label" for="status">
+                                            Status Aktif
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="kota" class="form-label">Kota *</label>
-                                    <input type="text" class="form-control" id="kota" name="kota" 
-                                           value="<?php echo $edit_vendor ? htmlspecialchars($edit_vendor['kota']) : ''; ?>" required>
+                            
+                            <!-- Contact Info Tab -->
+                            <div class="tab-pane fade" id="contact" role="tabpanel">
+                                <div class="mt-3">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="hp" class="form-label">Nomor HP *</label>
+                                                <input type="text" class="form-control" id="hp" name="hp" 
+                                                       value="<?php echo $edit_vendor ? htmlspecialchars($edit_vendor['hp']) : ''; ?>" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="email" class="form-label">Email *</label>
+                                                <input type="email" class="form-control" id="email" name="email" 
+                                                       value="<?php echo $edit_vendor ? htmlspecialchars($edit_vendor['email']) : ''; ?>" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="person" class="form-label">Contact Person</label>
+                                        <input type="text" class="form-control" id="person" name="person" 
+                                               value="<?php echo $edit_vendor ? htmlspecialchars($edit_vendor['person']) : ''; ?>">
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="alamat" class="form-label">Alamat *</label>
-                            <textarea class="form-control" id="alamat" name="alamat" rows="3" required><?php echo $edit_vendor ? htmlspecialchars($edit_vendor['alamat']) : ''; ?></textarea>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="hp" class="form-label">Nomor HP *</label>
-                                    <input type="text" class="form-control" id="hp" name="hp" 
-                                           value="<?php echo $edit_vendor ? htmlspecialchars($edit_vendor['hp']) : ''; ?>" required>
+                            
+                            <!-- Payment Info Tab -->
+                            <div class="tab-pane fade" id="payment" role="tabpanel">
+                                <div class="mt-3">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="nomor_rekening1" class="form-label">Nomor Rekening 1</label>
+                                                <input type="text" class="form-control" id="nomor_rekening1" name="nomor_rekening1" 
+                                                       value="<?php echo $edit_vendor ? htmlspecialchars($edit_vendor['nomor_rekening1']) : ''; ?>">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="nomor_rekening2" class="form-label">Nomor Rekening 2</label>
+                                                <input type="text" class="form-control" id="nomor_rekening2" name="nomor_rekening2" 
+                                                       value="<?php echo $edit_vendor ? htmlspecialchars($edit_vendor['nomor_rekening2']) : ''; ?>">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email *</label>
-                                    <input type="email" class="form-control" id="email" name="email" 
-                                           value="<?php echo $edit_vendor ? htmlspecialchars($edit_vendor['email']) : ''; ?>" required>
+                            
+                            <!-- Other Info Tab -->
+                            <div class="tab-pane fade" id="other" role="tabpanel">
+                                <div class="mt-3">
+                                    <div class="mb-3">
+                                        <label for="keterangan" class="form-label">Keterangan</label>
+                                        <textarea class="form-control" id="keterangan" name="keterangan" rows="4"><?php echo $edit_vendor ? htmlspecialchars($edit_vendor['keterangan']) : ''; ?></textarea>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="nomor_rekening1" class="form-label">Nomor Rekening 1</label>
-                                    <input type="text" class="form-control" id="nomor_rekening1" name="nomor_rekening1" 
-                                           value="<?php echo $edit_vendor ? htmlspecialchars($edit_vendor['nomor_rekening1']) : ''; ?>">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="nomor_rekening2" class="form-label">Nomor Rekening 2</label>
-                                    <input type="text" class="form-control" id="nomor_rekening2" name="nomor_rekening2" 
-                                           value="<?php echo $edit_vendor ? htmlspecialchars($edit_vendor['nomor_rekening2']) : ''; ?>">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="person" class="form-label">Contact Person</label>
-                            <input type="text" class="form-control" id="person" name="person" 
-                                   value="<?php echo $edit_vendor ? htmlspecialchars($edit_vendor['person']) : ''; ?>">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="keterangan" class="form-label">Keterangan</label>
-                            <textarea class="form-control" id="keterangan" name="keterangan" rows="3"><?php echo $edit_vendor ? htmlspecialchars($edit_vendor['keterangan']) : ''; ?></textarea>
-                        </div>
-                        
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="status" name="status" 
-                                   <?php echo ($edit_vendor && $edit_vendor['status'] == '1') || !$edit_vendor ? 'checked' : ''; ?>>
-                            <label class="form-check-label" for="status">
-                                Status Aktif
-                            </label>
                         </div>
                     </div>
                     <div class="modal-footer">
