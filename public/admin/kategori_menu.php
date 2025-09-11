@@ -650,6 +650,31 @@ if (isset($_GET['edit'])) {
             }
           }, 100);
         <?php endif; ?>
+        
+        // Handle "Tambah Kategori" button click
+        document.querySelector('[data-bs-target="#categoryModal"]').addEventListener('click', function() {
+          // Reset form for add mode
+          var form = document.querySelector('#categoryModal form');
+          var actionInput = form.querySelector('input[name="action"]');
+          var idInput = form.querySelector('input[name="id_kategori"]');
+          var namaInput = form.querySelector('input[name="nama_kategori"]');
+          var aktifInput = form.querySelector('input[name="aktif"]');
+          var modalTitle = document.querySelector('#categoryModal .modal-title');
+          var submitBtn = document.querySelector('#categoryModal button[type="submit"]');
+          
+          // Reset to add mode
+          actionInput.value = 'create';
+          if (idInput) idInput.remove();
+          namaInput.value = '';
+          aktifInput.checked = true;
+          modalTitle.textContent = 'Tambah Kategori Menu';
+          submitBtn.textContent = 'Simpan';
+          
+          // Remove edit parameter from URL
+          if (window.location.search.includes('edit=')) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        });
       });
     </script>
   </body>
