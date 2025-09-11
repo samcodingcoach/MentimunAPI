@@ -113,7 +113,7 @@ id_info	int(11)	NO	PRI		auto_increment
 judul	varchar(50)	YES			
 isi	text	YES			
 divisi	varchar(20)	YES			    All,Admin,Kasir,Pramusaji,Dapur
-gambar	varchar(255)	YES			ini pakai browser upload gambar minimal 1280x720 dan max 500kb
+gambar	varchar(255)	YES			ini pakai browser upload gambar minimal 1280x720 dan max 500kb dan uploadke public/images
 link	varchar(255)	YES			ini pakai link copy paste
 id_users	int(11)	YES			
 created_time	datetime	YES		current_timestamp()	on update current_timestamp()
