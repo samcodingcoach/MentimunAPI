@@ -202,7 +202,7 @@ if (!empty($params)) {
                                     <li class="nav-item"><a class="nav-link" href="vendor.php"><i class="bi bi-truck"></i> Vendor</a></li>
                                     <li class="nav-item"><a class="nav-link" href="meja.php"><i class="bi bi-table"></i> Meja</a></li>
                                     <li class="nav-item"><a class="nav-link active" href="metode_pembayaran.php"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-cash"></i> Bayar</a></li>
+                                    
                                 </ul>
                             </div>
                         </li>

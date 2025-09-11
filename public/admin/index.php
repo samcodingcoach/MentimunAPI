@@ -71,10 +71,10 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                   <ul class="nav flex-column ms-3">
                     <li class="nav-item"><a class="nav-link" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
                     <li class="nav-item"><a class="nav-link" href="pegawai.php"><i class="bi bi-people"></i> Pegawai</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-truck"></i> Vendor</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-table"></i> Meja</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-wallet2"></i> Bayar</a></li>
+                    <li class="nav-item"><a class="nav-link" href="vendor.php"><i class="bi bi-truck"></i> Vendor</a></li>
+                    <li class="nav-item"><a class="nav-link" href="meja.php"><i class="bi bi-table"></i> Meja</a></li>
+                    <li class="nav-item"><a class="nav-link" href="metode_pembayaran.php"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
+                    
                   </ul>
                 </div>
               </li>
