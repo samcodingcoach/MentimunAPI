@@ -250,6 +250,27 @@ main {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
 }
 
+/* Button Group Fixes */
+.btn-group {
+  display: flex;
+  gap: 2px;
+}
+
+.btn-group .btn {
+  margin: 0;
+  border-radius: 0.25rem !important;
+}
+
+.btn-group .btn:not(:last-child) {
+  margin-right: 2px;
+}
+
+/* Table Action Column */
+.table td:last-child {
+  min-width: 80px;
+  white-space: nowrap;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .sidebar {
@@ -285,6 +306,17 @@ main {
   /* Hide certain columns on mobile */
   .table .d-none-mobile {
     display: none !important;
+  }
+  
+  /* Mobile button adjustments */
+  .btn-group {
+    flex-direction: column;
+    gap: 1px;
+  }
+  
+  .btn-group .btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
   }
 }
 

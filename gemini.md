@@ -64,3 +64,19 @@ aktif	tinyint(4)	YES		1
 
 #berinama halaman pegawai.php
 
+perintah 7 CRUD Vendor untuk halaman vendor
+table vendor
+id_vendor	int(11)	NO	PRI		auto_increment
+nama_vendor	varchar(50)	YES			
+alamat	text	YES			
+kota	varchar(30)	YES			
+hp	varchar(20)	YES			
+nomor_rekening1	varchar(100)	YES			
+nomor_rekening2	varchar(100)	YES			
+person	varchar(30)	YES			
+email	varchar(30)	YES	UNI		
+status	varchar(1)	YES		1	
+keterangan	text	YES			
+kode_vendor	varchar(15)	YES			Buat Kode Auto VD25-0001  atau VD25-0002 dst , 25 adalah 2 digit akhir tahun
+
+mengikuti pattern ui dan backend pegawai.php
