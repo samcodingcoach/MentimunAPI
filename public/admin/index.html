@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <style>
+        body {
+            display: flex;
+        }
+        #sidebar {
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+            overflow-y: auto;
+        }
+        #content {
+            margin-left: 250px;
+            padding: 20px;
+            width: calc(100% - 250px);
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h3 class="text-center">Resto Admin</h3>
+        <div class="list-group list-group-flush">
+            <a href="#" class="list-group-item list-group-item-action">Beranda</a>
+            <a href="#" class="list-group-item list-group-item-action">Informasi</a>
+            
+            <a href="#masterSubmenu" data-bs-toggle="collapse" class="list-group-item list-group-item-action">Master</a>
+            <div class="collapse" id="masterSubmenu">
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Resto</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Pegawai</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Vendor</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Meja</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Metode Pembayaran</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Bayar</a>
+                </div>
+            </div>
+
+            <a href="#produkSubmenu" data-bs-toggle="collapse" class="list-group-item list-group-item-action">Produk</a>
+            <div class="collapse" id="produkSubmenu">
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Kategori Menu</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Menu</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Kategori Bahan</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Bahan</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Resep</a>
+                </div>
+            </div>
+
+            <a href="#pembelianSubmenu" data-bs-toggle="collapse" class="list-group-item list-group-item-action">Pembelian</a>
+            <div class="collapse" id="pembelianSubmenu">
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Pesanan Pembelian</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Pembayaran</a>
+                </div>
+            </div>
+
+            <a href="#penjualanSubmenu" data-bs-toggle="collapse" class="list-group-item list-group-item-action">Penjualan</a>
+            <div class="collapse" id="penjualanSubmenu">
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Shift Kasir</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Biaya Lain</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Harga Pokok Penjualan</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Harga Rilis</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Pembatalan</a>
+                </div>
+            </div>
+
+            <a href="#inventorySubmenu" data-bs-toggle="collapse" class="list-group-item list-group-item-action">Inventory</a>
+            <div class="collapse" id="inventorySubmenu">
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Inventory</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Transaksi</a>
+                </div>
+            </div>
+
+            <a href="#laporanSubmenu" data-bs-toggle="collapse" class="list-group-item list-group-item-action">Laporan</a>
+            <div class="collapse" id="laporanSubmenu">
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Transaksi</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Pengeluaran vs Penjualan</a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Kuantitas</a>
+                </div>
+            </div>
+
+            <a href="#pengaturanSubmenu" data-bs-toggle="collapse" class="list-group-item list-group-item-action">Pengaturan</a>
+            <div class="collapse" id="pengaturanSubmenu">
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action ps-5">Ubah Password</a>
+                </div>
+            </div>
+
+            <a href="logout.php" class="list-group-item list-group-item-action">Logout</a>
+        </div>
+    </div>
+
+    <div id="content">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">Dashboard</a>
+            </div>
+        </nav>
+        <div class="container-fluid">
+            <h1 class="mt-4">Welcome, Admin!</h1>
+            <p>This is your dashboard. You can manage the restaurant from here.</p>
+        </div>
+    </div>
+
+    <script src="../js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
