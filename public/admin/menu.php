@@ -565,7 +565,7 @@ $categories = $categories_result->fetch_all(MYSQLI_ASSOC);
                     <li class="nav-item"><a class="nav-link active" href="menu.php"><i class="bi bi-list"></i> Menu</a></li>
                     <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-tags"></i> Kategori Bahan</a></li>
                     <li class="nav-item"><a class="nav-link" href="bahan.php"><i class="bi bi-egg"></i> Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-book"></i> Resep</a></li>
+                    <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-book"></i> Resep</a></li>
                   </ul>
                 </div>
               </li>
@@ -576,8 +576,8 @@ $categories = $categories_result->fetch_all(MYSQLI_ASSOC);
                 </a>
                 <div class="collapse" id="pembelianMenuMobile">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-cart-plus"></i> Pesanan Pembelian</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pembelian.php"><i class="bi bi-cart-plus"></i> Pesanan Pembelian</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pembayaran_pembelian.php"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
                   </ul>
                 </div>
               </li>
@@ -590,8 +590,8 @@ $categories = $categories_result->fetch_all(MYSQLI_ASSOC);
                 </a>
                 <div class="collapse" id="penjualanMenuMobile">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-receipt"></i> Pesanan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
+                    <li class="nav-item"><a class="nav-link" href="penjualan.php"><i class="bi bi-receipt"></i> Pesanan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pembayaran_penjualan.php"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
                   </ul>
                 </div>
               </li>

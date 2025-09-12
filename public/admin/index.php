@@ -53,7 +53,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="informasi.php">
                   <i class="bi bi-info-circle"></i>
                   <span>Informasi</span>
                 </a>
@@ -90,11 +90,11 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 </a>
                 <div class="collapse" id="produkMenu">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-tags"></i> Kategori Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-card-list"></i> Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-collection"></i> Kategori Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-basket"></i> Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-journal-text"></i> Resep</a></li>
+                    <li class="nav-item"><a class="nav-link" href="kategori_menu.php"><i class="bi bi-tags"></i> Kategori Menu</a></li>
+                    <li class="nav-item"><a class="nav-link" href="menu.php"><i class="bi bi-card-list"></i> Menu</a></li>
+                    <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-collection"></i> Kategori Bahan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="bahan.php"><i class="bi bi-basket"></i> Bahan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-journal-text"></i> Resep</a></li>
                   </ul>
                 </div>
               </li>
