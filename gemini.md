@@ -311,3 +311,112 @@ FROM
 
     untuk oprasi tambah, skip dulu 
 
+    perintah 17
+
+    buatkan tombol new detail pada resep_detail.php?id=X dan simpan ke table resep_detail
+    lalu modal inputnya sebagai berikut
+
+    1. Cari Bahan -> Pakai Dropdownlist searchable 
+    isinya dengan query dibawah ini
+    SELECT
+    bahan_biaya.id_bahan_biaya,
+    bahan_biaya.id_bahan,
+    bahan.nama_bahan,
+    kategori_bahan.nama_kategori,
+    CONCAT(FORMAT(bahan_biaya.harga_satuan,0),'/',bahan_biaya.satuan) as harga_satuan,
+    bahan_biaya.tanggal
+FROM
+    bahan_biaya
+INNER JOIN (
+    SELECT 
+        id_bahan, 
+        satuan, 
+        MAX(tanggal) AS max_tanggal
+    FROM 
+        bahan_biaya
+    GROUP BY 
+        id_bahan, satuan
+) latest
+ON bahan_biaya.id_bahan = latest.id_bahan 
+   AND bahan_biaya.satuan = latest.satuan 
+   AND bahan_biaya.tanggal = latest.max_tanggal
+INNER JOIN bahan 
+    ON bahan_biaya.id_bahan = bahan.id_bahan
+INNER JOIN kategori_bahan 
+    ON bahan.id_kategori = kategori_bahan.id_kategori  where nama_bahan like '$nama_produk%'
+
+    2. lalu ada satuan dan sub satuan, dengan dropdownlist
+    dengan schema berikut yang saya ambil dari c#, bisa anda terapkan diphp, yang tersimpan di table adalah subsatuannya
+
+    private Dictionary<string, Dictionary<string, string>> satuanData = new Dictionary<string, Dictionary<string, string>>()
+  {
+      { "Berat", new Dictionary<string, string>
+          {
+              { "Miligram (mg)", "mg" },
+              { "Gram (g)", "g" },
+              { "Ons (ons)", "ons" },
+              { "Kilogram (kg)", "kg" },
+              { "Kuintal (kwintal)", "kwintal" },
+              { "Ton (ton)", "ton" }
+          }
+      },
+      { "Volume", new Dictionary<string, string>
+          {
+              { "Mililiter (ml)", "ml" },
+              { "Centiliter (cl)", "cl" },
+              { "Desiliter (dl)", "dl" },
+              { "Liter (l)", "l" },
+              { "Galon (galon)", "galon" }
+          }
+      },
+      { "Jumlah", new Dictionary<string, string>
+          {
+              { "Butir", "butir" },
+              { "Siung", "siung" },
+              { "Batang", "batang" },
+              { "Ikat", "ikat" },
+              { "Buah", "buah" },
+              { "Pack", "pack" }
+          }
+      },
+      { "Rumah Tangga", new Dictionary<string, string>
+          {
+              { "Sejumput", "sejumput" },
+              { "Sendok Teh (sdt)", "sdt" },
+              { "Sendok Makan (sdm)", "sdm" },
+              { "Cangkir / Cup", "cup" },
+              { "Gelas", "gelas" }
+          }
+      }
+  };
+
+  3. jumlah_pemakaian dan 4. perkiraan biaya
+  contoh insertnya dr project sebelumnya
+  // Cek apakah bahan sudah ada di resep ini
+$check = mysqli_query($conn, "SELECT id_resep, id_bahan FROM resep_detail WHERE id_bahan = '$id_bahan' AND id_resep = '$id_resep'");
+
+if (mysqli_num_rows($check) > 0) 
+{
+    
+    $response = [
+        'status' => 'duplikat',
+        'message' => 'Gagal Simpan',
+      
+    ];
+} 
+else {
+    // Insert data ke resep_detail
+    $sql = "INSERT INTO resep_detail (id_resep, id_bahan, id_bahan_biaya, satuan_pemakaian, jumlah_pemakaian, nilai_ekpetasi) 
+            VALUES ('$id_resep', '$id_bahan', '$id_bahan_biaya', '$satuan_pemakaian', '$jumlah_pemakaian', '$nilai_ekpetasi')";
+
+    if (mysqli_query($conn, $sql)) {
+        $response = [
+            'status' => 'success',
+            'message' => 'Simpan sukses'
+        ];
+    } 
+    else {
+        $response['message'] = 'Gagal menyimpan data: ' . mysqli_error($conn);
+    }
+}
+
