@@ -136,3 +136,16 @@ nama_kategori	varchar(30)	NO	UNI
 
 mengikuti pattern ui 100% dan backend vendor.php pastikan koneksiny mysqli bukan pdo. 
 pada kolom aksi hanya ada edit dan jangan sampe ada masalah-masalah lain seperti beda ui css, error 500, modal tidak tertutup
+
+perintah 13 CRUD Bahan (bahan.php)
+table bahan
+id_bahan	int(11)	NO	PRI		auto_increment
+id_kategori	int(11)	NO			
+nama_bahan	varchar(30)	YES			
+kode_bahan	varchar(10)	YES					
+
+mengikuti pattern ui 100% dan backend vendor.php pastikan koneksiny mysqli bukan pdo. 
+pada kolom aksi hanya ada edit dan jangan sampe ada masalah-masalah lain seperti beda ui css, error 500, modal tidak tertutup, tampilan mobile berantakan dan tidak responsive, 
+
+id_kategori diambil dari table kategori_bahan.id_kategori tampilkan saja inputan pakai dropdownlist
+kode_bahan manual max 6 karakter
