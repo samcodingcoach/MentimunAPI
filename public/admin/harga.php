@@ -266,7 +266,7 @@ while ($row = $result->fetch_assoc()) {
             <!-- Main Content -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">Set Harga Menu</h1>
+                    <h1 class="h2">Set Harga Menu: <?php echo htmlspecialchars($product_info['nama_produk']); ?> (<?php echo htmlspecialchars($product_info['kode_produk']); ?>)</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <a href="menu.php" class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left"></i> Kembali ke Menu
@@ -274,16 +274,8 @@ while ($row = $result->fetch_assoc()) {
                     </div>
                 </div>
 
-                <!-- Product Info -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title"><?php echo htmlspecialchars($product_info['nama_produk']); ?></h5>
-                        <p class="card-text">
-                            <strong>Kode Produk:</strong> <?php echo htmlspecialchars($product_info['kode_produk']); ?><br>
-                            <strong>Kategori:</strong> <?php echo htmlspecialchars($product_info['nama_kategori']); ?>
-                        </p>
-                    </div>
-                </div>
+              
+               
 
                 <!-- Alert Messages -->
                 <?php if (!empty($message)): ?>
@@ -301,19 +293,15 @@ while ($row = $result->fetch_assoc()) {
                 <?php endif; ?>
 
                 <!-- Harga Table -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">Riwayat Harga</h5>
-                    </div>
-                    <div class="card-body">
+               
+                    
                         <div class="table-responsive">
                             <table class="table table-striped table-hover">
                                 <thead class="table-dark">
                                     <tr>
                                         <th>No</th>
                                         <th>Tanggal</th>
-                                        <th>User Harga</th>
-                                        <th>User Resep</th>
+                                       
                                         <th>Harga Pokok</th>
                                         <th>Biaya Produksi</th>
                                         <th>Margin</th>
@@ -333,11 +321,10 @@ while ($row = $result->fetch_assoc()) {
                                     <tr>
                                         <td><?php echo $no++; ?></td>
                                         <td><?php echo htmlspecialchars($harga['tgl']); ?></td>
-                                        <td><?php echo htmlspecialchars($harga['user_harga']); ?></td>
-                                        <td><?php echo htmlspecialchars($harga['user_resep']); ?></td>
+                                        
                                         <td>Rp <?php echo number_format($harga['harga_pokok_resep'], 0, ',', '.'); ?></td>
                                         <td>Rp <?php echo number_format($harga['biaya_produksi'], 0, ',', '.'); ?></td>
-                                        <td><?php echo number_format($harga['margin'], 2, ',', '.'); ?>%</td>
+                                        <td>Rp <?php echo number_format($harga['margin'], 0, ',', '.'); ?></td>
                                         <td>Rp <?php echo number_format($harga['nominal'], 0, ',', '.'); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
@@ -376,8 +363,8 @@ while ($row = $result->fetch_assoc()) {
                             </ul>
                         </nav>
                         <?php endif; ?>
-                    </div>
-                </div>
+                    
+               
             </main>
         </div>
     </div>
