@@ -258,7 +258,74 @@ if (isset($_GET['edit'])) {
                   </ul>
                 </div>
               </li>
+              
+              <!-- Pembelian Menu -->
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#pembelianMenu" role="button">
+                  <i class="bi bi-cart"></i>
+                  <span>Pembelian</span>
+                  <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse" id="pembelianMenu">
+                  <ul class="nav flex-column ms-3">
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-cart-plus"></i> Pesanan Pembelian</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
+                  </ul>
+                </div>
+              </li>
               <?php endif; ?>
+              
+              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Kasir"): ?>
+              <!-- Penjualan Menu -->
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#penjualanMenu" role="button">
+                  <i class="bi bi-cash-stack"></i>
+                  <span>Penjualan</span>
+                  <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse" id="penjualanMenu">
+                  <ul class="nav flex-column ms-3">
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-clock"></i> Shift Kasir</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-tag"></i> Harga Rilis</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
+                  </ul>
+                </div>
+              </li>
+              <?php endif; ?>
+              
+              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
+              <!-- Inventory Menu -->
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#inventoryMenu" role="button">
+                  <i class="bi bi-boxes"></i>
+                  <span>Inventory</span>
+                  <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse" id="inventoryMenu">
+                  <ul class="nav flex-column ms-3">
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-box-seam"></i> Inventory</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
+                  </ul>
+                </div>
+              </li>
+              <?php endif; ?>
+              
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#laporanMenu" role="button">
+                  <i class="bi bi-graph-up"></i>
+                  <span>Laporan</span>
+                  <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse" id="laporanMenu">
+                  <ul class="nav flex-column ms-3">
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-list-ul"></i> Transaksi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-bar-chart"></i> Pengeluaran vs Penjualan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-pie-chart"></i> Kuantitas</a></li>
+                  </ul>
+                </div>
+              </li>
               
               <li class="nav-item">
                 <a class="nav-link" href="#">
@@ -338,8 +405,8 @@ if (isset($_GET['edit'])) {
                       <td class="d-none d-lg-table-cell"><?php echo $resep['qty_bahan']; ?></td>
                       <td class="d-none d-lg-table-cell"><?php echo htmlspecialchars($resep['nilai']); ?></td>
                       <td>
-                        <a href="?edit=<?php echo $resep['id_resep']; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>&page=<?php echo $page; ?>" class="btn btn-sm btn-warning">
-                          <i class="bi bi-pencil"></i> Edit
+                        <a href="resep_detail.php?id=<?php echo $resep['id_resep']; ?>" class="btn btn-sm btn-info">
+                          <i class="bi bi-eye"></i> Detail
                         </a>
                       </td>
                     </tr>
@@ -397,7 +464,7 @@ if (isset($_GET['edit'])) {
 
     <!-- Modal -->
     <div class="modal fade" id="resepModal" tabindex="-1" aria-labelledby="resepModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-md">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="resepModalLabel">

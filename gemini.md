@@ -267,3 +267,47 @@ FROM
     
    GROUP BY resep.id_resep
    ORDER BY resep.tanggal_release DESC
+
+
+#perintah 16#
+Buat CRUD untuk detail resep (resep_detail.php)
+table resep_detail
+id_resep_detail	int(11)	NO	PRI		auto_increment
+id_resep	int(11)	YES			
+id_bahan	int(11)	YES			
+id_bahan_biaya	int(11)	YES			
+satuan_pemakaian	varchar(15)	YES			
+jumlah_pemakaian	double	YES			
+nilai_ekpetasi	double	YES		
+
+untuk tampilan table querynya sebagai berikut
+
+$id = $_GET['id_resep'];
+$sql = "SELECT
+	resep_detail.id_resep_detail, 
+	resep_detail.id_resep, 
+  CONCAT(bahan.nama_bahan, ' [', kategori_bahan.nama_kategori,']',' | ',bahan.kode_bahan) as nama_bahan,
+	resep_detail.id_bahan, 
+  CONCAT('Rp ',FORMAT(bahan_biaya.harga_satuan,0),'/',bahan_biaya.satuan) as harga_satuan,
+	resep_detail.id_bahan_biaya, 
+  CONCAT('Rp ',FORMAT(resep_detail.nilai_ekpetasi,0)) as nilai_ekpetasi,
+  CONCAT(resep_detail.jumlah_pemakaian,' ',resep_detail.satuan_pemakaian) satuan_pemakaian
+FROM
+	resep_detail
+	INNER JOIN
+	bahan
+	ON 
+		resep_detail.id_bahan = bahan.id_bahan
+	INNER JOIN
+	kategori_bahan
+	ON 
+		bahan.id_kategori = kategori_bahan.id_kategori
+	INNER JOIN
+	bahan_biaya
+	ON 
+		resep_detail.id_bahan_biaya = bahan_biaya.id_bahan_biaya
+    
+    where resep_detail.id_resep = '$id'
+
+    untuk oprasi tambah, skip dulu 
+
