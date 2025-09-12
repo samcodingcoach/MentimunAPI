@@ -149,3 +149,68 @@ pada kolom aksi hanya ada edit dan jangan sampe ada masalah-masalah lain seperti
 
 id_kategori diambil dari table kategori_bahan.id_kategori tampilkan saja inputan pakai dropdownlist
 kode_bahan manual max 6 karakter
+
+perintah 13 CRUD Produk Menu (menu.php)
+table produk_menu
+id_produk	int(11)	NO	PRI		auto_increment
+kode_produk	varchar(30)	YES			
+nama_produk	varchar(30)	YES			
+id_kategori	int(11)	YES			
+id_harga	int(11)	YES			
+aktif	varchar(1)	YES		1	
+
+mengikuti pattern ui 100% dan backend vendor.php pastikan koneksiny mysqli bukan pdo. 
+pada kolom aksi hanya ada edit dan jangan sampe ada masalah-masalah lain seperti beda ui css, error 500, modal tidak tertutup, tampilan mobile berantakan dan tidak responsive, 
+
+id_kategori diambil dari table kategori_menu.id_kategori tampilkan saja inputan pakai dropdownlist seacrhable
+dan untuk tampilan ditable adalah seperti query dibawah ini
+(
+    SELECT
+        pm.id_produk, 
+        pm.kode_produk, 
+        CONCAT('[',km.nama_kategori,'] ', pm.nama_produk) as nama_produk,
+        COALESCE(CONCAT('Rp ',FORMAT(hm.nominal,0)), 'Not Set') as harga, 
+        DATE_FORMAT(hm.tgl,'%d %M %Y') as tgl, 
+        CONCAT(pg.nama_lengkap,' [',pg.jabatan,']') as pegawai
+    FROM produk_menu pm
+    INNER JOIN kategori_menu km ON pm.id_kategori = km.id_kategori
+    LEFT JOIN (
+        SELECT id_produk, MAX(tgl) AS max_tgl
+        FROM harga_menu
+        GROUP BY id_produk
+    ) AS lh ON pm.id_produk = lh.id_produk
+    LEFT JOIN harga_menu hm ON pm.id_produk = hm.id_produk AND hm.tgl = lh.max_tgl
+    LEFT JOIN pegawai pg ON hm.id_user = pg.id_user
+    ORDER BY pm.id_produk DESC
+    LIMIT 1
+)
+
+UNION ALL
+
+-- Ambil semua selain produk terbaru
+(
+    SELECT
+        pm.id_produk, 
+        pm.kode_produk, 
+        CONCAT('[',km.nama_kategori,'] ', pm.nama_produk) as nama_produk,
+        COALESCE(CONCAT('Rp ',FORMAT(hm.nominal,0)), 'Not Set') as harga, 
+        DATE_FORMAT(hm.tgl,'%d %M %Y') as tgl, 
+        CONCAT(pg.nama_lengkap,' [',pg.jabatan,']') as pegawai
+    FROM produk_menu pm
+    INNER JOIN kategori_menu km ON pm.id_kategori = km.id_kategori
+    LEFT JOIN (
+        SELECT id_produk, MAX(tgl) AS max_tgl
+        FROM harga_menu
+        GROUP BY id_produk
+    ) AS lh ON pm.id_produk = lh.id_produk
+    LEFT JOIN harga_menu hm ON pm.id_produk = hm.id_produk AND hm.tgl = lh.max_tgl
+    LEFT JOIN pegawai pg ON hm.id_user = pg.id_user
+    WHERE pm.id_produk NOT IN (
+        SELECT id_produk FROM (
+            SELECT id_produk 
+            FROM produk_menu 
+            ORDER BY id_produk DESC 
+            LIMIT 1
+        ) AS sub
+    )
+    ORDER BY hm.tgl DESC, pm.nama_produk ASC

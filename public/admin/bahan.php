@@ -200,6 +200,34 @@ if (!empty($params)) {
       .search-box {
         max-width: 300px;
       }
+      .searchable-select {
+        position: relative;
+      }
+      .searchable-select .form-control {
+        cursor: pointer;
+      }
+      .searchable-select .dropdown-menu {
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      .searchable-select .search-input {
+        border: none;
+        outline: none;
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        border-bottom: 1px solid #dee2e6;
+      }
+      .searchable-select .dropdown-item {
+        cursor: pointer;
+      }
+      .searchable-select .dropdown-item:hover {
+        background-color: #f8f9fa;
+      }
+      .searchable-select .dropdown-item.active {
+        background-color: #0d6efd;
+        color: white;
+      }
     </style>
   </head>
 
@@ -629,14 +657,20 @@ if (!empty($params)) {
              
              <div class="mb-3">
                <label for="id_kategori" class="form-label">Kategori Bahan <span class="text-danger">*</span></label>
-               <select class="form-select" id="id_kategori" name="id_kategori" required>
-                 <option value="">Pilih Kategori</option>
-                 <?php foreach ($categories as $category): ?>
-                   <option value="<?php echo $category['id_kategori']; ?>" <?php echo ($edit_data && $edit_data['id_kategori'] == $category['id_kategori']) ? 'selected' : ''; ?>>
-                     <?php echo htmlspecialchars($category['nama_kategori']); ?>
-                   </option>
-                 <?php endforeach; ?>
-               </select>
+               <div class="searchable-select">
+                 <input type="text" class="form-control" id="kategori_display" placeholder="Pilih atau ketik untuk mencari kategori..." readonly>
+                 <input type="hidden" id="id_kategori" name="id_kategori" required>
+                 <div class="dropdown-menu" id="kategori_dropdown">
+                   <input type="text" class="search-input" id="kategori_search" placeholder="Cari kategori...">
+                   <div id="kategori_options">
+                     <?php foreach ($categories as $category): ?>
+                       <div class="dropdown-item" data-value="<?php echo $category['id_kategori']; ?>" data-text="<?php echo htmlspecialchars($category['nama_kategori']); ?>">
+                         <?php echo htmlspecialchars($category['nama_kategori']); ?>
+                       </div>
+                     <?php endforeach; ?>
+                   </div>
+                 </div>
+               </div>
              </div>
              
              <div class="mb-3">
@@ -669,6 +703,64 @@ if (!empty($params)) {
        });
      <?php endif; ?>
      
+     // Initialize searchable dropdown
+     document.addEventListener('DOMContentLoaded', function() {
+       const displayInput = document.getElementById('kategori_display');
+       const hiddenInput = document.getElementById('id_kategori');
+       const dropdown = document.getElementById('kategori_dropdown');
+       const searchInput = document.getElementById('kategori_search');
+       const optionsContainer = document.getElementById('kategori_options');
+       const allOptions = optionsContainer.querySelectorAll('.dropdown-item');
+       
+       // Show dropdown when clicking display input
+       displayInput.addEventListener('click', function() {
+         dropdown.style.display = 'block';
+         searchInput.focus();
+       });
+       
+       // Hide dropdown when clicking outside
+       document.addEventListener('click', function(e) {
+         if (!e.target.closest('.searchable-select')) {
+           dropdown.style.display = 'none';
+         }
+       });
+       
+       // Search functionality
+       searchInput.addEventListener('input', function() {
+         const searchTerm = this.value.toLowerCase();
+         allOptions.forEach(option => {
+           const text = option.textContent.toLowerCase();
+           if (text.includes(searchTerm)) {
+             option.style.display = 'block';
+           } else {
+             option.style.display = 'none';
+           }
+         });
+       });
+       
+       // Select option
+       allOptions.forEach(option => {
+         option.addEventListener('click', function() {
+           const value = this.getAttribute('data-value');
+           const text = this.getAttribute('data-text');
+           
+           hiddenInput.value = value;
+           displayInput.value = text;
+           dropdown.style.display = 'none';
+           searchInput.value = '';
+           
+           // Show all options again
+           allOptions.forEach(opt => opt.style.display = 'block');
+         });
+       });
+       
+       // Clear search when dropdown is shown
+       displayInput.addEventListener('focus', function() {
+         searchInput.value = '';
+         allOptions.forEach(opt => opt.style.display = 'block');
+       });
+     });
+     
      // Handle form submission success
      document.addEventListener('DOMContentLoaded', function() {
        <?php if ($message): ?>
@@ -700,7 +792,8 @@ if (!empty($params)) {
          // Reset to add mode
          actionInput.value = 'create';
          if (idInput) idInput.remove();
-         kategoriSelect.value = '';
+         document.getElementById('id_kategori').value = '';
+         document.getElementById('kategori_display').value = '';
          namaInput.value = '';
          kodeInput.value = '';
          modalTitle.textContent = 'Tambah Bahan';
@@ -737,7 +830,12 @@ if (!empty($params)) {
        idInput.value = id;
        
        // Set form values
-       kategoriSelect.value = kategori;
+       document.getElementById('id_kategori').value = kategori;
+       // Find the category name for display
+       const categoryOption = document.querySelector(`[data-value="${kategori}"]`);
+       if (categoryOption) {
+         document.getElementById('kategori_display').value = categoryOption.getAttribute('data-text');
+       }
        namaInput.value = nama;
        kodeInput.value = kode;
        modalTitle.textContent = 'Edit Bahan';
