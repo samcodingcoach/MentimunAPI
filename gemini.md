@@ -150,7 +150,7 @@ pada kolom aksi hanya ada edit dan jangan sampe ada masalah-masalah lain seperti
 id_kategori diambil dari table kategori_bahan.id_kategori tampilkan saja inputan pakai dropdownlist
 kode_bahan manual max 6 karakter
 
-perintah 13 CRUD Produk Menu (menu.php)
+perintah 14 CRUD Produk Menu (menu.php)
 table produk_menu
 id_produk	int(11)	NO	PRI		auto_increment
 kode_produk	varchar(30)	YES			
