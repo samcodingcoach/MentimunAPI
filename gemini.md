@@ -214,3 +214,56 @@ UNION ALL
         ) AS sub
     )
     ORDER BY hm.tgl DESC, pm.nama_produk ASC
+
+#perintah 15#
+buatkan CRUD Resep (resep.php)
+table resep
+id_resep	int(11)	NO	PRI		auto_increment
+kode_resep	varchar(50)	YES			
+id_produk	int(11)	YES			
+harga_pokok_resep	double	YES		0	
+id_user	int(11)	YES			
+tanggal_release	datetime	YES		current_timestamp()	on update current_timestamp()
+
+mengikuti pattern ui 100% dan backend vendor.php pastikan koneksiny mysqli bukan pdo. 
+pada kolom aksi hanya ada edit dan jangan sampe ada masalah-masalah lain seperti beda ui css, error 500, modal tidak tertutup, tampilan mobile berantakan dan tidak responsive, 
+
+PENTING:
+1. inputannya hanya kode_resep,id_produk,id_user
+   id_produk berarti ambil dropdownlist searchable data dari table produk muncul nama_produk
+2. id_user ambil dr session
+3. tampilah tablenya ada dibawah ini
+
+SELECT
+	resep.id_resep, 
+	resep.kode_resep, 
+	resep.id_produk, 
+  CONCAT(produk_menu.nama_produk,' - ',kategori_menu.nama_kategori, ' [',produk_menu.kode_produk,']') as nama_produk,
+	resep.id_user, 
+  CONCAT(pegawai.nama_lengkap,' [',pegawai.jabatan,']') as pembuat_resep,
+
+  DATE_FORMAT(resep.tanggal_release,'%d %M %Y %H:%i') as tanggal_release,
+	resep.pin,
+  COUNT(resep_detail.id_bahan) as qty_bahan,
+ CONCAT('Rp ', FORMAT(COALESCE(SUM(resep_detail.nilai_ekpetasi), 0), 0)) AS nilai,resep.publish_menu
+FROM
+	resep
+	INNER JOIN
+	produk_menu
+	ON 
+		resep.id_produk = produk_menu.id_produk
+	INNER JOIN
+	kategori_menu
+	ON 
+		produk_menu.id_kategori = kategori_menu.id_kategori
+	INNER JOIN
+	pegawai
+	ON 
+		resep.id_user = pegawai.id_user
+	left JOIN
+	resep_detail
+	ON 
+		resep.id_resep = resep_detail.id_resep
+    
+   GROUP BY resep.id_resep
+   ORDER BY resep.tanggal_release DESC
