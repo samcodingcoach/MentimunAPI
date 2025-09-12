@@ -413,18 +413,12 @@ while ($resep_row = $resep_result->fetch_assoc()) {
                 <?php endif; ?>
 
                 <!-- Harga Table -->
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">Riwayat Harga</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
+                <div class="table-responsive">
                             <table class="table table-striped table-hover">
                                 <thead class="table-dark">
                                     <tr>
                                         <th>No</th>
                                         <th>Tanggal</th>
-                                       
                                         <th>Harga Pokok</th>
                                         <th>Biaya Produksi</th>
                                         <th>Margin</th>
@@ -462,8 +456,6 @@ while ($resep_row = $resep_result->fetch_assoc()) {
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                </div>
 
                         <!-- Pagination -->
                         <?php if ($total_pages > 1): ?>
