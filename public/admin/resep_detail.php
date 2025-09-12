@@ -14,6 +14,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Tidak perlu AJAX search, langsung load semua bahan
     
+    if ($action === 'publish_resep') {
+        $id_resep = $_POST['id_resep'] ?? '';
+        
+        if (empty($id_resep)) {
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'error', 'message' => 'ID Resep tidak valid']);
+            exit;
+        }
+        
+        $stmt = $conn->prepare("UPDATE resep SET publish_menu = 1 WHERE id_resep = ?");
+        $stmt->bind_param('i', $id_resep);
+        
+        if ($stmt->execute()) {
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'success', 'message' => 'Resep berhasil dipublish']);
+        } else {
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'error', 'message' => 'Gagal mempublish resep']);
+        }
+        exit;
+    }
+    
     if ($action === 'add_detail') {
         $id_resep = $_POST['id_resep'] ?? '';
         $id_bahan_biaya = $_POST['id_bahan_biaya'] ?? '';
@@ -434,6 +456,9 @@ $resep_details = $result->fetch_all(MYSQLI_ASSOC);
               <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#detailModal">
                 <i class="bi bi-plus-circle"></i> New Detail
               </button>
+              <button type="button" class="btn btn-success me-2" id="publishBtn" onclick="publishResep()">
+                <i class="bi bi-check-circle"></i> Publish
+              </button>
               <a href="resep.php" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> Kembali ke Resep
               </a>
@@ -659,6 +684,33 @@ $resep_details = $result->fetch_all(MYSQLI_ASSOC);
         document.getElementById('harga_info').style.display = 'none';
         document.getElementById('id_bahan_biaya').value = '';
     });
+    
+    // Publish resep function
+    function publishResep() {
+        if (confirm('Yakin, Setelah publish tidak bisa tambah resep lagi?')) {
+            const formData = new FormData();
+            formData.append('action', 'publish_resep');
+            formData.append('id_resep', '<?php echo $id_resep; ?>');
+            
+            fetch('resep_detail.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.href = 'resep.php';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat mempublish resep');
+            });
+        }
+    }
     </script>
 </body>
 </html>
