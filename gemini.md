@@ -128,3 +128,11 @@ aktif	varchar(1)	NO		1
 
 mengikuti pattern ui dan backend vendor.php pastikan koneksiny mysqli bukan pdo. 
 pada kolom aksi hanya ada edit
+
+perintah 12 CRUD Kategori Bahan
+table kategori_bahan
+id_kategori	int(11)	NO	PRI		auto_increment
+nama_kategori	varchar(30)	NO	UNI		
+
+mengikuti pattern ui 100% dan backend vendor.php pastikan koneksiny mysqli bukan pdo. 
+pada kolom aksi hanya ada edit dan jangan sampe ada masalah-masalah lain seperti beda ui css, error 500, modal tidak tertutup
