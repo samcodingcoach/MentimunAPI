@@ -420,3 +420,40 @@ else {
     }
 }
 
+perintah 15
+pada menu.php, tambahkan perintah berikut
+1. pada kolom aksi tambahkan tombol / link Set Harga
+   buat file baru harga.php dengan parameter id_produk=X
+   dalam harga.php 
+   menampilkan data dari dari query berikut
+
+   SELECT
+  DATE_FORMAT( harga_menu.tgl ,'%d %M %Y %H:%i') AS tgl, 
+	harga_menu.id_harga, 
+	harga_menu.id_resep,
+  CONCAT(pegawai.nama_lengkap,' - ',pegawai.jabatan) as user_harga,
+  CONCAT(pegawai.nama_lengkap,' - ',pegawai.jabatan) as user_resep, 
+	resep.harga_pokok_resep, 
+  biaya_produksi, 
+	harga_menu.margin as margin, 
+	nominal
+FROM
+	harga_menu
+	INNER JOIN
+	produk_menu
+	ON 
+		harga_menu.id_produk = produk_menu.id_produk
+	INNER JOIN
+	resep
+	ON 
+		harga_menu.id_resep = resep.id_resep
+	INNER JOIN
+	pegawai
+	ON 
+		harga_menu.id_user = pegawai.id_user AND
+		resep.id_user = pegawai.id_user 
+    
+    WHERE produk_menu.id_produk = 22
+    ORDER BY DATE(harga_menu.tgl) desc, harga_menu.nominal ASC
+
+    

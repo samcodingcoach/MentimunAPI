@@ -702,6 +702,9 @@ $categories = $categories_result->fetch_all(MYSQLI_ASSOC);
                     <button type="button" class="btn btn-sm btn-warning" onclick="editProduct(<?php echo $product['id_produk']; ?>)">
                       <i class="bi bi-pencil"></i> Edit
                     </button>
+                    <a href="harga.php?id_produk=<?php echo $product['id_produk']; ?>" class="btn btn-sm btn-info ms-1">
+                      <i class="bi bi-currency-dollar"></i> Set Harga
+                    </a>
                   </td>
                 </tr>
                 <?php endforeach; ?>
