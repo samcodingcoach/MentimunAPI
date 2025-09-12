@@ -36,6 +36,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     
+    if ($action === 'delete_detail') {
+        $id_resep_detail = $_POST['id_resep_detail'] ?? '';
+        
+        if (empty($id_resep_detail)) {
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'error', 'message' => 'ID Resep Detail tidak valid']);
+            exit;
+        }
+        
+        $stmt = $conn->prepare("DELETE FROM resep_detail WHERE id_resep_detail = ?");
+        $stmt->bind_param('i', $id_resep_detail);
+        
+        if ($stmt->execute()) {
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'success', 'message' => 'Detail resep berhasil dihapus']);
+        } else {
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menghapus detail resep']);
+        }
+        exit;
+    }
+    
     if ($action === 'add_detail') {
         $id_resep = $_POST['id_resep'] ?? '';
         $id_bahan_biaya = $_POST['id_bahan_biaya'] ?? '';
@@ -74,18 +96,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         try {
             // Cek duplikasi
-            $checkStmt = $conn->prepare("
-                SELECT COUNT(*) as count FROM resep_detail 
-                WHERE id_resep = ? AND id_bahan_biaya = ? AND satuan_pemakaian = ?
-            ");
-            $checkStmt->bind_param('iis', $id_resep, $id_bahan_biaya, $satuan_pemakaian);
+            $checkStmt = $conn->prepare("SELECT COUNT(*) AS count FROM resep_detail INNER JOIN resep ON resep_detail.id_resep = resep.id_resep WHERE resep.publish_menu = 0 and resep_detail.id_resep = ? AND id_bahan_biaya = ?");
+            $checkStmt->bind_param('ii', $id_resep, $id_bahan_biaya);
             $checkStmt->execute();
             $checkResult = $checkStmt->get_result();
             $count = $checkResult->fetch_assoc()['count'];
             
             if ($count > 0) {
                 header('Content-Type: application/json');
-                echo json_encode(['status' => 'error', 'message' => 'Detail resep dengan bahan dan satuan yang sama sudah ada']);
+                echo json_encode(['status' => 'error', 'message' => 'Detail resep dengan bahan yang sama sudah ada']);
                 exit;
             }
             
@@ -139,6 +158,14 @@ if (!$resep_info) {
     header("Location: resep.php");
     exit();
 }
+
+// Check if resep is already published
+$publish_query = "SELECT resep.publish_menu FROM resep WHERE id_resep = ? AND publish_menu = 1";
+$publish_stmt = $conn->prepare($publish_query);
+$publish_stmt->bind_param("i", $id_resep);
+$publish_stmt->execute();
+$publish_result = $publish_stmt->get_result();
+$is_published = $publish_result->num_rows > 0;
 
 // Pagination
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -453,12 +480,14 @@ $resep_details = $result->fetch_all(MYSQLI_ASSOC);
               </p>
             </div>
             <div>
+              <?php if (!$is_published): ?>
               <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#detailModal">
                 <i class="bi bi-plus-circle"></i> New Detail
               </button>
               <button type="button" class="btn btn-success me-2" id="publishBtn" onclick="publishResep()">
                 <i class="bi bi-check-circle"></i> Publish
               </button>
+              <?php endif; ?>
               <a href="resep.php" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> Kembali ke Resep
               </a>
@@ -493,6 +522,9 @@ $resep_details = $result->fetch_all(MYSQLI_ASSOC);
                   <th class="d-none d-md-table-cell">Harga Satuan</th>
                   <th class="d-none d-lg-table-cell">Pemakaian</th>
                   <th>Nilai Ekspetasi</th>
+                  <?php if (!$is_published): ?>
+                  <th>Aksi</th>
+                  <?php endif; ?>
                 </tr>
               </thead>
               <tbody>
@@ -504,11 +536,18 @@ $resep_details = $result->fetch_all(MYSQLI_ASSOC);
                       <td class="d-none d-md-table-cell"><?php echo htmlspecialchars($detail['harga_satuan']); ?></td>
                       <td class="d-none d-lg-table-cell"><?php echo htmlspecialchars($detail['satuan_pemakaian']); ?></td>
                       <td><span class="badge bg-success"><?php echo htmlspecialchars($detail['nilai_ekpetasi']); ?></span></td>
+                      <?php if (!$is_published): ?>
+                      <td>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="deleteDetail(<?php echo $detail['id_resep_detail']; ?>)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </td>
+                      <?php endif; ?>
                     </tr>
                   <?php endforeach; ?>
                 <?php else: ?>
                   <tr>
-                    <td colspan="5" class="text-center">Tidak ada data detail resep</td>
+                    <td colspan="<?php echo $is_published ? '5' : '6'; ?>" class="text-center">Tidak ada data detail resep</td>
                   </tr>
                 <?php endif; ?>
               </tbody>
@@ -686,7 +725,8 @@ $resep_details = $result->fetch_all(MYSQLI_ASSOC);
     });
     
     // Publish resep function
-    function publishResep() {
+    function publishResep() 
+    {
         if (confirm('Yakin, Setelah publish tidak bisa tambah resep lagi?')) {
             const formData = new FormData();
             formData.append('action', 'publish_resep');
@@ -707,7 +747,34 @@ $resep_details = $result->fetch_all(MYSQLI_ASSOC);
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Terjadi kesalahan saat mempublish resep');
+                alert('Terjadi kesalahan saat publish resep');
+            });
+        }
+    }
+    
+    // Delete detail function
+    function deleteDetail(id_resep_detail) {
+        if (confirm('Yakin ingin menghapus detail resep ini?')) {
+            const formData = new FormData();
+            formData.append('action', 'delete_detail');
+            formData.append('id_resep_detail', id_resep_detail);
+            
+            fetch('resep_detail.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menghapus data');
             });
         }
     }
