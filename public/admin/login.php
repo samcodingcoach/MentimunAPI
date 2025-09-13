@@ -23,10 +23,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             // Verify password using encryption function
             if (verifyPassword($password, $row['password'], $row['nomor_hp'])) {
+                // Get application name from perusahaan table
+                $app_sql = "SELECT nama_aplikasi FROM `perusahaan` LIMIT 1";
+                $app_result = $conn->query($app_sql);
+                $app_name = "Resto007 Admin"; // Default name
+                if ($app_result && $app_result->num_rows > 0) {
+                    $app_row = $app_result->fetch_assoc();
+                    $app_name = $app_row['nama_aplikasi'] . " Admin";
+                }
+                
                 $_SESSION['loggedin'] = true;
                 $_SESSION['id_user'] = $row['id_user'];
                 $_SESSION['nama_lengkap'] = $row['nama_lengkap'];
                 $_SESSION['jabatan'] = $row['jabatan'];
+                $_SESSION['nama_aplikasi'] = $app_name;
                 header("location: index.php");
                 exit;
             } else {
