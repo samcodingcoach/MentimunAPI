@@ -292,7 +292,7 @@ foreach ($tunai_data as $row) {
                       <th class="text-center">No</th>
                       <th>Kode Payment</th>
                       <th class="text-center">Jam</th>
-                      <th>Waktu Dibayar</th>
+                     
                       <th>Kasir</th>
                       <th class="text-center">Status</th>
                        <th class="text-end">Nominal</th>
@@ -315,7 +315,7 @@ foreach ($tunai_data as $row) {
                       <td class="text-center fw-bold"><?php echo $no++; ?></td>
                       <td class="fw-semibold"><?php echo htmlspecialchars($row['kode_payment']); ?></td>
                       <td class="text-center"><?php echo htmlspecialchars($row['jam']); ?></td>
-                      <td><?php echo htmlspecialchars($row['waktu_dibayar']); ?></td>
+                      
                       <td><?php echo htmlspecialchars($row['kasir']); ?></td>
                      
                       <td class="text-center">
