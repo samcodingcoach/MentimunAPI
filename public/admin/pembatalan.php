@@ -473,7 +473,9 @@ $total_amount = $total_result->fetch_assoc()['total_keseluruhan'] ?? 0;
                   <td class="text-center fw-bold"><?php echo $no++; ?></td>
                   <td><?php echo date('d/m/Y H:i', strtotime($row['waktu'])); ?></td>
                   <td>
-                    <span class="badge bg-info fs-6 px-3 py-2"><?php echo htmlspecialchars($row['id_tagihan']); ?></span>
+                    <a href="#" class="text-decoration-none" onclick="showDetail('<?php echo htmlspecialchars($row['id_tagihan']); ?>', '<?php echo htmlspecialchars($tanggal_mulai); ?>', '<?php echo htmlspecialchars($tanggal_selesai); ?>')" data-bs-toggle="modal" data-bs-target="#detailModal">
+                      <span class="badge bg-info fs-6 px-3 py-2" style="cursor: pointer;"><?php echo htmlspecialchars($row['id_tagihan']); ?></span>
+                    </a>
                   </td>
                   <td class="text-center"><?php echo htmlspecialchars($row['nomor_meja']); ?></td>
                   <td class="fw-semibold"><?php echo htmlspecialchars($row['nama_lengkap']); ?></td>
@@ -538,6 +540,29 @@ $total_amount = $total_result->fetch_assoc()['total_keseluruhan'] ?? 0;
       </div>
     </div>
 
+    <!-- Detail Modal -->
+    <div class="modal fade" id="detailModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Detail Pembatalan - <span id="modal-id-tagihan"></span></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div id="loading-spinner" class="text-center py-5" style="display: none;">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+            <div id="detail-content">
+              <!-- Content will be loaded here via AJAX -->
+            </div>
+          </div>
+         
+        </div>
+      </div>
+    </div>
+
     <script src="../js/bootstrap.bundle.min.js"></script>
     <!-- Flatpickr JS for Date Picker -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -579,6 +604,33 @@ $total_amount = $total_result->fetch_assoc()['total_keseluruhan'] ?? 0;
           }
         }
       });
+
+      // Function to show detail modal
+      function showDetail(idTagihan, tanggalMulai, tanggalSelesai) {
+        document.getElementById('modal-id-tagihan').textContent = idTagihan;
+        document.getElementById('loading-spinner').style.display = 'block';
+        document.getElementById('detail-content').innerHTML = '';
+        
+        // Create AJAX request to get detail data
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'get_pembatalan_detail.php?id_tagihan=' + encodeURIComponent(idTagihan) + '&tanggal_mulai=' + encodeURIComponent(tanggalMulai) + '&tanggal_selesai=' + encodeURIComponent(tanggalSelesai), true);
+        
+        xhr.onload = function() {
+          document.getElementById('loading-spinner').style.display = 'none';
+          if (xhr.status === 200) {
+            document.getElementById('detail-content').innerHTML = xhr.responseText;
+          } else {
+            document.getElementById('detail-content').innerHTML = '<div class="alert alert-danger">Error loading data</div>';
+          }
+        };
+        
+        xhr.onerror = function() {
+          document.getElementById('loading-spinner').style.display = 'none';
+          document.getElementById('detail-content').innerHTML = '<div class="alert alert-danger">Network error</div>';
+        };
+        
+        xhr.send();
+      }
     </script>
   </body>
 </html>
