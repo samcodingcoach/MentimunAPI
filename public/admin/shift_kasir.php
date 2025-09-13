@@ -308,38 +308,22 @@ try {
                 <?php endif; ?>
 
           <!-- Search and Filter -->
-          <div class="card shadow-sm mb-4">
-            <div class="card-body">
-              <form method="GET" class="row g-3 align-items-end">
-                <div class="col-md-3">
-                  <label for="tanggal" class="form-label fw-semibold">
-                    <i class="bi bi-calendar3 me-2"></i>Tanggal
-                  </label>
-                  <input type="date" class="form-control" id="tanggal" name="tanggal" value="<?php echo $selected_date; ?>">
-                </div>
-                <div class="col-md-2">
-                  <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search me-1"></i>Filter
-                  </button>
-                </div>
-                <div class="col-md-2">
-                  <a href="shift_kasir.php" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-clockwise me-1"></i>Reset
-                  </a>
-                </div>
-                <div class="col-md-5">
-                  <div class="text-muted">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Menampilkan data shift untuk tanggal: <strong><?php echo date('d F Y', strtotime($selected_date)); ?></strong>
-                  </div>
-                </div>
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <form method="GET" class="d-flex">
+                <input type="date" class="form-control me-2" name="tanggal" value="<?php echo $selected_date; ?>">
+                <button type="submit" class="btn btn-outline-primary">
+                  <i class="bi bi-search"></i>
+                </button>
+              
               </form>
             </div>
+           
           </div>
 
           <!-- Shift Data Table -->
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0 text-primary"><i class="bi bi-clock me-2"></i>Data Shift Kasir</h5>
+            
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shiftModal">
               <i class="bi bi-plus-circle me-2"></i>Tambah Shift
             </button>
@@ -370,7 +354,7 @@ try {
                       <td class="text-center fw-bold"><?php echo $index + 1; ?></td>
                       <td class="fw-semibold"><?php echo htmlspecialchars($shift['kasir']); ?></td>
                       <td class="text-center">
-                        <?php if ($shift['status'] == 'open'): ?>
+                        <?php if ($shift['status'] == '1'): ?>
                           <span class="badge bg-success fs-6 px-3 py-2">
                             <i class="bi bi-check-circle me-1"></i>Open
                           </span>
