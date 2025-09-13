@@ -129,7 +129,7 @@ try {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Harga Pokok Penjualan - Admin Dashboard</title>
+    <title>Harga Rilis - Admin Dashboard</title>
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="../css/admin.css" rel="stylesheet">
@@ -244,8 +244,8 @@ try {
                   <ul class="nav flex-column ms-3">
                     <li class="nav-item"><a class="nav-link" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
                     <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
+                    <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
                     <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
                   </ul>
                 </div>
@@ -369,8 +369,8 @@ try {
                   <ul class="nav flex-column ms-3">
                     <li class="nav-item"><a class="nav-link" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
                     <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
+                    <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
                     <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
                   </ul>
                 </div>
@@ -416,7 +416,7 @@ try {
         <!-- Main Content -->
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Harga Pokok Penjualan</h1>
+            <h1 class="h2">Harga Rilis</h1>
           </div>
 
           <!-- Alert Messages -->
