@@ -170,7 +170,7 @@ try {
 // Get Takeaway data
 $takeaway_data = [];
 try {
-    $takeaway_sql = "SELECT id_ta, DATE_FORMAT(tanggal_rilis,'%d %M %Y') as tanggal_rilis, biaya_per_item FROM takeaway_charge ORDER BY DATE(tanggal_rilis) DESC";
+    $takeaway_sql = "SELECT id_ta, DATE_FORMAT(tanggal_rilis,'%d %M %Y') as tanggal_rilis, biaya_per_item FROM takeaway_charge ORDER BY id_ta DESC";
     $takeaway_result = $conn->query($takeaway_sql);
     $takeaway_data = $takeaway_result->fetch_all(MYSQLI_ASSOC);
 } catch (Exception $e) {
@@ -393,140 +393,116 @@ try {
             </div>
           <?php endif; ?>
 
-          <!-- Tab Navigation -->
-          <ul class="nav nav-tabs" id="biayaTab" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button class="nav-link active" id="pajak-tab" data-bs-toggle="tab" data-bs-target="#pajak" type="button" role="tab">
+          <!-- Modern Tab Navigation -->
+          <div class="tab-navigation-modern mb-4">
+            <div class="nav nav-pills nav-fill bg-light rounded-3 p-1" id="biayaTab" role="tablist">
+              <button class="nav-link active rounded-3 fw-semibold" id="pajak-tab" data-bs-toggle="tab" data-bs-target="#pajak" type="button" role="tab">
                 <i class="bi bi-percent me-2"></i>Pajak (PPN)
               </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="takeaway-tab" data-bs-toggle="tab" data-bs-target="#takeaway" type="button" role="tab">
+              <button class="nav-link rounded-3 fw-semibold" id="takeaway-tab" data-bs-toggle="tab" data-bs-target="#takeaway" type="button" role="tab">
                 <i class="bi bi-bag me-2"></i>Takeaway
               </button>
-            </li>
-          </ul>
+            </div>
+          </div>
 
           <!-- Tab Content -->
           <div class="tab-content" id="biayaTabContent">
             <!-- PPN Tab -->
             <div class="tab-pane fade show active" id="pajak" role="tabpanel">
-              <div class="card mt-3">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                  <h5 class="mb-0">Data PPN</h5>
-                  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPpnModal">
-                    <i class="bi bi-plus-circle me-2"></i>Tambah PPN
-                  </button>
-                </div>
-                <div class="card-body">
-                  <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                      <thead class="table-dark">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0 text-primary"><i class="bi bi-percent me-2"></i>Data PPN</h5>
+                <button type="button" class="btn btn-primary btn-lg shadow-sm" data-bs-toggle="modal" data-bs-target="#addPpnModal">
+                  <i class="bi bi-plus-circle me-2"></i>Tambah PPN
+                </button>
+              </div>
+              
+              <div class="table-responsive shadow-sm">
+                <table class="table table-hover align-middle">
+                  <thead class="table-dark">
+                    <tr>
+                      <th class="text-center">No</th>
+                      <th>Nilai PPN (%)</th>
+                      <th>Keterangan</th>
+                      <th>Tanggal Rilis</th>
+                      <th class="text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php if (empty($ppn_data)): ?>
+                      <tr>
+                        <td colspan="5" class="text-center text-muted py-5">
+                          <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
+                          <span class="fs-5">Belum ada data PPN</span>
+                        </td>
+                      </tr>
+                    <?php else: ?>
+                      <?php foreach ($ppn_data as $index => $ppn): ?>
                         <tr>
-                          <th>No</th>
-                          <th>Nilai PPN (%)</th>
-                          <th>Keterangan</th>
-                          <th>Tanggal Rilis</th>
-                          <th>Status</th>
-                          <th>Aksi</th>
+                          <td class="text-center fw-bold"><?php echo $index + 1; ?></td>
+                          <td class="fw-semibold text-primary"><?php echo number_format($ppn['nilai_ppn'], 2); ?>%</td>
+                          <td><?php echo htmlspecialchars($ppn['keterangan']); ?></td>
+                          <td class="text-muted"><?php echo $ppn['rilis']; ?></td>
+                          <td class="text-center">
+                            <?php if ($ppn['aktif'] == 1): ?>
+                              <span class="badge bg-success fs-6 px-3 py-2">
+                                <i class="bi bi-check-circle me-1"></i>Aktif
+                              </span>
+                            <?php else: ?>
+                              <span class="badge bg-warning fs-6 px-3 py-2">
+                                <i class="bi bi-pause-circle me-1"></i>Nonaktif
+                              </span>
+                            <?php endif; ?>
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        <?php if (empty($ppn_data)): ?>
-                          <tr>
-                            <td colspan="6" class="text-center text-muted">Belum ada data PPN</td>
-                          </tr>
-                        <?php else: ?>
-                          <?php foreach ($ppn_data as $index => $ppn): ?>
-                            <tr>
-                              <td><?php echo $index + 1; ?></td>
-                              <td><?php echo number_format($ppn['nilai_ppn'], 2); ?>%</td>
-                              <td><?php echo htmlspecialchars($ppn['keterangan']); ?></td>
-                              <td><?php echo $ppn['rilis']; ?></td>
-                              <td>
-                                <?php if ($ppn['aktif'] == 1): ?>
-                                  <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#togglePpnModal" 
-                                          onclick="setTogglePpnData(<?php echo $ppn['id_ppn']; ?>, '<?php echo addslashes($ppn['keterangan']); ?>', <?php echo $ppn['aktif']; ?>)">
-                                    <i class="bi bi-check-circle"></i> Aktif
-                                  </button>
-                                <?php else: ?>
-                                  <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#togglePpnModal" 
-                                          onclick="setTogglePpnData(<?php echo $ppn['id_ppn']; ?>, '<?php echo addslashes($ppn['keterangan']); ?>', <?php echo $ppn['aktif']; ?>)">
-                                    <i class="bi bi-pause-circle"></i> Nonaktif
-                                  </button>
-                                <?php endif; ?>
-                              </td>
-                              <td>
-                                <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editPpnModal" 
-                                        onclick="setEditPpnData(<?php echo $ppn['id_ppn']; ?>, <?php echo $ppn['nilai_ppn']; ?>, '<?php echo addslashes($ppn['keterangan']); ?>')">
-                                  <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deletePpnModal" 
-                                        onclick="setDeletePpnData(<?php echo $ppn['id_ppn']; ?>, '<?php echo addslashes($ppn['keterangan']); ?>')">
-                                  <i class="bi bi-trash"></i>
-                                </button>
-                              </td>
-                            </tr>
-                          <?php endforeach; ?>
-                        <?php endif; ?>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+                      <?php endforeach; ?>
+                    <?php endif; ?>
+                  </tbody>
+                </table>
               </div>
             </div>
 
             <!-- Takeaway Tab -->
             <div class="tab-pane fade" id="takeaway" role="tabpanel">
-              <div class="card mt-3">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                  <h5 class="mb-0">Data Biaya Takeaway</h5>
-                  <div>
-                    <span class="badge bg-info me-2">Biaya Saat Ini: Rp <?php echo number_format($current_takeaway, 0, ',', '.'); ?></span>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTakeawayModal">
-                      <i class="bi bi-plus-circle me-2"></i>Tambah Biaya
-                    </button>
-                  </div>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <h5 class="mb-1 text-primary"><i class="bi bi-bag me-2"></i>Data Biaya Takeaway</h5>
+                  <span class="badge bg-info fs-6 px-3 py-2">
+                    <i class="bi bi-currency-dollar me-1"></i>Biaya Saat Ini: Rp <?php echo number_format($current_takeaway, 0, ',', '.'); ?>
+                  </span>
                 </div>
-                <div class="card-body">
-                  <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                      <thead class="table-dark">
+                <button type="button" class="btn btn-primary btn-lg shadow-sm" data-bs-toggle="modal" data-bs-target="#addTakeawayModal">
+                  <i class="bi bi-plus-circle me-2"></i>Tambah Biaya
+                </button>
+              </div>
+              
+              <div class="table-responsive shadow-sm">
+                <table class="table table-hover align-middle">
+                  <thead class="table-dark">
+                    <tr>
+                      <th class="text-center">No</th>
+                      <th>Tanggal Rilis</th>
+                      <th>Biaya per Item</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php if (empty($takeaway_data)): ?>
+                      <tr>
+                        <td colspan="3" class="text-center text-muted py-5">
+                          <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
+                          <span class="fs-5">Belum ada data biaya takeaway</span>
+                        </td>
+                      </tr>
+                    <?php else: ?>
+                      <?php foreach ($takeaway_data as $index => $takeaway): ?>
                         <tr>
-                          <th>No</th>
-                          <th>Tanggal Rilis</th>
-                          <th>Biaya per Item</th>
-                          <th>Aksi</th>
+                          <td class="text-center fw-bold"><?php echo $index + 1; ?></td>
+                          <td class="text-muted"><?php echo $takeaway['tanggal_rilis']; ?></td>
+                          <td class="fw-semibold text-success">Rp <?php echo number_format($takeaway['biaya_per_item'], 0, ',', '.'); ?></td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        <?php if (empty($takeaway_data)): ?>
-                          <tr>
-                            <td colspan="4" class="text-center text-muted">Belum ada data biaya takeaway</td>
-                          </tr>
-                        <?php else: ?>
-                          <?php foreach ($takeaway_data as $index => $takeaway): ?>
-                            <tr>
-                              <td><?php echo $index + 1; ?></td>
-                              <td><?php echo $takeaway['tanggal_rilis']; ?></td>
-                              <td>Rp <?php echo number_format($takeaway['biaya_per_item'], 0, ',', '.'); ?></td>
-                              <td>
-                                <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editTakeawayModal" 
-                                        onclick="setEditTakeawayData(<?php echo $takeaway['id_ta']; ?>, <?php echo $takeaway['biaya_per_item']; ?>)">
-                                  <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteTakeawayModal" 
-                                        onclick="setDeleteTakeawayData(<?php echo $takeaway['id_ta']; ?>, <?php echo $takeaway['biaya_per_item']; ?>)">
-                                  <i class="bi bi-trash"></i>
-                                </button>
-              </td>
-                            </tr>
-                          <?php endforeach; ?>
-                        <?php endif; ?>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+                      <?php endforeach; ?>
+                    <?php endif; ?>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -563,84 +539,7 @@ try {
       </div>
     </div>
 
-    <!-- Modal Edit PPN -->
-    <div class="modal fade" id="editPpnModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header bg-warning text-dark">
-            <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Edit PPN</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <form method="POST">
-            <div class="modal-body">
-              <input type="hidden" name="action" value="update_ppn">
-              <input type="hidden" id="edit_id_ppn" name="id_ppn">
-              <div class="mb-3">
-                <label for="edit_nilai_ppn" class="form-label">Nilai PPN (%)</label>
-                <input type="number" class="form-control" id="edit_nilai_ppn" name="nilai_ppn" step="0.01" min="0" max="100" required>
-              </div>
-              <div class="mb-3">
-                <label for="edit_keterangan" class="form-label">Keterangan</label>
-                <textarea class="form-control" id="edit_keterangan" name="keterangan" rows="3" required></textarea>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-              <button type="submit" class="btn btn-warning">Update</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
 
-    <!-- Modal Delete PPN -->
-    <div class="modal fade" id="deletePpnModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header bg-danger text-white">
-            <h5 class="modal-title"><i class="bi bi-trash me-2"></i>Hapus PPN</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <form method="POST">
-            <div class="modal-body">
-              <input type="hidden" name="action" value="delete_ppn">
-              <input type="hidden" id="delete_id_ppn" name="id_ppn">
-              <p>Apakah Anda yakin ingin menghapus PPN dengan keterangan:</p>
-              <p class="fw-bold text-danger" id="delete_ppn_keterangan"></p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-              <button type="submit" class="btn btn-danger">Hapus</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Toggle PPN Status -->
-    <div class="modal fade" id="togglePpnModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header bg-info text-white">
-            <h5 class="modal-title"><i class="bi bi-arrow-repeat me-2"></i>Ubah Status PPN</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <form method="POST">
-            <div class="modal-body">
-              <input type="hidden" name="action" value="toggle_ppn">
-              <input type="hidden" id="toggle_id_ppn" name="id_ppn">
-              <p>Apakah Anda yakin ingin mengubah status PPN:</p>
-              <p class="fw-bold" id="toggle_ppn_keterangan"></p>
-              <p class="text-muted" id="toggle_ppn_status"></p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-              <button type="submit" class="btn btn-info">Ubah Status</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
 
     <!-- Modal Add Takeaway -->
     <div class="modal fade" id="addTakeawayModal" tabindex="-1">
@@ -667,91 +566,27 @@ try {
       </div>
     </div>
 
-    <!-- Modal Edit Takeaway -->
-    <div class="modal fade" id="editTakeawayModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header bg-warning text-dark">
-            <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Edit Biaya Takeaway</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <form method="POST">
-            <div class="modal-body">
-              <input type="hidden" name="action" value="update_takeaway">
-              <input type="hidden" id="edit_id_ta" name="id_ta">
-              <div class="mb-3">
-                <label for="edit_biaya_per_item" class="form-label">Biaya per Item (Rp)</label>
-                <input type="number" class="form-control" id="edit_biaya_per_item" name="biaya_per_item" min="0" required>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-              <button type="submit" class="btn btn-warning">Update</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
 
-    <!-- Modal Delete Takeaway -->
-    <div class="modal fade" id="deleteTakeawayModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header bg-danger text-white">
-            <h5 class="modal-title"><i class="bi bi-trash me-2"></i>Hapus Biaya Takeaway</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <form method="POST">
-            <div class="modal-body">
-              <input type="hidden" name="action" value="delete_takeaway">
-              <input type="hidden" id="delete_id_ta" name="id_ta">
-              <p>Apakah Anda yakin ingin menghapus biaya takeaway:</p>
-              <p class="fw-bold text-danger" id="delete_takeaway_biaya"></p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-              <button type="submit" class="btn btn-danger">Hapus</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
 
     <!-- Bootstrap JS -->
     <script src="../js/bootstrap.bundle.min.js"></script>
     
     <!-- JavaScript Functions -->
     <script>
-      // PPN Functions
-      function setEditPpnData(id, nilai, keterangan) {
-        document.getElementById('edit_id_ppn').value = id;
-        document.getElementById('edit_nilai_ppn').value = nilai;
-        document.getElementById('edit_keterangan').value = keterangan;
-      }
-      
-      function setDeletePpnData(id, keterangan) {
-        document.getElementById('delete_id_ppn').value = id;
-        document.getElementById('delete_ppn_keterangan').textContent = keterangan;
-      }
-      
-      function setTogglePpnData(id, keterangan, aktif) {
-        document.getElementById('toggle_id_ppn').value = id;
-        document.getElementById('toggle_ppn_keterangan').textContent = keterangan;
-        
-        const statusText = aktif == 1 ? 'Status saat ini: Aktif → akan diubah menjadi Nonaktif' : 'Status saat ini: Nonaktif → akan diubah menjadi Aktif';
-        document.getElementById('toggle_ppn_status').textContent = statusText;
-      }
-      
-      // Takeaway Functions
-      function setEditTakeawayData(id, biaya) {
-        document.getElementById('edit_id_ta').value = id;
-        document.getElementById('edit_biaya_per_item').value = biaya;
-      }
-      
-      function setDeleteTakeawayData(id, biaya) {
-        document.getElementById('delete_id_ta').value = id;
-        document.getElementById('delete_takeaway_biaya').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(biaya);
-      }
+      // Modern tab animation
+      document.addEventListener('DOMContentLoaded', function() {
+        const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
+        tabButtons.forEach(button => {
+          button.addEventListener('shown.bs.tab', function(e) {
+            // Add smooth transition effect
+            const target = document.querySelector(e.target.getAttribute('data-bs-target'));
+            target.style.opacity = '0';
+            setTimeout(() => {
+              target.style.opacity = '1';
+            }, 100);
+          });
+        });
+      });
     </script>
   </body>
 </html>
