@@ -93,56 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
                 break;
                 
-            case 'update':
-                $id_promo = intval($_POST['id_promo']);
-                $kode_promo = trim($_POST['kode_promo']);
-                $nama_promo = trim($_POST['nama_promo']);
-                $deskripsi = trim($_POST['deskripsi']);
-                $tanggalmulai_promo = $_POST['tanggalmulai_promo'];
-                $tanggalselesai_promo = $_POST['tanggalselesai_promo'];
-                $pilihan_promo = $_POST['pilihan_promo'];
-                $nominal = floatval($_POST['nominal']);
-                $persen = floatval($_POST['persen']);
-                $kuota = intval($_POST['kuota']);
-                $min_pembelian = floatval($_POST['min_pembelian']);
-                $aktif = isset($_POST['aktif']) ? '1' : '0';
-                
-                if (!empty($nama_promo) && !empty($tanggalmulai_promo) && !empty($tanggalselesai_promo)) {
-                    // Check if promo code already exists (excluding current record)
-                    $stmt = $conn->prepare("SELECT id_promo FROM promo WHERE kode_promo = ? AND id_promo != ?");
-                    $stmt->bind_param("si", $kode_promo, $id_promo);
-                    $stmt->execute();
-                    $result = $stmt->get_result();
-                    if ($result->fetch_assoc()) {
-                        $error = 'Kode promo sudah digunakan!';
-                        break;
-                    }
-                    
-                    // Validate dates
-                    if ($tanggalselesai_promo <= $tanggalmulai_promo) {
-                        $error = 'Tanggal selesai harus lebih besar dari tanggal mulai!';
-                        break;
-                    }
-                    
-                    // Set nilai based on pilihan_promo
-                    if ($pilihan_promo == 'nominal') {
-                        $persen = 0;
-                    } else {
-                        $nominal = 0;
-                    }
-                    
-                    $stmt = $conn->prepare("UPDATE promo SET kode_promo = ?, nama_promo = ?, deskripsi = ?, tanggalmulai_promo = ?, tanggalselesai_promo = ?, nominal = ?, persen = ?, pilihan_promo = ?, aktif = ?, kuota = ?, min_pembelian = ? WHERE id_promo = ?");
-                    $stmt->bind_param("sssssddsiii", $kode_promo, $nama_promo, $deskripsi, $tanggalmulai_promo, $tanggalselesai_promo, $nominal, $persen, $pilihan_promo, $aktif, $kuota, $min_pembelian, $id_promo);
-                    if ($stmt->execute()) {
-                        $message = 'Data promo berhasil diperbarui!';
-                    } else {
-                        $error = 'Error: ' . $conn->error;
-                    }
-                } else {
-                    $error = 'Nama promo, tanggal mulai, dan tanggal selesai harus diisi!';
-                }
-                break;
-                
+
             case 'toggle_status':
                 $id_promo = intval($_POST['id_promo']);
                 $aktif = $_POST['aktif'] == '1' ? '0' : '1';
@@ -242,15 +193,7 @@ if (!empty($params)) {
     }
 }
 
-// Get single promo for editing
-$edit_promo = null;
-if (isset($_GET['edit'])) {
-    $stmt = $conn->prepare("SELECT * FROM promo WHERE id_promo = ?");
-    $stmt->bind_param("i", $_GET['edit']);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $edit_promo = $result->fetch_assoc();
-}
+
 ?>
 
 <!doctype html>
@@ -641,9 +584,6 @@ if (isset($_GET['edit'])) {
                     <?php endif; ?>
                   </td>
                   <td>
-                    <button type="button" class="btn btn-sm btn-warning" onclick="editPromo(<?php echo $promo['id_promo']; ?>)">
-                      <i class="bi bi-pencil"></i> Edit
-                    </button>
                     <form method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin mengubah status promo ini?')">
                       <input type="hidden" name="action" value="toggle_status">
                       <input type="hidden" name="id_promo" value="<?php echo $promo['id_promo']; ?>">
@@ -801,18 +741,16 @@ if (isset($_GET['edit'])) {
 
     <!-- Detail Modal -->
     <div class="modal fade" id="detailModal" tabindex="-1">
-      <div class="modal-dialog">
+      <div class="modal-dialog modal-lg">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Detail Promo</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title"><i class="bi bi-info-circle me-2"></i>Detail Promo</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body" id="detailContent">
             <!-- Content will be populated by JavaScript -->
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-          </div>
+         
         </div>
       </div>
     </div>
@@ -844,64 +782,97 @@ if (isset($_GET['edit'])) {
         }
     }
     
-    function editPromo(id) {
-        window.location.href = 'promo.php?edit=' + id;
-    }
+
+    
+    let currentPromoId = null;
     
     function showPromoDetail(promoJson) {
         const promo = JSON.parse(promoJson);
+        currentPromoId = promo.id_promo;
+        
+        const statusBadge = promo.aktif == '1' ? 
+            '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Aktif</span>' : 
+            '<span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Tidak Aktif</span>';
+            
+        const promoValue = promo.pilihan_promo === 'nominal' ? 
+             `${promo.nilai_promo || 0}` : 
+             `${promo.nilai_promo || 0}`;
+            
         const content = `
-            <div class="row">
-                <div class="col-sm-4"><strong>Tanggal Mulai:</strong></div>
-                <div class="col-sm-8">${promo.tanggalmulai_promo}</div>
-            </div>
-            <div class="row mt-2">
-                <div class="col-sm-4"><strong>Tanggal Selesai:</strong></div>
-                <div class="col-sm-8">${promo.tanggalselesai_promo}</div>
-            </div>
-            <div class="row mt-2">
-                <div class="col-sm-4"><strong>Di Insert Oleh:</strong></div>
-                <div class="col-sm-8">${promo.insert_by}</div>
-            </div>
-            <div class="row mt-2">
-                <div class="col-sm-4"><strong>Minimal Pembelian:</strong></div>
-                <div class="col-sm-8">Rp ${new Intl.NumberFormat('id-ID').format(promo.min_pembelian)}</div>
-            </div>
-            <div class="row mt-2">
-                <div class="col-sm-4"><strong>Pilihan Promo:</strong></div>
-                <div class="col-sm-8">${promo.pilihan_promo === 'nominal' ? 'Nominal (Rp)' : 'Persentase (%)'}</div>
-            </div>
-            <div class="row mt-2">
-                <div class="col-sm-4"><strong>Deskripsi:</strong></div>
-                <div class="col-sm-8">${promo.deskripsi || '-'}</div>
+            <div class="card border-0">
+                <div class="card-body p-0">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="text-primary mb-3"><i class="bi bi-tag me-2"></i>Informasi Promo</h6>
+                                <div class="mb-2">
+                                    <small class="text-muted">Kode Promo</small>
+                                    <div class="fw-bold">${promo.kode_promo}</div>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Nama Promo</small>
+                                    <div class="fw-bold">${promo.nama_promo}</div>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Status</small>
+                                    <div>${statusBadge}</div>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Deskripsi</small>
+                                    <div>${promo.deskripsi || '<em class="text-muted">Tidak ada deskripsi</em>'}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="text-success mb-3"><i class="bi bi-percent me-2"></i>Detail Promo</h6>
+                                <div class="mb-2">
+                                    <small class="text-muted">Jenis Promo</small>
+                                    <div class="fw-bold">${promo.pilihan_promo === 'nominal' ? 'Nominal (Rp)' : 'Persentase (%)'}</div>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Nilai Promo</small>
+                                    <div class="fw-bold text-success fs-5">${promoValue}</div>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Minimal Pembelian</small>
+                                    <div class="fw-bold">Rp ${new Intl.NumberFormat('id-ID').format(promo.min_pembelian)}</div>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Kuota</small>
+                                    <div class="fw-bold">${promo.kuota} kali</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="border rounded p-3">
+                                <h6 class="text-info mb-3"><i class="bi bi-calendar me-2"></i>Periode & Tracking</h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <small class="text-muted">Tanggal Mulai</small>
+                                        <div class="fw-bold">${new Date(promo.tanggalmulai_promo).toLocaleDateString('id-ID', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small class="text-muted">Tanggal Selesai</small>
+                                        <div class="fw-bold">${new Date(promo.tanggalselesai_promo).toLocaleDateString('id-ID', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                         <small class="text-muted">Dibuat Oleh</small>
+                                         <div class="fw-bold">${promo.insert_by}</div>
+                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
         document.getElementById('detailContent').innerHTML = content;
     }
     
-    // Handle edit mode
-    <?php if ($edit_promo): ?>
-    document.addEventListener('DOMContentLoaded', function() {
-        const modal = new bootstrap.Modal(document.getElementById('promoModal'));
-        document.getElementById('promoModalTitle').textContent = 'Edit Promo';
-        document.getElementById('promoAction').value = 'update';
-        document.getElementById('promoId').value = '<?php echo $edit_promo['id_promo']; ?>';
-        document.getElementById('kode_promo').value = '<?php echo htmlspecialchars($edit_promo['kode_promo']); ?>';
-        document.getElementById('nama_promo').value = '<?php echo htmlspecialchars($edit_promo['nama_promo']); ?>';
-        document.getElementById('deskripsi').value = '<?php echo htmlspecialchars($edit_promo['deskripsi']); ?>';
-        document.getElementById('tanggalmulai_promo').value = '<?php echo $edit_promo['tanggalmulai_promo']; ?>';
-        document.getElementById('tanggalselesai_promo').value = '<?php echo $edit_promo['tanggalselesai_promo']; ?>';
-        document.getElementById('pilihan_promo').value = '<?php echo $edit_promo['pilihan_promo']; ?>';
-        document.getElementById('nominal').value = '<?php echo $edit_promo['nominal']; ?>';
-        document.getElementById('persen').value = '<?php echo $edit_promo['persen']; ?>';
-        document.getElementById('kuota').value = '<?php echo $edit_promo['kuota']; ?>';
-        document.getElementById('min_pembelian').value = '<?php echo $edit_promo['min_pembelian']; ?>';
-        document.getElementById('aktif').checked = <?php echo $edit_promo['aktif'] == '1' ? 'true' : 'false'; ?>;
-        
-        togglePromoValue();
-        modal.show();
-    });
-    <?php endif; ?>
+
+    
+
     
     // Reset form when modal is closed
     document.getElementById('promoModal').addEventListener('hidden.bs.modal', function() {
