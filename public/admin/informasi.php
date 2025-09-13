@@ -335,11 +335,11 @@ if (!empty($params)) {
                 </a>
                 <div class="collapse" id="produkMenu">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-tags"></i> Kategori Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-list"></i> Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-tags"></i> Kategori Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-egg"></i> Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-book"></i> Resep</a></li>
+                    <li class="nav-item"><a class="nav-link" href="kategori_menu.php"><i class="bi bi-tags"></i> Kategori Menu</a></li>
+                    <li class="nav-item"><a class="nav-link" href="menu.php"><i class="bi bi-list"></i> Menu</a></li>
+                    <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-tags"></i> Kategori Bahan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="bahan.php"><i class="bi bi-egg"></i> Bahan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-book"></i> Resep</a></li>
                   </ul>
                 </div>
               </li>
@@ -353,8 +353,8 @@ if (!empty($params)) {
                 </a>
                 <div class="collapse" id="pembelianMenu">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-cart-plus"></i> Pesanan Pembelian</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pembelian.php"><i class="bi bi-cart-plus"></i> Pesanan Pembelian</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pembayaran_pembelian.php"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
                   </ul>
                 </div>
               </li>
@@ -370,10 +370,10 @@ if (!empty($params)) {
                 </a>
                 <div class="collapse" id="penjualanMenu">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-clock"></i> Shift Kasir</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-cart-check"></i> Transaksi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
+                    <li class="nav-item"><a class="nav-link" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
+                    <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
+                    <li class="nav-item"><a class="nav-link" href="transaksi.php"><i class="bi bi-cart-check"></i> Transaksi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pembayaran.php"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
                   </ul>
                 </div>
               </li>
@@ -389,8 +389,8 @@ if (!empty($params)) {
                 </a>
                 <div class="collapse" id="inventoryMenu">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-box"></i> Inventory</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="inventory.php"><i class="bi bi-box"></i> Inventory</a></li>
+                    <li class="nav-item"><a class="nav-link" href="transaksi_inventory.php"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
                   </ul>
                 </div>
               </li>
@@ -405,16 +405,16 @@ if (!empty($params)) {
                 </a>
                 <div class="collapse" id="laporanMenu">
                   <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-receipt"></i> Transaksi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-graph-up"></i> Pengeluaran vs Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-bar-chart"></i> Kuantitas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="laporan_transaksi.php"><i class="bi bi-receipt"></i> Transaksi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="laporan_pengeluaran.php"><i class="bi bi-graph-up"></i> Pengeluaran vs Penjualan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="laporan_kuantitas.php"><i class="bi bi-bar-chart"></i> Kuantitas</a></li>
                   </ul>
                 </div>
               </li>
               
               <!-- Pengaturan Menu -->
               <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="pengaturan.php">
                   <i class="bi bi-gear"></i>
                   <span>Pengaturan</span>
                 </a>
@@ -631,11 +631,11 @@ if (!empty($params)) {
             </a>
             <div class="collapse" id="produkMenuMobile">
               <ul class="nav flex-column ms-3">
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-tags"></i> Kategori Menu</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-list"></i> Menu</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-tags"></i> Kategori Bahan</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-egg"></i> Bahan</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-book"></i> Resep</a></li>
+                <li class="nav-item"><a class="nav-link" href="kategori_menu.php"><i class="bi bi-tags"></i> Kategori Menu</a></li>
+                <li class="nav-item"><a class="nav-link" href="menu.php"><i class="bi bi-list"></i> Menu</a></li>
+                <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-tags"></i> Kategori Bahan</a></li>
+                <li class="nav-item"><a class="nav-link" href="bahan.php"><i class="bi bi-egg"></i> Bahan</a></li>
+                <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-book"></i> Resep</a></li>
               </ul>
             </div>
           </li>
@@ -649,8 +649,8 @@ if (!empty($params)) {
             </a>
             <div class="collapse" id="pembelianMenuMobile">
               <ul class="nav flex-column ms-3">
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-cart-plus"></i> Pesanan Pembelian</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
+                <li class="nav-item"><a class="nav-link" href="pembelian.php"><i class="bi bi-cart-plus"></i> Pesanan Pembelian</a></li>
+                <li class="nav-item"><a class="nav-link" href="pembayaran_pembelian.php"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
               </ul>
             </div>
           </li>
@@ -666,10 +666,10 @@ if (!empty($params)) {
             </a>
             <div class="collapse" id="penjualanMenuMobile">
               <ul class="nav flex-column ms-3">
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-clock"></i> Shift Kasir</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-cart-check"></i> Transaksi</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
+                <li class="nav-item"><a class="nav-link" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
+                <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
+                <li class="nav-item"><a class="nav-link" href="transaksi.php"><i class="bi bi-cart-check"></i> Transaksi</a></li>
+                <li class="nav-item"><a class="nav-link" href="pembayaran.php"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
               </ul>
             </div>
           </li>
@@ -685,8 +685,8 @@ if (!empty($params)) {
             </a>
             <div class="collapse" id="inventoryMenuMobile">
               <ul class="nav flex-column ms-3">
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-box"></i> Inventory</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
+                <li class="nav-item"><a class="nav-link" href="inventory.php"><i class="bi bi-box"></i> Inventory</a></li>
+                <li class="nav-item"><a class="nav-link" href="transaksi_inventory.php"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
               </ul>
             </div>
           </li>
@@ -701,16 +701,16 @@ if (!empty($params)) {
             </a>
             <div class="collapse" id="laporanMenuMobile">
               <ul class="nav flex-column ms-3">
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-receipt"></i> Transaksi</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-graph-up"></i> Pengeluaran vs Penjualan</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-bar-chart"></i> Kuantitas</a></li>
+                <li class="nav-item"><a class="nav-link" href="laporan_transaksi.php"><i class="bi bi-receipt"></i> Transaksi</a></li>
+                <li class="nav-item"><a class="nav-link" href="laporan_pengeluaran.php"><i class="bi bi-graph-up"></i> Pengeluaran vs Penjualan</a></li>
+                <li class="nav-item"><a class="nav-link" href="laporan_kuantitas.php"><i class="bi bi-bar-chart"></i> Kuantitas</a></li>
               </ul>
             </div>
           </li>
           
           <!-- Pengaturan Menu Mobile -->
           <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="pengaturan.php">
               <i class="bi bi-gear"></i>
               <span>Pengaturan</span>
             </a>
