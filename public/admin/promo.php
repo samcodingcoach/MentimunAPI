@@ -54,23 +54,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $id_user = $_SESSION['id_user'];
                 
                 if (!empty($nama_promo) && !empty($tanggalmulai_promo) && !empty($tanggalselesai_promo)) {
-                    // Check if promo code already exists
-                    if (!empty($kode_promo)) {
-                        $stmt = $conn->prepare("SELECT id_promo FROM promo WHERE kode_promo = ?");
-                        $stmt->bind_param("s", $kode_promo);
-                        $stmt->execute();
-                        $result = $stmt->get_result();
-                        if ($result->fetch_assoc()) {
-                            $error = 'Kode promo sudah digunakan!';
-                            break;
-                        }
-                    } else {
+                    // Generate promo code if empty
+                    if (empty($kode_promo)) {
                         $kode_promo = generatePromoCode($conn);
                     }
                     
+                    // Check if promo code already exists
+                    $stmt = $conn->prepare("SELECT id_promo FROM promo WHERE kode_promo = ?");
+                    $stmt->bind_param("s", $kode_promo);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    if ($result->fetch_assoc()) {
+                        $error = 'Kode promo "' . $kode_promo . '" sudah digunakan! Silakan gunakan kode lain.';
+                        break;
+                    }
+                    
                     // Validate dates
-                    if ($tanggalselesai_promo <= $tanggalmulai_promo) {
-                        $error = 'Tanggal selesai harus lebih besar dari tanggal mulai!';
+                    if ($tanggalselesai_promo < $tanggalmulai_promo) {
+                        $error = 'Tanggal selesai harus sama atau lebih besar dari tanggal mulai!';
                         break;
                     }
                     
@@ -105,6 +106,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 } else {
                     $error = 'Error: ' . $conn->error;
                 }
+                break;
+                
+            case 'check_promo_code':
+                $kode_promo = $_POST['kode_promo'];
+                
+                $stmt = $conn->prepare("SELECT id_promo FROM promo WHERE kode_promo = ?");
+                $stmt->bind_param("s", $kode_promo);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                
+                echo json_encode(['exists' => $result->num_rows > 0]);
+                exit;
                 break;
         }
     }
@@ -652,7 +665,8 @@ if (!empty($params)) {
                 <div class="col-md-6">
                   <div class="mb-3">
                     <label for="kode_promo" class="form-label">Kode Promo</label>
-                    <input type="text" class="form-control" id="kode_promo" name="kode_promo" placeholder="Kosongkan untuk auto generate">
+                    <input type="text" class="form-control" id="kode_promo" name="kode_promo" placeholder="Kosongkan untuk auto generate" onblur="checkPromoCode()">
+                    <div id="kode_promo_feedback" class="form-text"></div>
                   </div>
                 </div>
                 <div class="col-md-6">
@@ -672,7 +686,7 @@ if (!empty($params)) {
                 <div class="col-md-6">
                   <div class="mb-3">
                     <label for="tanggalmulai_promo" class="form-label">Tanggal Mulai <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="tanggalmulai_promo" name="tanggalmulai_promo" required>
+                    <input type="date" class="form-control" id="tanggalmulai_promo" name="tanggalmulai_promo" required onchange="updateMinEndDate()">
                   </div>
                 </div>
                 <div class="col-md-6">
@@ -781,6 +795,59 @@ if (!empty($params)) {
             document.getElementById('persen').required = false;
         }
     }
+    
+    function updateMinEndDate() {
+        const startDate = document.getElementById('tanggalmulai_promo').value;
+        const endDateInput = document.getElementById('tanggalselesai_promo');
+        
+        if (startDate) {
+            endDateInput.min = startDate;
+            
+            // If end date is already set and is before start date, clear it
+            if (endDateInput.value && endDateInput.value < startDate) {
+                endDateInput.value = '';
+            }
+        }
+    }
+    
+    // Check if promo code already exists
+    function checkPromoCode() {
+        const kodePromo = document.getElementById('kode_promo').value.trim();
+        const feedback = document.getElementById('kode_promo_feedback');
+        
+        if (kodePromo === '') {
+            feedback.innerHTML = '';
+            feedback.className = 'form-text';
+            return;
+        }
+        
+        // Create AJAX request
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.exists) {
+                    feedback.innerHTML = '<i class="fas fa-times-circle text-danger"></i> Kode promo sudah digunakan!';
+                    feedback.className = 'form-text text-danger';
+                } else {
+                    feedback.innerHTML = '<i class="fas fa-check-circle text-success"></i> Kode promo tersedia';
+                    feedback.className = 'form-text text-success';
+                }
+            }
+        };
+        
+        xhr.send('action=check_promo_code&kode_promo=' + encodeURIComponent(kodePromo));
+    }
+    
+    // Set minimum date to today for start date
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('tanggalmulai_promo').min = today;
+        document.getElementById('tanggalselesai_promo').min = today;
+    })
     
 
     
