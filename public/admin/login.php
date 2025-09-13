@@ -26,10 +26,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Get application name from perusahaan table
                 $app_sql = "SELECT nama_aplikasi FROM `perusahaan` LIMIT 1";
                 $app_result = $conn->query($app_sql);
-                $app_name = "Resto007 Admin"; // Default name
+                $app_name = "Resto Admin"; // Default name
                 if ($app_result && $app_result->num_rows > 0) {
                     $app_row = $app_result->fetch_assoc();
-                    $app_name = $app_row['nama_aplikasi'] . " Admin";
+                    $app_name = $app_row['nama_aplikasi'];
                 }
                 
                 $_SESSION['loggedin'] = true;
