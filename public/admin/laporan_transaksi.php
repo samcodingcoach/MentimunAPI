@@ -85,6 +85,41 @@ $total_transfer = 0;
 foreach ($transfer_data as $row) {
     $total_transfer += $row['nominal_transfer'];
 }
+
+// Query for QRIS transactions
+$qris_sql = "
+    SELECT
+        proses_pembayaran.kode_payment,
+        DATE_FORMAT(proses_pembayaran.tanggal_payment,'%H:%i') AS jam,
+        CASE
+            WHEN proses_pembayaran.`status` = 1 THEN 'SETTLEMENT'
+            WHEN proses_pembayaran.`status` = 0 THEN 'PENDING'
+        END AS status_bayar,
+        pegawai.nama_lengkap as kasir,
+        FORMAT(proses_pembayaran.jumlah_uang, 0) AS nominal,
+        DATE_FORMAT(proses_pembayaran.update_status,'%d %M %Y %H:%i') AS waktu_dibayar
+    FROM
+        proses_pembayaran
+    INNER JOIN pegawai ON proses_pembayaran.id_user = pegawai.id_user
+    INNER JOIN metode_pembayaran ON proses_pembayaran.id_bayar = metode_pembayaran.id_bayar
+    WHERE
+        metode_pembayaran.kategori = 'QRIS' AND
+        DATE(tanggal_payment) = ?
+    ORDER BY proses_pembayaran.tanggal_payment DESC
+";
+
+$qris_stmt = $conn->prepare($qris_sql);
+$qris_stmt->bind_param("s", $selected_date);
+$qris_stmt->execute();
+$qris_result = $qris_stmt->get_result();
+$qris_data = $qris_result->fetch_all(MYSQLI_ASSOC);
+
+// Calculate total for QRIS
+$total_qris = 0;
+foreach ($qris_data as $row) {
+    $amount = str_replace(',', '', $row['nominal']);
+    $total_qris += (int)$amount;
+}
 ?>
 
 <!doctype html>
@@ -468,10 +503,72 @@ foreach ($transfer_data as $row) {
 
             <!-- QRIS Tab -->
             <div class="tab-pane fade" id="qris" role="tabpanel">
-              <div class="text-center py-5">
-                <i class="bi bi-qr-code display-1 text-muted"></i>
-                <p class="mt-3">Tab QRIS akan segera tersedia</p>
+              <div class="table-responsive shadow-sm">
+                <table class="table table-hover align-middle">
+                  <thead class="table-dark">
+                    <tr>
+                      <th class="text-center">No</th>
+                      <th>Kode Payment</th>
+                      <th class="text-center">Jam</th>
+                      <th>Kasir</th>
+                      <th class="text-center">Status</th>
+                      <th class="text-end">Nominal</th>
+                      <th class="text-center">Waktu Dibayar</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php if (empty($qris_data)): ?>
+                    <tr>
+                      <td colspan="7" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
+                        <span class="fs-5">Tidak ada transaksi QRIS untuk tanggal <?php echo date('d F Y', strtotime($selected_date)); ?></span>
+                      </td>
+                    </tr>
+                    <?php else: ?>
+                    <?php 
+                    $no = 1;
+                    foreach ($qris_data as $row): 
+                    ?>
+                    <tr>
+                      <td class="text-center fw-bold"><?php echo $no++; ?></td>
+                      <td class="fw-semibold"><?php echo htmlspecialchars($row['kode_payment']); ?></td>
+                      <td class="text-center"><?php echo htmlspecialchars($row['jam']); ?></td>
+                      <td><?php echo htmlspecialchars($row['kasir']); ?></td>
+                      <td class="text-center">
+                        <?php if ($row['status_bayar'] == 'SETTLEMENT'): ?>
+                          <span class="badge bg-success fs-6 px-3 py-2">
+                            <i class="bi bi-check-circle me-1"></i>SETTLEMENT
+                          </span>
+                        <?php else: ?>
+                          <span class="badge bg-warning fs-6 px-3 py-2">
+                            <i class="bi bi-clock me-1"></i>PENDING
+                          </span>
+                        <?php endif; ?>
+                      </td>
+                      <td class="text-end fw-semibold">Rp <?php echo htmlspecialchars($row['nominal']); ?></td>
+                      <td class="text-center text-muted">
+                        <small><?php echo htmlspecialchars($row['waktu_dibayar']); ?></small>
+                      </td>
+                    </tr>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                  </tbody>
+                </table>
               </div>
+              
+              <!-- Total Summary -->
+              <?php if (!empty($qris_data)): ?>
+              <div class="mt-3 p-3 bg-light rounded border">
+                <div class="row align-items-center">
+                  <div class="col-md-8">
+                    <span class="text-muted">Total Transaksi QRIS (<?php echo count($qris_data); ?> transaksi)</span>
+                  </div>
+                  <div class="col-md-4 text-end">
+                    <span class="fw-bold fs-4 text-success">Rp <?php echo number_format($total_qris, 0, ',', '.'); ?></span>
+                  </div>
+                </div>
+              </div>
+              <?php endif; ?>
             </div>
 
             <!-- Kasir Tab -->
