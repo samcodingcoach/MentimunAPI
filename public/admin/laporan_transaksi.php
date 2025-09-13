@@ -51,6 +51,40 @@ foreach ($tunai_data as $row) {
     $amount = str_replace(',', '', $row['nominal']);
     $total_tunai += (int)$amount;
 }
+
+// Query for Transfer transactions
+$transfer_sql = "
+    SELECT
+        proses_edc.id_tx_bank,
+        proses_edc.kode_payment,
+        CASE
+            WHEN proses_edc.transfer_or_edc = 0 THEN CONCAT('TRANSFER - ', nama_bank, ' A.N ', COALESCE(nama_pengirim, 'NONE'))
+            WHEN proses_edc.transfer_or_edc = 1 THEN CONCAT('EDC - ', nama_bank, ' A.N ', COALESCE(nama_pengirim, 'NONE'))
+        END AS bank,
+        nominal_transfer,
+        proses_edc.tanggal_transfer,
+        proses_edc.no_referensi,
+        proses_edc.img_ss,
+        proses_edc.status_pemeriksaan,
+        tgl_pemeriksaan
+    FROM
+        proses_edc
+    WHERE
+        DATE(tanggal_transfer) = ?
+    ORDER BY proses_edc.tanggal_transfer DESC
+";
+
+$transfer_stmt = $conn->prepare($transfer_sql);
+$transfer_stmt->bind_param("s", $selected_date);
+$transfer_stmt->execute();
+$transfer_result = $transfer_stmt->get_result();
+$transfer_data = $transfer_result->fetch_all(MYSQLI_ASSOC);
+
+// Calculate total for Transfer
+$total_transfer = 0;
+foreach ($transfer_data as $row) {
+    $total_transfer += $row['nominal_transfer'];
+}
 ?>
 
 <!doctype html>
@@ -355,10 +389,81 @@ foreach ($tunai_data as $row) {
 
             <!-- Transfer Tab -->
             <div class="tab-pane fade" id="transfer" role="tabpanel">
-              <div class="text-center py-5">
-                <i class="bi bi-bank display-1 text-muted"></i>
-                <p class="mt-3">Tab Transfer akan segera tersedia</p>
+              <div class="table-responsive shadow-sm">
+                <table class="table table-hover align-middle">
+                  <thead class="table-dark">
+                    <tr>
+                      <th class="text-center">NO</th>
+                      <th>KODE PAYMENT</th>
+                      <th>BANK/METODE</th>
+                      <th class="text-center">TANGGAL TRF</th>
+                      <th class="text-center">STATUS</th>
+                      <th class="text-end">NOMINAL</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php if (empty($transfer_data)): ?>
+                    <tr>
+                      <td colspan="6" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
+                        <span class="fs-5">Tidak ada transaksi transfer untuk tanggal <?php echo date('d F Y', strtotime($selected_date)); ?></span>
+                      </td>
+                    </tr>
+                    <?php else: ?>
+                    <?php 
+                    $no = 1;
+                    foreach ($transfer_data as $row): 
+                    ?>
+                    <tr>
+                      <td class="text-center fw-bold"><?php echo $no++; ?></td>
+                      <td class="fw-semibold"><?php echo htmlspecialchars($row['kode_payment']); ?></td>
+                      <td><?php echo htmlspecialchars($row['bank']); ?></td>
+                      <td class="text-center"><?php echo date('d/m/Y H:i', strtotime($row['tanggal_transfer'])); ?></td>
+                      <td class="text-center">
+                        <a href="#" class="text-decoration-none" onclick="showTransferDetail(
+                          '<?php echo addslashes($row['tanggal_transfer']); ?>',
+                          '<?php echo addslashes($row['no_referensi'] ?? '-'); ?>',
+                          '<?php echo addslashes($row['img_ss'] ?? ''); ?>',
+                          '<?php echo $row['status_pemeriksaan']; ?>',
+                          '<?php echo addslashes($row['tgl_pemeriksaan'] ?? ''); ?>'
+                        )" data-bs-toggle="modal" data-bs-target="#transferDetailModal">
+                          <?php 
+                          if ($row['status_pemeriksaan'] == 1): ?>
+                            <span class="badge bg-success fs-6 px-3 py-2" style="cursor: pointer;">
+                              <i class="bi bi-check-circle me-1"></i>DITERIMA
+                            </span>
+                          <?php elseif ($row['status_pemeriksaan'] == 2): ?>
+                            <span class="badge bg-danger fs-6 px-3 py-2" style="cursor: pointer;">
+                              <i class="bi bi-x-circle me-1"></i>PALSU
+                            </span>
+                          <?php else: ?>
+                            <span class="badge bg-warning fs-6 px-3 py-2" style="cursor: pointer;">
+                              <i class="bi bi-clock me-1"></i>BELUM DITERIMA
+                            </span>
+                          <?php endif; ?>
+                        </a>
+                      </td>
+                      <td class="text-end fw-bold text-primary">Rp <?php echo number_format($row['nominal_transfer'], 0, ',', '.'); ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                  </tbody>
+                </table>
               </div>
+              
+              <!-- Total Summary -->
+              <?php if (!empty($transfer_data)): ?>
+              <div class="mt-3 p-3 bg-light rounded border">
+                <div class="row align-items-center">
+                  <div class="col-md-8">
+                    <span class="text-muted">Total Transaksi Transfer/EDC (<?php echo count($transfer_data); ?> transaksi)</span>
+                  </div>
+                  <div class="col-md-4 text-end">
+                    <span class="fw-bold fs-4 text-success">Rp <?php echo number_format($total_transfer, 0, ',', '.'); ?></span>
+                  </div>
+                </div>
+              </div>
+              <?php endif; ?>
             </div>
 
             <!-- QRIS Tab -->
@@ -389,6 +494,47 @@ foreach ($tunai_data as $row) {
       </div>
     </div>
 
+    <!-- Transfer Detail Modal -->
+    <div class="modal fade" id="transferDetailModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Detail Transfer</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label text-muted">Tanggal Transfer</label>
+                <p class="fw-semibold" id="modal-tanggal-transfer">-</p>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-muted">No. Referensi</label>
+                <p class="fw-semibold" id="modal-no-referensi">-</p>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-muted">Status Pemeriksaan</label>
+                <p id="modal-status-pemeriksaan">-</p>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-muted">Tanggal Pemeriksaan</label>
+                <p class="fw-semibold" id="modal-tgl-pemeriksaan">-</p>
+              </div>
+              <div class="col-12">
+                <label class="form-label text-muted">Bukti Transfer</label>
+                <div id="modal-img-container" class="text-center">
+                  <p class="text-muted">Tidak ada bukti</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="../js/bootstrap.bundle.min.js"></script>
     <!-- Flatpickr JS for Date Picker -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -402,6 +548,66 @@ foreach ($tunai_data as $row) {
           firstDayOfWeek: 1
         }
       });
+
+      // Function to show transfer detail modal
+      function showTransferDetail(tanggalTransfer, noReferensi, imgSs, statusPemeriksaan, tglPemeriksaan) {
+        // Format tanggal transfer
+        if (tanggalTransfer) {
+          const date = new Date(tanggalTransfer);
+          const options = { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          };
+          document.getElementById('modal-tanggal-transfer').textContent = date.toLocaleDateString('id-ID', options);
+        } else {
+          document.getElementById('modal-tanggal-transfer').textContent = '-';
+        }
+        
+        // Set no referensi
+        document.getElementById('modal-no-referensi').textContent = noReferensi || '-';
+        
+        // Set status pemeriksaan with badge
+        let statusHtml = '';
+        if (statusPemeriksaan == '1') {
+          statusHtml = '<span class="badge bg-success fs-6 px-3 py-2"><i class="bi bi-check-circle me-1"></i>DITERIMA</span>';
+        } else if (statusPemeriksaan == '2') {
+          statusHtml = '<span class="badge bg-danger fs-6 px-3 py-2"><i class="bi bi-x-circle me-1"></i>PALSU</span>';
+        } else {
+          statusHtml = '<span class="badge bg-warning fs-6 px-3 py-2"><i class="bi bi-clock me-1"></i>BELUM DITERIMA</span>';
+        }
+        document.getElementById('modal-status-pemeriksaan').innerHTML = statusHtml;
+        
+        // Set tanggal pemeriksaan
+        if (tglPemeriksaan && tglPemeriksaan !== '') {
+          const datePeriksa = new Date(tglPemeriksaan);
+          const options = { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          };
+          document.getElementById('modal-tgl-pemeriksaan').textContent = datePeriksa.toLocaleDateString('id-ID', options);
+        } else {
+          document.getElementById('modal-tgl-pemeriksaan').textContent = 'Belum diperiksa';
+        }
+        
+        // Set image
+        const imgContainer = document.getElementById('modal-img-container');
+        if (imgSs && imgSs !== '') {
+          imgContainer.innerHTML = `
+            <a href="../images/${imgSs}" target="_blank" class="d-block">
+              <img src="../images/${imgSs}" class="img-fluid rounded border" style="max-height: 400px;" alt="Bukti Transfer">
+            </a>
+            <p class="mt-2 text-muted small">Klik gambar untuk melihat ukuran penuh</p>
+          `;
+        } else {
+          imgContainer.innerHTML = '<p class="text-muted">Tidak ada bukti transfer</p>';
+        }
+      }
     </script>
   </body>
 </html>
