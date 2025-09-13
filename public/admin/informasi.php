@@ -276,7 +276,7 @@ if (!empty($params)) {
               <?php echo htmlspecialchars($_SESSION["nama_lengkap"]); ?> (<?php echo htmlspecialchars($_SESSION["jabatan"]); ?>)
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Ubah Password</a></li>
+              <li><a class="dropdown-item" href="profile.php">Ubah Profil</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="logout.php">Logout</a></li>
             </ul>
