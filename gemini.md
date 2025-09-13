@@ -1,30 +1,31 @@
-pada kolom aktif jual di harga_rilis, jika statusnya -, maka tampilkan tombol Belum Rilis, 
-jika statusnya , maka tampilkan tombol Sudah Rilis
+buatkan di biaya_lain.php untuk crud ppn dan takeaway
+dihalaman ini tetap pakai pattern ui halaman sebelumnya namun di main nya ada 2 tab
+1. tab Pajak ,
+2. tab Takeaway
+berikut quernya ppn
+SELECT
+	ppn.id_ppn, 
+	ppn.nilai_ppn, <-persen ada koma karna di table pakai type double
+	ppn.keterangan, 
+	DATE_FORMAT(ppn.rilis,'%d %M %Y') as rilis, 
+	ppn.aktif
+FROM
+	ppn
+  ORDER BY id_ppn DESC
 
-jika tombol Belum Rilis di klik, keluar modal Simpan
-berikut konten modalnya
-1. Label Nama Produk dan
-2. Label tanggal hari ini
-3. Label harga jual ambil dari value harga pokok
-   tampilan kolom harga jual karena tidak dipake
-4. inputan stok
-5. checkbox aktif jual (default true)
+query takeaway
+SELECT biaya_per_item FROM `takeaway_charge` ORDER BY DATE(tanggal_rilis) desc limit 1 
 
-tombol RILIS
+setiap tab ada crudnya dan pada ppn bisa aktif dan tidak aktif jadi ketika di ada inputan baru maka row dibawahnya atau sebelumnya menjadi tidak Aktif
+saya tampilkan struktur ppn 
+id_ppn	int(11)	NO	PRI		auto_increment
+nilai_ppn	double	YES			
+keterangan	text	YES			
+rilis	date	YES		current_timestamp()	
+aktif	tinyint(4)	YES		0	
 
-query simpannya adalah
-cek dulu 
-$cek_sql = "SELECT id_produk_sell FROM produk_sell 
-            WHERE id_produk = '$id_produk' 
-            AND DATE(tgl_release) = '$tgl_hari_ini'";
-
-jika row > 0 , tidak insert atau pesan data sudah ada
-jika row = 0, insert data
-
-$sql = "INSERT INTO produk_sell(id_produk, stok, harga_jual, id_user, aktif,stok_awal) 
-            VALUES ('$id_produk', '$stok', '$harga_jual', '$id_user', '$aktif', '$stok')";
-
-values silahkan di sesuaikan
-
-hal lain pada tombol action-> hapus, jika di kolom stok = 0 dan aktif jual = -,
-maka bisa dihapus, jika stok > 0 dan aktif jual = -, maka tidak bisa dihapus
+dan takeaway_charge
+id_ta	int(11)	NO	PRI		auto_increment
+tanggal_rilis	date	YES		current_timestamp()	
+id_user	int(11)	YES			
+biaya_per_item	double	YES		0	
