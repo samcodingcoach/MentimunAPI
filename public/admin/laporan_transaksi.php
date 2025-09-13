@@ -234,8 +234,8 @@ foreach ($tunai_data as $row) {
           </div>
 
           <!-- Date Filter -->
-          <div class="card mb-3">
-            <div class="card-body">
+          <div class="mb-3">
+          
               <form method="GET" class="row g-3 align-items-end">
                 <div class="col-md-4">
                   <label for="tanggal" class="form-label">Pilih Tanggal</label>
@@ -247,11 +247,9 @@ foreach ($tunai_data as $row) {
                     <i class="bi bi-search"></i> Filter
                   </button>
                 </div>
-                <div class="col-md-6 text-end">
-                  <small class="text-muted">Data untuk tanggal: <?php echo date('d F Y', strtotime($selected_date)); ?></small>
-                </div>
+               
               </form>
-            </div>
+           
           </div>
 
           <!-- Tabs -->
@@ -296,8 +294,8 @@ foreach ($tunai_data as $row) {
                       <th class="text-center">Jam</th>
                       <th>Waktu Dibayar</th>
                       <th>Kasir</th>
-                      <th class="text-end">Nominal</th>
                       <th class="text-center">Status</th>
+                       <th class="text-end">Nominal</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -319,7 +317,7 @@ foreach ($tunai_data as $row) {
                       <td class="text-center"><?php echo htmlspecialchars($row['jam']); ?></td>
                       <td><?php echo htmlspecialchars($row['waktu_dibayar']); ?></td>
                       <td><?php echo htmlspecialchars($row['kasir']); ?></td>
-                      <td class="text-end fw-semibold">Rp <?php echo htmlspecialchars($row['nominal']); ?></td>
+                     
                       <td class="text-center">
                         <?php if ($row['status_bayar'] == 'DIBAYAR'): ?>
                           <span class="badge bg-success fs-6 px-3 py-2">
@@ -331,6 +329,8 @@ foreach ($tunai_data as $row) {
                           </span>
                         <?php endif; ?>
                       </td>
+
+                       <td class="text-end fw-semibold">Rp <?php echo htmlspecialchars($row['nominal']); ?></td>
                     </tr>
                     <?php endforeach; ?>
                     <?php endif; ?>
