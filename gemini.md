@@ -1,83 +1,25 @@
-pada pembatalan.php
-buatkan table menampilkan data dengan query dibawah ini
+buat list table pada laporan_transaksi.php
+ada beberapa tab
+Tunai, Transfer, QRIS, Kasir, Semua
+selesaikan dulu Tab Tunai
+pada tab tunai ada filterisasi berdasarkan tanggal menggunakan datetime picker, default tanggal hari ini format YYYY-MM-DD
+berikut querynya
 SELECT
-id_batal,
-waktu,
-pesanan.id_tagihan,
-meja.nomor_meja,
-pegawai.nama_lengkap,
-SUM(produk_sell.harga_jual) AS total_harga_jual,
-sum(dapur_batal.qty) as total_item
+proses_pembayaran.kode_payment,
+DATE_FORMAT(proses_pembayaran.tanggal_payment,'%H:%i') AS jam,
+DATE_FORMAT(proses_pembayaran.update_status,'%d %M %Y %H:%i') AS waktu_dibayar,
+pegawai.nama_lengkap as kasir,
+FORMAT(proses_pembayaran.jumlah_uang, 0) AS nominal,
+CASE
+WHEN proses_pembayaran.`status` = 1 THEN 'DIBAYAR'
+WHEN proses_pembayaran.`status` = 0 THEN 'BELUM DIBAYAR'
+END AS status_bayar
 FROM
-dapur_batal
-INNER JOIN dapur_order_detail ON dapur_batal.id_order_detail = dapur_order_detail.id_order_detail
-INNER JOIN pesanan ON dapur_batal.id_pesanan = pesanan.id_pesanan
-INNER JOIN pesanan_detail ON dapur_order_detail.id_pesanan_detail = pesanan_detail.id_pesanan_detail
-INNER JOIN produk_sell ON pesanan_detail.id_produk_sell = produk_sell.id_produk_sell
-INNER JOIN meja ON pesanan.id_meja = meja.id_meja
-INNER JOIN view_produk ON produk_sell.id_produk = view_produk.id_produk
-INNER JOIN pegawai ON dapur_batal.id_user = pegawai.id_user
+proses_pembayaran
+INNER JOIN pegawai ON proses_pembayaran.id_user = pegawai.id_user
+INNER JOIN metode_pembayaran ON proses_pembayaran.id_bayar = metode_pembayaran.id_bayar
 WHERE
-DATE(dapur_batal.waktu) BETWEEN '?' AND '?'
-GROUP BY
-pesanan.id_tagihan, meja.nomor_meja
-ORDER BY
-pesanan.id_tagihan DESC
+metode_pembayaran.kategori = 'Tunai' AND
+DATE(tanggal_payment) = CURDATE()
 
-pada where dan between anda harus datetimepicker pencarian antara tanggal mulai dan tanggal selesai
-pastikan desain pattern ui harus mengikuti yang sudah ada yaitu menu.php
-
-hapus summary card pada line 473
-hapus fitur cetak
-ikuti css untuk table dan responsive di shift_kasir.php
-
-pembatalan.php.
-jika row pada kolom id_tagihan di klik muncul modal, untuk menampilkan detail apa yang dibatalkan
-berikut query dibawah ini
-SELECT
-dapur_batal.id_batal,
-DATE_FORMAT(dapur_batal.waktu,'%H:%i') AS waktu,
-dapur_batal.alasan,
-pesanan_detail.ta_dinein as jenis_pesanan,
-produk_sell.harga_jual,
-meja.nomor_meja,
-view_produk.kode_produk,
-view_produk.nama_produk,
-pegawai.nama_lengkap
-FROM
-dapur_batal
-INNER JOIN
-dapur_order_detail
-ON
-dapur_batal.id_order_detail = dapur_order_detail.id_order_detail
-INNER JOIN
-pesanan
-ON
-dapur_batal.id_pesanan = pesanan.id_pesanan
-INNER JOIN
-pesanan_detail
-ON
-dapur_order_detail.id_pesanan_detail = pesanan_detail.id_pesanan_detail
-INNER JOIN
-produk_sell
-ON
-pesanan_detail.id_produk_sell = produk_sell.id_produk_sell
-INNER JOIN
-meja
-ON
-pesanan.id_meja = meja.id_meja
-INNER JOIN
-view_produk
-ON
-produk_sell.id_produk = view_produk.id_produk
-INNER JOIN
-pegawai
-ON
-dapur_batal.id_user = pegawai.id_user
-WHERE
-DATE(waktu) and id_tagihan=?
-ORDER BY
-id_batal DESC
-
-jenis_pesanan, jika 0 artinya Dine In, 1 Takeaway
-untuk style modalnya bisa dilihat dari menu.php di modal edit
+gunakan pattern yang sudah anda pelajari di project ini.
