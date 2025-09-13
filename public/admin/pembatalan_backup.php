@@ -113,6 +113,28 @@ $total_amount = $total_result->fetch_assoc()['total_keseluruhan'] ?? 0;
     <link href="../css/admin.css" rel="stylesheet">
     <!-- Flatpickr CSS for Date Picker -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+      .table-responsive {
+        min-height: 400px;
+      }
+      .summary-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .summary-card h5 {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 5px;
+      }
+      .summary-card h3 {
+        font-size: 28px;
+        font-weight: bold;
+        margin: 0;
+      }
+    </style>
   </head>
   <body>
     <!-- Top Navbar -->
@@ -401,6 +423,11 @@ $total_amount = $total_result->fetch_assoc()['total_keseluruhan'] ?? 0;
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">Pembatalan</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+              <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
+                <i class="bi bi-printer"></i> Cetak
+              </button>
+            </div>
           </div>
 
           <!-- Alert Messages -->
@@ -419,7 +446,7 @@ $total_amount = $total_result->fetch_assoc()['total_keseluruhan'] ?? 0;
           <?php endif; ?>
 
           <!-- Date Range Filter -->
-          <div class="mb-4">
+          <div>
            
               <form method="GET" class="row g-3">
                 <div class="col-md-5">
@@ -442,27 +469,36 @@ $total_amount = $total_result->fetch_assoc()['total_keseluruhan'] ?? 0;
            
           </div>
 
+          <!-- Summary Card -->
+          <div class="row mb-4">
+            <div class="col-md-4">
+              <div class="summary-card">
+                <h5>Total Pembatalan</h5>
+                <h3>Rp <?php echo number_format($total_amount, 0, ',', '.'); ?></h3>
+                <small>Periode: <?php echo date('d/m/Y', strtotime($tanggal_mulai)); ?> - <?php echo date('d/m/Y', strtotime($tanggal_selesai)); ?></small>
+              </div>
+            </div>
+          </div>
+
           <!-- Cancellation Table -->
-          <div class="table-responsive shadow-sm">
-            <table class="table table-hover align-middle">
+          <div >
+            <table class="table  table-hover">
               <thead class="table-dark">
                 <tr>
-                  <th class="text-center">No</th>
+                  <th>No</th>
+                  
                   <th>Waktu</th>
                   <th>ID Tagihan</th>
-                  <th class="text-center">No. Meja</th>
-                  <th>Pegawai</th>            
-                  <th class="text-center">Total Item</th>
-                  <th class="text-end">Total Harga</th>
+                  <th>No. Meja</th>
+                  <th>Pegawai</th>
+                  <th>Total Harga</th>
+                  <th>Total Item</th>
                 </tr>
               </thead>
               <tbody>
                 <?php if (empty($pembatalan_data)): ?>
                 <tr>
-                  <td colspan="7" class="text-center text-muted py-5">
-                    <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
-                    <span class="fs-5">Tidak ada data pembatalan untuk periode <?php echo date('d F Y', strtotime($tanggal_mulai)); ?> - <?php echo date('d F Y', strtotime($tanggal_selesai)); ?></span>
-                  </td>
+                  <td colspan="8" class="text-center">Tidak ada data pembatalan untuk periode ini</td>
                 </tr>
                 <?php else: ?>
                 <?php 
@@ -470,39 +506,37 @@ $total_amount = $total_result->fetch_assoc()['total_keseluruhan'] ?? 0;
                 foreach ($pembatalan_data as $row): 
                 ?>
                 <tr>
-                  <td class="text-center fw-bold"><?php echo $no++; ?></td>
+                  <td><?php echo $no++; ?></td>
+                  
                   <td><?php echo date('d/m/Y H:i', strtotime($row['waktu'])); ?></td>
                   <td>
-                    <span class="badge bg-info fs-6 px-3 py-2"><?php echo htmlspecialchars($row['id_tagihan']); ?></span>
+                    <span class="badge bg-info"><?php echo htmlspecialchars($row['id_tagihan']); ?></span>
                   </td>
-                  <td class="text-center"><?php echo htmlspecialchars($row['nomor_meja']); ?></td>
-                  <td class="fw-semibold"><?php echo htmlspecialchars($row['nama_lengkap']); ?></td>
-                 
-                  <td class="text-center">
-                    <span class="badge bg-secondary fs-6 px-3 py-2"><?php echo $row['total_item']; ?> item</span>
+                  <td><?php echo htmlspecialchars($row['nomor_meja']); ?></td>
+                  <td><?php echo htmlspecialchars($row['nama_lengkap']); ?></td>
+                  <td>Rp <?php echo number_format($row['total_harga_jual'], 0, ',', '.'); ?></td>
+                  <td>
+                    <span class="badge bg-secondary"><?php echo $row['total_item']; ?> item</span>
                   </td>
-                   <td class="text-end fw-semibold text-danger">Rp <?php echo number_format($row['total_harga_jual'], 0, ',', '.'); ?></td>
                 </tr>
                 <?php endforeach; ?>
                 <?php endif; ?>
               </tbody>
-              
+              <?php if (!empty($pembatalan_data)): ?>
+              <tfoot class="table-secondary">
+                <tr>
+                  <th colspan="5" class="text-end">Total Halaman Ini:</th>
+                  <th>
+                    Rp <?php echo number_format(array_sum(array_column($pembatalan_data, 'total_harga_jual')), 0, ',', '.'); ?>
+                  </th>
+                  <th>
+                    <?php echo array_sum(array_column($pembatalan_data, 'total_item')); ?> item
+                  </th>
+                </tr>
+              </tfoot>
+              <?php endif; ?>
             </table>
           </div>
-          
-          <!-- Grand Total Summary -->
-          <?php if (!empty($pembatalan_data)): ?>
-            <div class="mt-3 p-3 bg-light rounded border">
-              <div class="row align-items-center">
-                <div class="col-md-8">
-                  <span class="text-muted">Total Pembatalan Periode (<?php echo count($pembatalan_data); ?> transaksi)</span>
-                </div>
-                <div class="col-md-4 text-end">
-                  <span class="fw-bold fs-4 text-danger">Rp <?php echo number_format($total_amount, 0, ',', '.'); ?></span>
-                </div>
-              </div>
-            </div>
-          <?php endif; ?>
 
           <!-- Pagination -->
           <?php if ($total_pages > 1): ?>
