@@ -12,21 +12,46 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 $message = '';
 $error = '';
 
-// Handle delete action
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'delete') {
-    $id_harga = (int)$_POST['id_harga'];
+// Handle rilis produk action
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'rilis') {
+    $id_produk = (int)$_POST['id_produk'];
+    $stok = (int)$_POST['stok'];
+    $harga_jual = (float)$_POST['harga_jual'];
+    $aktif = isset($_POST['aktif']) ? '1' : '0';
+    $id_user = $_SESSION['id_user'];
+    $tgl_hari_ini = date('Y-m-d');
     
-    if ($id_harga > 0) {
-        $stmt = $conn->prepare("DELETE FROM harga_menu WHERE id_harga = ?");
-        $stmt->bind_param("i", $id_harga);
+    if ($id_produk > 0 && $stok >= 0) {
+        // Cek apakah sudah ada data untuk hari ini
+        $cek_sql = "SELECT id_produk_sell FROM produk_sell 
+                    WHERE id_produk = ? 
+                    AND DATE(tgl_release) = ?";
+        $cek_stmt = $conn->prepare($cek_sql);
+        $cek_stmt->bind_param("is", $id_produk, $tgl_hari_ini);
+        $cek_stmt->execute();
+        $cek_result = $cek_stmt->get_result();
         
-        if ($stmt->execute()) {
-            $message = 'Data berhasil dihapus!';
+        if ($cek_result->num_rows > 0) {
+            $error = 'Data sudah ada untuk tanggal hari ini!';
         } else {
-            $error = 'Gagal menghapus data!';
+            // Insert data baru
+            $sql = "INSERT INTO produk_sell(id_produk, stok, harga_jual, id_user, aktif, stok_awal, tgl_release) 
+                    VALUES (?, ?, ?, ?, ?, ?, NOW())";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("iidisi", $id_produk, $stok, $harga_jual, $id_user, $aktif, $stok);
+            
+            if ($stmt->execute()) {
+                $message = 'Produk berhasil dirilis!';
+            } else {
+                $error = 'Gagal merilis produk: ' . $conn->error;
+            }
         }
+    } else {
+        $error = 'Data tidak valid!';
     }
 }
+
+
 
 // Get parameters
 $selected_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
@@ -480,13 +505,12 @@ try {
                   <th>Harga Jual</th>
                   <th>Stok</th>
                   <th>Aktif Jual</th>
-                  <th>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 <?php if (empty($data)): ?>
                  <tr>
-                   <td colspan="9" class="text-center">
+                   <td colspan="8" class="text-center">
                      <?php if (!empty($search_nama) || $filter_kategori > 0): ?>
                        Tidak ada data yang sesuai dengan kriteria pencarian
                      <?php else: ?>
@@ -506,21 +530,19 @@ try {
                   <td><?php echo htmlspecialchars($row['stok']); ?></td>
                   <td>
                     <?php if ($row['aktif_jual'] === '1'): ?>
-                      <span class="badge bg-success">Aktif</span>
-                    <?php elseif ($row['aktif_jual'] === '0'): ?>
-                      <span class="badge bg-danger">Tidak Aktif</span>
-                    <?php else: ?>
-                      <span class="badge bg-secondary">-</span>
-                    <?php endif; ?>
-                  </td>
-                  <td>
-                    <form method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                      <input type="hidden" name="action" value="delete">
-                      <input type="hidden" name="id_harga" value="<?php echo $row['id_harga']; ?>">
-                      <button type="submit" class="btn btn-danger btn-sm">
-                        <i class="bi bi-trash"></i> Hapus
+                      <button class="btn btn-success btn-sm" disabled>
+                        <i class="bi bi-check-circle"></i> Sudah Rilis
                       </button>
-                    </form>
+                    <?php elseif ($row['aktif_jual'] === '0'): ?>
+                      <button class="btn btn-warning btn-sm" disabled>
+                        <i class="bi bi-pause-circle"></i> Tidak Aktif
+                      </button>
+                    <?php else: ?>
+                      <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#rilisModal" 
+                              onclick="setRilisData(<?php echo $row['id_produk']; ?>, '<?php echo addslashes($row['nama_produk']); ?>', <?php echo $row['nominal']; ?>)">
+                        <i class="bi bi-upload"></i> Belum Rilis
+                      </button>
+                    <?php endif; ?>
                   </td>
                 </tr>
                 <?php endforeach; ?>
@@ -556,6 +578,66 @@ try {
       </div>
     </div>
 
+    <!-- Modal Rilis Produk -->
+    <div class="modal fade" id="rilisModal" tabindex="-1" aria-labelledby="rilisModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="rilisModalLabel">Rilis Produk</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form method="POST">
+            <div class="modal-body">
+              <input type="hidden" name="action" value="rilis">
+              <input type="hidden" name="id_produk" id="modal_id_produk">
+              <input type="hidden" name="harga_jual" id="modal_harga_jual">
+              
+              <div class="mb-3">
+                <label class="form-label"><strong>Nama Produk:</strong></label>
+                <p id="modal_nama_produk" class="form-control-plaintext"></p>
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label"><strong>Tanggal:</strong></label>
+                <p class="form-control-plaintext"><?php echo date('d/m/Y'); ?></p>
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label"><strong>Harga Jual:</strong></label>
+                <p id="modal_harga_display" class="form-control-plaintext"></p>
+              </div>
+              
+              <div class="mb-3">
+                <label for="modal_stok" class="form-label"><strong>Stok:</strong></label>
+                <input type="number" class="form-control" id="modal_stok" name="stok" min="0" required>
+              </div>
+              
+              <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="modal_aktif" name="aktif" checked>
+                <label class="form-check-label" for="modal_aktif">
+                  Aktif Jual
+                </label>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+              <button type="submit" class="btn btn-primary">RILIS</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <script src="../js/bootstrap.bundle.min.js"></script>
+    <script>
+    function setRilisData(idProduk, namaProduk, hargaPokok) {
+        document.getElementById('modal_id_produk').value = idProduk;
+        document.getElementById('modal_nama_produk').textContent = namaProduk;
+        document.getElementById('modal_harga_jual').value = hargaPokok;
+        document.getElementById('modal_harga_display').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(hargaPokok);
+        document.getElementById('modal_stok').value = '';
+        document.getElementById('modal_aktif').checked = true;
+    }
+    </script>
   </body>
 </html>
