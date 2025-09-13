@@ -371,7 +371,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
           <?php endif; ?>
 
           <div class="row">
-            <div class="col-md-8">
+            <div class="col-md-12">
               <div class="card">
                 <div class="card-header">
                   <h5 class="card-title mb-0">Edit Profile</h5>
@@ -419,29 +419,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
               </div>
             </div>
             
-            <div class="col-md-4">
-              <div class="card">
-                <div class="card-header">
-                  <h5 class="card-title mb-0">Informasi Akun</h5>
-                </div>
-                <div class="card-body">
-                  <p><strong>Jabatan:</strong> <?php echo htmlspecialchars($current_user['jabatan']); ?></p>
-                  <p><strong>Status:</strong> 
-                    <?php if($current_user['aktif'] == 1): ?>
-                      <span class="badge bg-success">Aktif</span>
-                    <?php else: ?>
-                      <span class="badge bg-danger">Nonaktif</span>
-                    <?php endif; ?>
-                  </p>
-                  <div class="alert alert-info">
-                    <small>
-                      <i class="bi bi-info-circle"></i>
-                      Setelah update profile, Anda akan diarahkan ke halaman login untuk masuk kembali.
-                    </small>
-                  </div>
-                </div>
-              </div>
-            </div>
+           
           </div>
         </main>
       </div>
