@@ -372,60 +372,80 @@ try {
               </tbody>
             </table>
           </div>
+          
+          <!-- Grand Total Summary -->
+          <?php if (!empty($shift_data)): ?>
+            <?php 
+              $total_grand = 0;
+              foreach ($shift_data as $shift) {
+                $total_grand += (int)str_replace(',', '', $shift['grand_total']);
+              }
+            ?>
+            <div class="mt-3 p-3 bg-light rounded border">
+              <div class="row align-items-center">
+                <div class="col-md-8">
+                  <span class="text-muted">Total Grand Total (<?php echo count($shift_data); ?> shift)</span>
+                </div>
+                <div class="col-md-4 text-end">
+                  <span class="fw-bold fs-4 text-success">Rp <?php echo number_format($total_grand, 0, ',', '.'); ?></span>
+                </div>
+              </div>
+            </div>
+          <?php endif; ?>
         </main>
       </div>
     </div>
 
     <!-- Detail Modal -->
     <div class="modal fade" id="detailModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="bi bi-info-circle me-2"></i>Detail Shift Kasir</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <div class="modal-dialog modal-md">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-dark">Detail Shift Kasir</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-12 mb-3">
-                            <div class="detail-card p-3 rounded">
-                                <h6 class="text-primary mb-2"><i class="bi bi-person me-2"></i>Kasir</h6>
-                                <p class="mb-0 fw-semibold" id="detail-kasir"></p>
+                <div class="modal-body px-4 py-3">
+                    <!-- Kasir Info -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-light rounded-circle p-2 me-3">
+                                <i class="bi bi-person-fill text-primary"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Kasir</small>
+                                <span class="fw-semibold" id="detail-kasir"></span>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Payment Details -->
                     <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="card h-100 border-success">
-                                <div class="card-body text-center">
-                                    <i class="bi bi-cash-coin display-4 text-success mb-2"></i>
-                                    <h6 class="card-title text-success">Tunai</h6>
-                                    <p class="card-text fw-bold fs-5" id="detail-tunai"></p>
-                                </div>
+                        <div class="col-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <i class="bi bi-cash text-success fs-4 mb-2 d-block"></i>
+                                <small class="text-muted d-block mb-1">Tunai</small>
+                                <div class="fw-bold text-success" id="detail-tunai"></div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card h-100 border-info">
-                                <div class="card-body text-center">
-                                    <i class="bi bi-qr-code display-4 text-info mb-2"></i>
-                                    <h6 class="card-title text-info">QRIS</h6>
-                                    <p class="card-text fw-bold fs-5" id="detail-qris"></p>
-                                </div>
+                        <div class="col-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <i class="bi bi-qr-code text-info fs-4 mb-2 d-block"></i>
+                                <small class="text-muted d-block mb-1">QRIS</small>
+                                <div class="fw-bold text-info" id="detail-qris"></div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card h-100 border-warning">
-                                <div class="card-body text-center">
-                                    <i class="bi bi-credit-card display-4 text-warning mb-2"></i>
-                                    <h6 class="card-title text-warning">Transfer</h6>
-                                    <p class="card-text fw-bold fs-5" id="detail-transfer"></p>
-                                </div>
+                        <div class="col-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <i class="bi bi-credit-card text-warning fs-4 mb-2 d-block"></i>
+                                <small class="text-muted d-block mb-1">Transfer</small>
+                                <div class="fw-bold text-warning" id="detail-transfer"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle me-2"></i>Tutup
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                        Tutup
                     </button>
                 </div>
             </div>
@@ -445,10 +465,10 @@ try {
                         <input type="hidden" name="action" value="create">
                         <div class="mb-3">
                              <label for="id_pegawai" class="form-label">Kasir <span class="text-danger">*</span></label>
-                             <div class="searchable-select">
+                             <div class="searchable-select" style="position: relative;">
                                  <input type="text" class="form-control" id="kasir_display" placeholder="Pilih kasir..." readonly onclick="toggleKasirDropdown()" style="padding-right: 2.5rem;">
                                  <input type="hidden" name="id_pegawai" id="id_pegawai" required>
-                                 <div class="dropdown-menu" id="kasir_dropdown" style="display: none; width: 100%; max-height: 200px; overflow-y: auto; border: 1px solid #ced4da; border-radius: 0.375rem; background: white; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);">
+                                 <div class="dropdown-menu" id="kasir_dropdown" style="display: none; position: absolute; width: 100%; max-height: 200px; overflow-y: auto; border: 1px solid #ced4da; border-radius: 0.375rem; background: white; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); z-index: 1060; top: 100%;">
                                      <input type="text" class="search-input form-control" id="kasir_search" placeholder="Cari kasir..." onkeyup="filterKasir()" style="margin: 0.5rem; width: calc(100% - 1rem);">
                                      <?php foreach ($kasir_list as $kasir): ?>
                                      <div class="dropdown-item" data-value="<?php echo $kasir['id_user']; ?>" data-text="<?php echo htmlspecialchars($kasir['nama_lengkap']); ?>" onclick="selectKasir(this)" style="padding: 0.5rem 1rem; cursor: pointer; border-bottom: 1px solid #f8f9fa;">
@@ -542,6 +562,30 @@ try {
         // Auto-submit form when date changes
         document.getElementById('tanggal').addEventListener('change', function() {
             this.form.submit();
+        });
+        
+        // Set date picker limits (yesterday to 2 days ahead)
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateInput = document.getElementById('tanggal');
+            const today = new Date();
+            
+            // Yesterday
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            
+            // 2 days ahead
+            const twoDaysAhead = new Date(today);
+            twoDaysAhead.setDate(today.getDate() + 2);
+            
+            // Format dates to YYYY-MM-DD
+            const formatDate = (date) => {
+                return date.getFullYear() + '-' + 
+                       String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                       String(date.getDate()).padStart(2, '0');
+            };
+            
+            dateInput.min = formatDate(yesterday);
+            dateInput.max = formatDate(twoDaysAhead);
         });
     </script>
 </body>
