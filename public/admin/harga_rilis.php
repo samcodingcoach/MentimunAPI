@@ -51,6 +51,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     }
 }
 
+// Handle toggle aktif jual action
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'toggle_aktif') {
+    $id_produk = (int)$_POST['id_produk'];
+    $current_status = $_POST['current_status'];
+    $new_status = ($current_status == '1') ? '0' : '1';
+    $tgl_release = $_POST['tgl_release'];
+    
+    if ($id_produk > 0) {
+        $sql = "UPDATE produk_sell SET aktif = ? WHERE id_produk = ? AND DATE(tgl_release) = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sis", $new_status, $id_produk, $tgl_release);
+        
+        if ($stmt->execute()) {
+            $status_text = ($new_status == '1') ? 'diaktifkan' : 'dinonaktifkan';
+            $message = "Status produk berhasil {$status_text}!";
+        } else {
+            $error = 'Gagal mengubah status produk: ' . $conn->error;
+        }
+    } else {
+        $error = 'Data tidak valid!';
+    }
+}
+
 
 
 // Get parameters
@@ -502,7 +525,7 @@ try {
                   <th>Nama Produk</th>
                   <th>Kategori</th>
                   <th>Harga Pokok</th>
-                  <th>Harga Jual</th>
+                
                   <th>Stok</th>
                   <th>Aktif Jual</th>
                 </tr>
@@ -526,16 +549,18 @@ try {
                   <td><?php echo htmlspecialchars($row['nama_produk']); ?></td>
                   <td><?php echo htmlspecialchars($row['nama_kategori']); ?></td>
                   <td>Rp <?php echo number_format($row['nominal'], 0, ',', '.'); ?></td>
-                  <td>Rp <?php echo htmlspecialchars($row['harga_jual']); ?></td>
+                 
                   <td><?php echo htmlspecialchars($row['stok']); ?></td>
                   <td>
                     <?php if ($row['aktif_jual'] === '1'): ?>
-                      <button class="btn btn-success btn-sm" disabled>
-                        <i class="bi bi-check-circle"></i> Sudah Rilis
+                      <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#toggleModal" 
+                              onclick="setToggleData(<?php echo $row['id_produk']; ?>, '<?php echo addslashes($row['nama_produk']); ?>', '1', '<?php echo $selected_date; ?>')">
+                        <i class="bi bi-check-circle"></i> Aktif
                       </button>
                     <?php elseif ($row['aktif_jual'] === '0'): ?>
-                      <button class="btn btn-warning btn-sm" disabled>
-                        <i class="bi bi-pause-circle"></i> Tidak Aktif
+                      <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#toggleModal" 
+                              onclick="setToggleData(<?php echo $row['id_produk']; ?>, '<?php echo addslashes($row['nama_produk']); ?>', '0', '<?php echo $selected_date; ?>')">
+                        <i class="bi bi-pause-circle"></i> Nonaktif
                       </button>
                     <?php else: ?>
                       <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#rilisModal" 
@@ -580,48 +605,95 @@ try {
 
     <!-- Modal Rilis Produk -->
     <div class="modal fade" id="rilisModal" tabindex="-1" aria-labelledby="rilisModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="rilisModalLabel">Rilis Produk</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header bg-primary text-white border-0">
+            <h5 class="modal-title fw-bold" id="rilisModalLabel">
+              <i class="bi bi-upload me-2"></i>Rilis Produk
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <form method="POST">
-            <div class="modal-body">
+            <div class="modal-body p-4">
               <input type="hidden" name="action" value="rilis">
               <input type="hidden" name="id_produk" id="modal_id_produk">
               <input type="hidden" name="harga_jual" id="modal_harga_jual">
               
-              <div class="mb-3">
-                <label class="form-label"><strong>Nama Produk:</strong></label>
-                <p id="modal_nama_produk" class="form-control-plaintext"></p>
+              <div class="mb-4">
+                <label class="form-label fw-semibold text-muted">Nama Produk</label>
+                <p id="modal_nama_produk" class="form-control-plaintext fw-bold fs-5"></p>
               </div>
               
-              <div class="mb-3">
-                <label class="form-label"><strong>Tanggal:</strong></label>
+              <div class="mb-4">
+                <label class="form-label fw-semibold text-muted">Tanggal</label>
                 <p class="form-control-plaintext"><?php echo date('d/m/Y'); ?></p>
               </div>
               
-              <div class="mb-3">
-                <label class="form-label"><strong>Harga Jual:</strong></label>
-                <p id="modal_harga_display" class="form-control-plaintext"></p>
+              <div class="mb-4">
+                <label class="form-label fw-semibold text-muted">Harga Jual</label>
+                <p id="modal_harga_display" class="form-control-plaintext fw-bold text-success fs-5"></p>
               </div>
               
-              <div class="mb-3">
-                <label for="modal_stok" class="form-label"><strong>Stok:</strong></label>
-                <input type="number" class="form-control" id="modal_stok" name="stok" min="0" required>
+              <div class="mb-4">
+                <label for="modal_stok" class="form-label fw-semibold text-muted">Stok</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-0"><i class="bi bi-box"></i></span>
+                  <input type="number" class="form-control border-0 bg-light" id="modal_stok" name="stok" min="0" required>
+                </div>
               </div>
               
-              <div class="mb-3 form-check">
+              <div class="form-check p-3 bg-light rounded">
                 <input type="checkbox" class="form-check-input" id="modal_aktif" name="aktif" checked>
-                <label class="form-check-label" for="modal_aktif">
-                  Aktif Jual
+                <label class="form-check-label fw-semibold" for="modal_aktif">
+                  <i class="bi bi-check-circle text-success me-2"></i>Aktif Jual
                 </label>
               </div>
             </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-              <button type="submit" class="btn btn-primary">RILIS</button>
+            <div class="modal-footer border-0 p-4">
+              <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">
+                <i class="bi bi-x-circle me-2"></i>Batal
+              </button>
+              <button type="submit" class="btn btn-primary px-4 fw-bold">
+                <i class="bi bi-upload me-2"></i>RILIS PRODUK
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Toggle Status Aktif -->
+    <div class="modal fade" id="toggleModal" tabindex="-1" aria-labelledby="toggleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header bg-warning text-dark border-0">
+            <h5 class="modal-title fw-bold" id="toggleModalLabel">
+              <i class="bi bi-toggle-on me-2"></i>Ubah Status Aktif Jual
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form method="POST">
+            <div class="modal-body p-4 text-center">
+              <input type="hidden" name="action" value="toggle_aktif">
+              <input type="hidden" name="id_produk" id="toggle_id_produk">
+              <input type="hidden" name="current_status" id="toggle_current_status">
+              <input type="hidden" name="tgl_release" id="toggle_tgl_release">
+              
+              <div class="mb-4">
+                <i class="bi bi-question-circle-fill text-warning" style="font-size: 3rem;"></i>
+              </div>
+              
+              <h6 class="fw-bold mb-3" id="toggle_nama_produk"></h6>
+              
+              <p class="text-muted mb-4" id="toggle_message"></p>
+            </div>
+            <div class="modal-footer border-0 p-4 justify-content-center">
+              <button type="button" class="btn btn-light px-4 me-2" data-bs-dismiss="modal">
+                <i class="bi bi-x-circle me-2"></i>Batal
+              </button>
+              <button type="submit" class="btn px-4 fw-bold" id="toggle_submit_btn">
+                <i class="bi bi-toggle-on me-2"></i><span id="toggle_action_text"></span>
+              </button>
             </div>
           </form>
         </div>
@@ -637,6 +709,27 @@ try {
         document.getElementById('modal_harga_display').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(hargaPokok);
         document.getElementById('modal_stok').value = '';
         document.getElementById('modal_aktif').checked = true;
+    }
+    
+    function setToggleData(idProduk, namaProduk, currentStatus, tglRelease) {
+        document.getElementById('toggle_id_produk').value = idProduk;
+        document.getElementById('toggle_nama_produk').textContent = namaProduk;
+        document.getElementById('toggle_current_status').value = currentStatus;
+        document.getElementById('toggle_tgl_release').value = tglRelease;
+        
+        const toggleMessage = document.getElementById('toggle_message');
+        const toggleSubmitBtn = document.getElementById('toggle_submit_btn');
+        const toggleActionText = document.getElementById('toggle_action_text');
+        
+        if (currentStatus === '1') {
+            toggleMessage.textContent = 'Apakah Anda yakin ingin menonaktifkan produk ini dari penjualan?';
+            toggleSubmitBtn.className = 'btn btn-warning px-4 fw-bold';
+            toggleActionText.textContent = 'NONAKTIFKAN';
+        } else {
+            toggleMessage.textContent = 'Apakah Anda yakin ingin mengaktifkan produk ini untuk penjualan?';
+            toggleSubmitBtn.className = 'btn btn-success px-4 fw-bold';
+            toggleActionText.textContent = 'AKTIFKAN';
+        }
     }
     </script>
   </body>
