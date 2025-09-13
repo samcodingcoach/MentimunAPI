@@ -290,6 +290,11 @@ try {
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">Shift Kasir</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shiftModal">
+                <i class="bi bi-plus-circle me-2"></i>Tambah Shift
+              </button>
+            </div>
           </div>
 
                 <!-- Alert Messages -->
@@ -322,12 +327,6 @@ try {
           </div>
 
           <!-- Shift Data Table -->
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shiftModal">
-              <i class="bi bi-plus-circle me-2"></i>Tambah Shift
-            </button>
-          </div>
           
           <div class="table-responsive shadow-sm">
             <table class="table table-hover align-middle">
@@ -400,20 +399,23 @@ try {
     <div class="modal fade" id="detailModal" tabindex="-1">
         <div class="modal-dialog modal-md">
             <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold text-dark">Detail Shift Kasir</h5>
+                <div class="modal-header border-0 pb-2">
+                    <h5 class="modal-title fw-bold text-dark d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                        Detail Shift Kasir
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body px-4 py-3">
                     <!-- Kasir Info -->
-                    <div class="mb-4">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="bg-light rounded-circle p-2 me-3">
-                                <i class="bi bi-person-fill text-primary"></i>
+                    <div class="mb-4 p-3 bg-primary bg-opacity-10 rounded-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-20 rounded-circle p-2 me-3">
+                                <i class="bi bi-person-fill text-primary fs-5"></i>
                             </div>
                             <div>
-                                <small class="text-muted d-block">Kasir</small>
-                                <span class="fw-semibold" id="detail-kasir"></span>
+                                <small class="text-muted d-block mb-1">Nama Kasir</small>
+                                <span class="fw-bold text-dark" id="detail-kasir"></span>
                             </div>
                         </div>
                     </div>
@@ -421,30 +423,31 @@ try {
                     <!-- Payment Details -->
                     <div class="row g-3">
                         <div class="col-4">
-                            <div class="text-center p-3 bg-light rounded">
-                                <i class="bi bi-cash text-success fs-4 mb-2 d-block"></i>
-                                <small class="text-muted d-block mb-1">Tunai</small>
-                                <div class="fw-bold text-success" id="detail-tunai"></div>
+                            <div class="text-center p-3 bg-success bg-opacity-10 rounded-3 border border-success border-opacity-25">
+                                <i class="bi bi-cash-stack text-success fs-3 mb-2 d-block"></i>
+                                <small class="text-muted d-block mb-1 fw-medium">Tunai</small>
+                                <div class="fw-bold text-success fs-6" id="detail-tunai"></div>
                             </div>
                         </div>
                         <div class="col-4">
-                            <div class="text-center p-3 bg-light rounded">
-                                <i class="bi bi-qr-code text-info fs-4 mb-2 d-block"></i>
-                                <small class="text-muted d-block mb-1">QRIS</small>
-                                <div class="fw-bold text-info" id="detail-qris"></div>
+                            <div class="text-center p-3 bg-info bg-opacity-10 rounded-3 border border-info border-opacity-25">
+                                <i class="bi bi-qr-code text-info fs-3 mb-2 d-block"></i>
+                                <small class="text-muted d-block mb-1 fw-medium">QRIS</small>
+                                <div class="fw-bold text-info fs-6" id="detail-qris"></div>
                             </div>
                         </div>
                         <div class="col-4">
-                            <div class="text-center p-3 bg-light rounded">
-                                <i class="bi bi-credit-card text-warning fs-4 mb-2 d-block"></i>
-                                <small class="text-muted d-block mb-1">Transfer</small>
-                                <div class="fw-bold text-warning" id="detail-transfer"></div>
+                            <div class="text-center p-3 bg-warning bg-opacity-10 rounded-3 border border-warning border-opacity-25">
+                                <i class="bi bi-credit-card text-warning fs-3 mb-2 d-block"></i>
+                                <small class="text-muted d-block mb-1 fw-medium">Transfer</small>
+                                <div class="fw-bold text-warning fs-6" id="detail-transfer"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                <div class="modal-footer border-0 pt-2 pb-3">
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>
                         Tutup
                     </button>
                 </div>
