@@ -224,6 +224,7 @@ try {
                 <div class="collapse show" id="penjualanMenu">
                   <ul class="nav flex-column ms-3">
                     <li class="nav-item"><a class="nav-link active" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
+                    <li class="nav-item"><a class="nav-link" href="promo.php"><i class="bi bi-percent"></i> Promo</a></li>
                     <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
                     <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
                     <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
@@ -282,7 +283,131 @@ try {
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
           </div>
           <div class="offcanvas-body">
-            <!-- Same menu structure as desktop sidebar -->
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a class="nav-link" href="index.php">
+                  <i class="bi bi-house"></i>
+                  <span>Beranda</span>
+                </a>
+              </li>
+              
+              <li class="nav-item">
+                <a class="nav-link" href="informasi.php">
+                  <i class="bi bi-info-circle"></i>
+                  <span>Informasi</span>
+                </a>
+              </li>
+              
+              <?php if($_SESSION["jabatan"] == "Admin"): ?>
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#masterMenuMobile" role="button">
+                  <i class="bi bi-folder"></i>
+                  <span>Master</span>
+                  <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse" id="masterMenuMobile">
+                  <ul class="nav flex-column ms-3">
+                    <li class="nav-item"><a class="nav-link" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pegawai.php"><i class="bi bi-people"></i> Pegawai</a></li>
+                    <li class="nav-item"><a class="nav-link" href="vendor.php"><i class="bi bi-truck"></i> Vendor</a></li>
+                    <li class="nav-item"><a class="nav-link" href="meja.php"><i class="bi bi-table"></i> Meja</a></li>
+                    <li class="nav-item"><a class="nav-link" href="metode_pembayaran.php"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
+                  </ul>
+                </div>
+              </li>
+              <?php endif; ?>
+              
+              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#produkMenuMobile" role="button">
+                  <i class="bi bi-box"></i>
+                  <span>Produk</span>
+                  <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse" id="produkMenuMobile">
+                  <ul class="nav flex-column ms-3">
+                    <li class="nav-item"><a class="nav-link" href="kategori_menu.php"><i class="bi bi-tags"></i> Kategori Menu</a></li>
+                    <li class="nav-item"><a class="nav-link" href="menu.php"><i class="bi bi-list"></i> Menu</a></li>
+                    <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-tags"></i> Kategori Bahan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="bahan.php"><i class="bi bi-egg"></i> Bahan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-book"></i> Resep</a></li>
+                  </ul>
+                </div>
+              </li>
+              
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#pembelianMenuMobile" role="button">
+                  <i class="bi bi-cart"></i>
+                  <span>Pembelian</span>
+                  <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse" id="pembelianMenuMobile">
+                  <ul class="nav flex-column ms-3">
+                    <li class="nav-item"><a class="nav-link" href="pembelian.php"><i class="bi bi-cart-plus"></i> Pesanan Pembelian</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pembayaran_pembelian.php"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
+                  </ul>
+                </div>
+              </li>
+              <?php endif; ?>
+              
+              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Kasir"): ?>
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#penjualanMenuMobile" role="button">
+                  <i class="bi bi-cash-stack"></i>
+                  <span>Penjualan</span>
+                  <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse show" id="penjualanMenuMobile">
+                  <ul class="nav flex-column ms-3">
+                    <li class="nav-item"><a class="nav-link active" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
+                    <li class="nav-item"><a class="nav-link" href="promo.php"><i class="bi bi-percent"></i> Promo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
+                    <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
+                  </ul>
+                </div>
+              </li>
+              <?php endif; ?>
+              
+              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#inventoryMenuMobile" role="button">
+                  <i class="bi bi-boxes"></i>
+                  <span>Inventory</span>
+                  <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse" id="inventoryMenuMobile">
+                  <ul class="nav flex-column ms-3">
+                    <li class="nav-item"><a class="nav-link" href="inventory.php"><i class="bi bi-box-seam"></i> Inventory</a></li>
+                    <li class="nav-item"><a class="nav-link" href="transaksi_inventory.php"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
+                  </ul>
+                </div>
+              </li>
+              <?php endif; ?>
+              
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#laporanMenuMobile" role="button">
+                  <i class="bi bi-graph-up"></i>
+                  <span>Laporan</span>
+                  <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse" id="laporanMenuMobile">
+                  <ul class="nav flex-column ms-3">
+                    <li class="nav-item"><a class="nav-link" href="laporan_transaksi.php"><i class="bi bi-list-ul"></i> Transaksi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="laporan_pengeluaran.php"><i class="bi bi-bar-chart"></i> Pengeluaran vs Penjualan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="laporan_kuantitas.php"><i class="bi bi-pie-chart"></i> Kuantitas</a></li>
+                  </ul>
+                </div>
+              </li>
+              
+              <li class="nav-item">
+                <a class="nav-link" href="pengaturan.php">
+                  <i class="bi bi-gear"></i>
+                  <span>Pengaturan</span>
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
 

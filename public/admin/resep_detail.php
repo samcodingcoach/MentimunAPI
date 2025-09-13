@@ -355,9 +355,10 @@ $resep_details = $result->fetch_all(MYSQLI_ASSOC);
                 <div class="collapse" id="penjualanMenu">
                   <ul class="nav flex-column ms-3">
                     <li class="nav-item"><a class="nav-link" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
+                    <li class="nav-item"><a class="nav-link" href="promo.php"><i class="bi bi-percent"></i> Promo</a></li>
                     <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_pokok.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
+                    <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
                     <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
                   </ul>
                 </div>
@@ -461,6 +462,26 @@ $resep_details = $result->fetch_all(MYSQLI_ASSOC);
                     <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-tags"></i> Kategori Bahan</a></li>
                     <li class="nav-item"><a class="nav-link" href="bahan.php"><i class="bi bi-egg"></i> Bahan</a></li>
                     <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-book"></i> Resep</a></li>
+                  </ul>
+                </div>
+              </li>
+              <?php endif; ?>
+              
+              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Kasir"): ?>
+              <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#penjualanMenuMobile" role="button">
+                  <i class="bi bi-cash-stack"></i>
+                  <span>Penjualan</span>
+                  <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <div class="collapse" id="penjualanMenuMobile">
+                  <ul class="nav flex-column ms-3">
+                    <li class="nav-item"><a class="nav-link" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
+                    <li class="nav-item"><a class="nav-link" href="promo.php"><i class="bi bi-percent"></i> Promo</a></li>
+                    <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
+                    <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
                   </ul>
                 </div>
               </li>
