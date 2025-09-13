@@ -513,7 +513,7 @@ foreach ($qris_data as $row) {
                       <th>Kasir</th>
                       <th class="text-center">Status</th>
                       <th class="text-end">Nominal</th>
-                      <th class="text-center">Waktu Dibayar</th>
+                      
                     </tr>
                   </thead>
                   <tbody>
@@ -546,9 +546,7 @@ foreach ($qris_data as $row) {
                         <?php endif; ?>
                       </td>
                       <td class="text-end fw-semibold">Rp <?php echo htmlspecialchars($row['nominal']); ?></td>
-                      <td class="text-center text-muted">
-                        <small><?php echo htmlspecialchars($row['waktu_dibayar']); ?></small>
-                      </td>
+                     
                     </tr>
                     <?php endforeach; ?>
                     <?php endif; ?>
