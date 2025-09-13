@@ -56,3 +56,15 @@ perbaiki tampilan table
 No, Kode Payment, BANK/METODE, TANGGAL TRF, STATUS, NOMINAL
 
 Ketika diklik status, muncul modal yang isinya tanggal_transfer,no_referensi,img_ss,status_pemeriksaan,tgl_pemeriksaan
+
+perbaiki bagian dibawah ini karna gambar tidak muncul
+const imgContainer = document.getElementById('modal-img-container');
+if (imgSs && imgSs !== '') {
+imgContainer.innerHTML = `            <a href="../../struk/images/${imgSs}" target="_blank" class="d-block">
+              <img src="../../struk/images/${imgSs}" class="img-fluid rounded border" style="max-height: 400px;" alt="Bukti Transfer">
+            </a>
+            <p class="mt-2 text-muted small">Klik gambar untuk melihat ukuran penuh</p>
+         `;
+} else {
+imgContainer.innerHTML = '<p class="text-muted">Tidak ada bukti transfer</p>';
+}

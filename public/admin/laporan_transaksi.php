@@ -509,6 +509,10 @@ foreach ($transfer_data as $row) {
                 <p class="fw-semibold" id="modal-tanggal-transfer">-</p>
               </div>
               <div class="col-md-6">
+                <label class="form-label text-muted">Tanggal Pemeriksaan</label>
+                <p class="fw-semibold" id="modal-tgl-pemeriksaan">-</p>
+              </div>
+              <div class="col-md-6">
                 <label class="form-label text-muted">No. Referensi</label>
                 <p class="fw-semibold" id="modal-no-referensi">-</p>
               </div>
@@ -516,10 +520,7 @@ foreach ($transfer_data as $row) {
                 <label class="form-label text-muted">Status Pemeriksaan</label>
                 <p id="modal-status-pemeriksaan">-</p>
               </div>
-              <div class="col-md-6">
-                <label class="form-label text-muted">Tanggal Pemeriksaan</label>
-                <p class="fw-semibold" id="modal-tgl-pemeriksaan">-</p>
-              </div>
+              
               <div class="col-12">
                 <label class="form-label text-muted">Bukti Transfer</label>
                 <div id="modal-img-container" class="text-center">
@@ -528,9 +529,7 @@ foreach ($transfer_data as $row) {
               </div>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-          </div>
+         
         </div>
       </div>
     </div>
@@ -596,17 +595,18 @@ foreach ($transfer_data as $row) {
         }
         
         // Set image
-        const imgContainer = document.getElementById('modal-img-container');
-        if (imgSs && imgSs !== '') {
-          imgContainer.innerHTML = `
-            <a href="../images/${imgSs}" target="_blank" class="d-block">
-              <img src="../images/${imgSs}" class="img-fluid rounded border" style="max-height: 400px;" alt="Bukti Transfer">
-            </a>
-            <p class="mt-2 text-muted small">Klik gambar untuk melihat ukuran penuh</p>
-          `;
-        } else {
-          imgContainer.innerHTML = '<p class="text-muted">Tidak ada bukti transfer</p>';
-        }
+        // Set image
+const imgContainer = document.getElementById('modal-img-container');
+if (imgSs && imgSs !== '') {
+  imgContainer.innerHTML = `
+    <a href="../struk/images/${imgSs}" target="_blank" class="d-block">
+      <img src="../struk/images/${imgSs}" class="img-fluid rounded border" style="max-height: 400px;" alt="Bukti Transfer">
+    </a>
+    <p class="mt-2 text-muted small">Klik gambar untuk melihat ukuran penuh</p>
+  `;
+} else {
+  imgContainer.innerHTML = '<p class="text-muted">Tidak ada bukti transfer</p>';
+}
       }
     </script>
   </body>
