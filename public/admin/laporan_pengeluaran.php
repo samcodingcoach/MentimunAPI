@@ -324,13 +324,11 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
           </div>
 
           <!-- Section 1: Pengeluaran Pembelian Bahan (PO) -->
-          <div class="card mb-4">
-            <div class="card-header">
-              <h5><?php echo count($rincianpo) > 0 ? $rincianpo[0]['nama'] : "Tidak ada data pengeluaran pembelian bahan"; ?></h5>
-            </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-bordered table-hover">
+          <div class="mb-4">
+            <?php echo count($rincianpo) > 0 ? $rincianpo[0]['nama'] : "Tidak ada data pengeluaran pembelian bahan"; ?>
+            <div>
+              <div>
+                <table class="table table-hover">
                   <thead class="table-dark">
                     <tr>
                       <th class="text-center" width="5%">NO</th>
@@ -378,13 +376,11 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
           </div>
 
           <!-- Section 2: Pengeluaran Produk -->
-          <div class="card mb-4">
-            <div class="card-header">
-              <h5><?php echo count($rincianbahan) > 0 ? $rincianbahan[0]['nama'] : "Tidak ada data rincian pembelian bahan"; ?></h5>
-            </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-bordered table-hover">
+          <div class="mb-4">
+            <?php echo count($rincianbahan) > 0 ? $rincianbahan[0]['nama'] : "Tidak ada data rincian pembelian bahan"; ?>
+            <div>
+              <div>
+                <table class="table table-hover">
                   <thead class="table-dark">
                     <tr>
                       <th class="text-center" width="5%">NO</th>
@@ -424,13 +420,11 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
           </div>
 
           <!-- Section 3: Penjualan Bruto -->
-          <div class="card mb-4">
-            <div class="card-header">
-              <h5><?php echo count($rincianpenjualanb) > 0 ? $rincianpenjualanb[0]['nama'] : "Tidak ada data penjualan"; ?></h5>
-            </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-bordered table-hover">
+          <div class="mb-4">
+            <?php echo count($rincianpenjualanb) > 0 ? $rincianpenjualanb[0]['nama'] : "Tidak ada data penjualan"; ?>
+            <div>
+              <div>
+                <table class="table table-hover">
                   <thead class="table-dark">
                     <tr>
                       <th class="text-center" width="5%">NO</th>
@@ -470,13 +464,11 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
           </div>
 
           <!-- Section 4: Penjualan Neto -->
-          <div class="card mb-4">
-            <div class="card-header">
-              <h5><?php echo count($rincianpenjualan2) > 0 ? $rincianpenjualan2[0]['nama'] : "Tidak ada data penjualan"; ?></h5>
-            </div>
-            <div class="card-body">
-              <div class="table-responsive">
-                <table class="table table-bordered table-hover">
+          <div class="mb-4">
+            <?php echo count($rincianpenjualan2) > 0 ? $rincianpenjualan2[0]['nama'] : "Tidak ada data penjualan"; ?>
+            <div>
+              <div >
+                <table class="table table-hover">
                   <thead class="table-dark">
                     <tr>
                       <th class="text-center" width="5%">NO</th>
