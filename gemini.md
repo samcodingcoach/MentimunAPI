@@ -15,6 +15,14 @@ id_kategori int(11) NO
 nama_bahan varchar(30) YES
 kode_bahan varchar(10) YES
 
+DESCRIBE bahan_biaya
+id_bahan_biaya int(11) NO PRI auto_increment
+id_bahan int(11) YES 0
+satuan varchar(15) YES
+harga_satuan double YES 0
+tanggal date YES current_timestamp()
+id_user int(11) YES
+
 DESCRIBE bahan_request;
 id_request int(11) NO PRI auto_increment
 kode_request varchar(50) YES UNI
