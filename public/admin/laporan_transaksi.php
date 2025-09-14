@@ -19,6 +19,14 @@ $tanggal_awal = isset($_GET['tanggal_awal']) ? $_GET['tanggal_awal'] : date('Y-m
 $tanggal_akhir = isset($_GET['tanggal_akhir']) ? $_GET['tanggal_akhir'] : date('Y-m-d');
 $selected_kasir = isset($_GET['kasir']) ? $_GET['kasir'] : '';
 
+// Get parameters for Semua tab
+$semua_tanggal1 = isset($_GET['tanggal1']) ? $_GET['tanggal1'] : date('Y-m-d');
+$semua_tanggal2 = isset($_GET['tanggal2']) ? $_GET['tanggal2'] : date('Y-m-d');
+$semua_kategori = isset($_GET['kategori']) ? $_GET['kategori'] : 'Semua';
+$semua_page = isset($_GET['semua_page']) ? (int)$_GET['semua_page'] : 1;
+$semua_limit = 15;
+$semua_offset = ($semua_page - 1) * $semua_limit;
+
 // Get active tab
 $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'tunai';
 
@@ -180,10 +188,77 @@ if (!empty($selected_kasir)) {
     $kasir_result = $kasir_stmt->get_result();
     $kasir_data = $kasir_result->fetch_all(MYSQLI_ASSOC);
     
-    // Calculate total for Per Kasir
+// Calculate total for Per Kasir
     foreach ($kasir_data as $row) {
         $total_kasir += $row['grand_total'];
     }
+}
+
+// Query for Semua tab
+$semua_where = "DATE(proses_pembayaran.tanggal_payment) BETWEEN ? AND ?";
+$semua_params = [$semua_tanggal1, $semua_tanggal2];
+$semua_types = "ss";
+
+if ($semua_kategori !== 'Semua') {
+    $semua_where .= " AND metode_pembayaran.kategori = ?";
+    $semua_params[] = $semua_kategori;
+    $semua_types .= "s";
+}
+
+// Main query for Semua tab
+$semua_sql = "
+    SELECT
+        proses_pembayaran.kode_payment AS kode,
+        proses_pembayaran.id_tagihan,
+        proses_pembayaran.jumlah_uang AS total,
+        metode_pembayaran.kategori
+    FROM
+        proses_pembayaran
+    INNER JOIN
+        metode_pembayaran ON proses_pembayaran.id_bayar = metode_pembayaran.id_bayar
+    WHERE
+        $semua_where
+    ORDER BY proses_pembayaran.tanggal_payment DESC
+    LIMIT ? OFFSET ?
+";
+
+$semua_params[] = $semua_limit;
+$semua_params[] = $semua_offset;
+$semua_types .= "ii";
+
+$semua_stmt = $conn->prepare($semua_sql);
+$semua_stmt->bind_param($semua_types, ...$semua_params);
+$semua_stmt->execute();
+$semua_result = $semua_stmt->get_result();
+$semua_data = $semua_result->fetch_all(MYSQLI_ASSOC);
+
+// Count query for pagination
+$semua_count_sql = "
+    SELECT COUNT(*) as total
+    FROM
+        proses_pembayaran
+    INNER JOIN
+        metode_pembayaran ON proses_pembayaran.id_bayar = metode_pembayaran.id_bayar
+    WHERE
+        $semua_where
+";
+
+$count_params = array_slice($semua_params, 0, -2); // Remove limit and offset
+$count_types = substr($semua_types, 0, -2);
+
+$semua_count_stmt = $conn->prepare($semua_count_sql);
+if (!empty($count_params)) {
+    $semua_count_stmt->bind_param($count_types, ...$count_params);
+}
+$semua_count_stmt->execute();
+$semua_count_result = $semua_count_stmt->get_result();
+$semua_total_records = $semua_count_result->fetch_assoc()['total'];
+$semua_total_pages = ceil($semua_total_records / $semua_limit);
+
+// Calculate total amount for Semua
+$total_semua = 0;
+foreach ($semua_data as $row) {
+    $total_semua += $row['total'];
 }
 ?>
 
@@ -760,10 +835,167 @@ if (!empty($selected_kasir)) {
 
             <!-- Semua Tab -->
             <div class="tab-pane fade" id="semua" role="tabpanel">
-              <div class="text-center py-5">
-                <i class="bi bi-list-ul display-1 text-muted"></i>
-                <p class="mt-3">Tab Semua akan segera tersedia</p>
+              <!-- Filter for Semua -->
+              <div class="mb-4 p-3 bg-light rounded">
+                <form method="GET" class="row g-3 align-items-end">
+                  <input type="hidden" name="tab" value="semua">
+                  <input type="hidden" name="semua_page" value="1">
+                  <div class="col-md-3">
+                    <label for="tanggal1" class="form-label">Tanggal Awal</label>
+                    <input type="date" class="form-control" id="tanggal1" name="tanggal1" 
+                           value="<?php echo htmlspecialchars($semua_tanggal1); ?>">
+                  </div>
+                  <div class="col-md-3">
+                    <label for="tanggal2" class="form-label">Tanggal Akhir</label>
+                    <input type="date" class="form-control" id="tanggal2" name="tanggal2" 
+                           value="<?php echo htmlspecialchars($semua_tanggal2); ?>">
+                  </div>
+                  <div class="col-md-3">
+                    <label for="kategori" class="form-label">Kategori</label>
+                    <select class="form-select" id="kategori" name="kategori">
+                      <option value="Semua" <?php echo $semua_kategori == 'Semua' ? 'selected' : ''; ?>>Semua</option>
+                      <option value="Tunai" <?php echo $semua_kategori == 'Tunai' ? 'selected' : ''; ?>>Tunai</option>
+                      <option value="Transfer" <?php echo $semua_kategori == 'Transfer' ? 'selected' : ''; ?>>Transfer</option>
+                      <option value="QRIS" <?php echo $semua_kategori == 'QRIS' ? 'selected' : ''; ?>>QRIS</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary">
+                      <i class="bi bi-search"></i> Tampilkan
+                    </button>
+                  </div>
+                </form>
               </div>
+              
+              <!-- Table for Semua -->
+              <div class="table-responsive shadow-sm">
+                <table class="table table-hover align-middle">
+                  <thead class="table-dark">
+                    <tr>
+                      <th class="text-center">No</th>
+                      <th>Kode</th>
+                      <th>ID</th>
+                      <th>Kategori</th>
+                      <th class="text-end">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php if (empty($semua_data)): ?>
+                    <tr>
+                      <td colspan="5" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
+                        <span class="fs-5">Tidak ada data untuk filter yang dipilih</span>
+                      </td>
+                    </tr>
+                    <?php else: ?>
+                    <?php 
+                    $no = $semua_offset + 1;
+                    foreach ($semua_data as $row): 
+                    ?>
+                    <tr>
+                      <td class="text-center fw-bold"><?php echo $no++; ?></td>
+                      <td class="fw-semibold"><?php echo htmlspecialchars($row['kode']); ?></td>
+                      <td><?php echo htmlspecialchars($row['id_tagihan']); ?></td>
+                      <td>
+                        <?php 
+                        $badge_class = '';
+                        switch($row['kategori']) {
+                            case 'Tunai':
+                                $badge_class = 'bg-success';
+                                break;
+                            case 'Transfer':
+                                $badge_class = 'bg-info';
+                                break;
+                            case 'QRIS':
+                                $badge_class = 'bg-warning text-dark';
+                                break;
+                            default:
+                                $badge_class = 'bg-secondary';
+                        }
+                        ?>
+                        <span class="badge <?php echo $badge_class; ?>"><?php echo htmlspecialchars($row['kategori']); ?></span>
+                      </td>
+                      <td class="text-end fw-bold">Rp <?php echo number_format($row['total'], 0, ',', '.'); ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Pagination -->
+              <?php if ($semua_total_pages > 1): ?>
+              <nav aria-label="Page navigation" class="mt-3">
+                <ul class="pagination justify-content-center">
+                  <!-- Previous -->
+                  <li class="page-item <?php echo $semua_page <= 1 ? 'disabled' : ''; ?>">
+                    <a class="page-link" href="?tab=semua&tanggal1=<?php echo $semua_tanggal1; ?>&tanggal2=<?php echo $semua_tanggal2; ?>&kategori=<?php echo $semua_kategori; ?>&semua_page=<?php echo $semua_page - 1; ?>">
+                      Previous
+                    </a>
+                  </li>
+                  
+                  <!-- Page Numbers -->
+                  <?php
+                  $start_page = max(1, $semua_page - 2);
+                  $end_page = min($semua_total_pages, $semua_page + 2);
+                  
+                  if ($start_page > 1): ?>
+                  <li class="page-item">
+                    <a class="page-link" href="?tab=semua&tanggal1=<?php echo $semua_tanggal1; ?>&tanggal2=<?php echo $semua_tanggal2; ?>&kategori=<?php echo $semua_kategori; ?>&semua_page=1">1</a>
+                  </li>
+                  <?php if ($start_page > 2): ?>
+                  <li class="page-item disabled"><span class="page-link">...</span></li>
+                  <?php endif; ?>
+                  <?php endif; ?>
+                  
+                  <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                  <li class="page-item <?php echo $i == $semua_page ? 'active' : ''; ?>">
+                    <a class="page-link" href="?tab=semua&tanggal1=<?php echo $semua_tanggal1; ?>&tanggal2=<?php echo $semua_tanggal2; ?>&kategori=<?php echo $semua_kategori; ?>&semua_page=<?php echo $i; ?>">
+                      <?php echo $i; ?>
+                    </a>
+                  </li>
+                  <?php endfor; ?>
+                  
+                  <?php if ($end_page < $semua_total_pages): ?>
+                  <?php if ($end_page < $semua_total_pages - 1): ?>
+                  <li class="page-item disabled"><span class="page-link">...</span></li>
+                  <?php endif; ?>
+                  <li class="page-item">
+                    <a class="page-link" href="?tab=semua&tanggal1=<?php echo $semua_tanggal1; ?>&tanggal2=<?php echo $semua_tanggal2; ?>&kategori=<?php echo $semua_kategori; ?>&semua_page=<?php echo $semua_total_pages; ?>">
+                      <?php echo $semua_total_pages; ?>
+                    </a>
+                  </li>
+                  <?php endif; ?>
+                  
+                  <!-- Next -->
+                  <li class="page-item <?php echo $semua_page >= $semua_total_pages ? 'disabled' : ''; ?>">
+                    <a class="page-link" href="?tab=semua&tanggal1=<?php echo $semua_tanggal1; ?>&tanggal2=<?php echo $semua_tanggal2; ?>&kategori=<?php echo $semua_kategori; ?>&semua_page=<?php echo $semua_page + 1; ?>">
+                      Next
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+              <?php endif; ?>
+              
+              <!-- Total Summary -->
+              <?php if (!empty($semua_data)): ?>
+              <div class="mt-3 p-3 bg-light rounded border">
+                <div class="row align-items-center">
+                  <div class="col-md-8">
+                    <span class="text-muted">
+                      Menampilkan <?php echo $semua_offset + 1; ?> - <?php echo min($semua_offset + $semua_limit, $semua_total_records); ?> 
+                      dari <?php echo $semua_total_records; ?> transaksi
+                      <?php if ($semua_kategori !== 'Semua'): ?>
+                        (Filter: <?php echo $semua_kategori; ?>)
+                      <?php endif; ?>
+                    </span>
+                  </div>
+                  <div class="col-md-4 text-end">
+                    <span class="fw-bold fs-4 text-success">Halaman Total: Rp <?php echo number_format($total_semua, 0, ',', '.'); ?></span>
+                  </div>
+                </div>
+              </div>
+              <?php endif; ?>
             </div>
           </div>
         </main>
@@ -890,6 +1122,29 @@ if (!empty($selected_kasir)) {
             dateFormat: "Y-m-d",
             maxDate: "today",
             defaultDate: "<?php echo $tanggal_akhir; ?>",
+            locale: {
+              firstDayOfWeek: 1
+            }
+          });
+        }
+        
+        // Initialize date pickers for Semua tab
+        if (document.getElementById('tanggal1')) {
+          flatpickr("#tanggal1", {
+            dateFormat: "Y-m-d",
+            maxDate: "today",
+            defaultDate: "<?php echo $semua_tanggal1; ?>",
+            locale: {
+              firstDayOfWeek: 1
+            }
+          });
+        }
+        
+        if (document.getElementById('tanggal2')) {
+          flatpickr("#tanggal2", {
+            dateFormat: "Y-m-d",
+            maxDate: "today",
+            defaultDate: "<?php echo $semua_tanggal2; ?>",
             locale: {
               firstDayOfWeek: 1
             }
