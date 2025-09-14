@@ -282,7 +282,7 @@ $data2 = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                 <label for="tgl" class="form-label">Pilih Tanggal</label>
                 <input type="date" class="form-control" id="tgl" name="tgl" 
                        value="<?php echo htmlspecialchars($tgl); ?>" required>
-                <small class="form-text text-muted">Laporan akan menampilkan 8 hari mundur dari tanggal yang dipilih</small>
+                
               </div>
               <div class="col-md-4">
                 <button type="submit" class="btn btn-primary">
@@ -293,13 +293,12 @@ $data2 = mysqli_fetch_all($result2, MYSQLI_ASSOC);
           </div>
 
           <!-- Ringkasan Kuantitas -->
-          <div class="card mb-5">
-            <div class="card-header bg-primary text-white">
-              <h3 class="text-center mb-0">RINGKASAN KUANTITAS</h3>
-              <h5 class="text-center mb-0"><?php echo date("d F Y", strtotime($tgl)); ?></h5>
+          <div class="mb-5">
+            <div>
+               <h3 class="text-left mb-0">RINGKASAN KUANTITAS</h3>
             </div>
-            <div class="card-body">
-              <div class="table-responsive">
+            <div>
+              <div>
                 <table class="table table-bordered table-sm text-center">
                   <thead class="table-light">
                     <tr>
@@ -335,18 +334,18 @@ $data2 = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                     <?php endif; ?>
                   </tbody>
                 </table>
-                <small class="text-muted"><i>A = Stok Awal, B = Terjual</i></small>
+                <small class="text-muted">A = Stok Awal, B = Terjual</small>
               </div>
             </div>
           </div>
 
           <!-- Pertumbuhan Penjualan -->
-          <div class="card mb-4">
-            <div class="card-header bg-success text-white">
-              <h4 class="text-center mb-0">PERTUMBUHAN PENJUALAN</h4>
+          <div>
+            <div>
+              <h4 class="text-left mb-0">PERTUMBUHAN PENJUALAN</h4>
             </div>
-            <div class="card-body">
-              <div class="table-responsive">
+            <div>
+              <div>
                 <table class="table table-bordered table-sm text-center">
                   <thead class="table-light">
                     <tr>
