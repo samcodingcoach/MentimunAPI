@@ -1,22 +1,35 @@
-pada tab Semua
-tampilkan data berikut dari query
+pada konsumen.php buat CRUD untuk Konsumen
+berikut query untuk menampilkan table
 SELECT
-proses_pembayaran.kode_payment AS kode,
-proses_pembayaran.id_tagihan,
-proses_pembayaran.jumlah_uang AS total,
-metode_pembayaran.kategori
+konsumen.id_konsumen,
+konsumen.nama_konsumen,
+konsumen.no_hp,
+konsumen.alamat,
+konsumen.email,
+konsumen.aktif,
+sum(pesanan.total_cart) as total_cart
 FROM
-proses_pembayaran
+konsumen
 INNER JOIN
-metode_pembayaran ON proses_pembayaran.id_bayar = metode_pembayaran.id_bayar
-WHERE
-DATE(proses_pembayaran.tanggal_payment) BETWEEN '?1' AND '?2'
+pesanan
+ON
+konsumen.id_konsumen = pesanan.id_konsumen
+where pesanan.status_checkout = 1
+GROUP BY pesanan.id_konsumen,pesanan.status_checkout
 
-kolomnya
-No, Kode, ID, Kategori, Total
+    ORDER BY nama_konsumen ASC
 
-?1=datetimepicker1 dan ?2=datetimepicker2
-YYYY-MM-DD
+tampilkan
+No, Nama Konsumen, HP, Status, Action
+1,XXX,08x,1 = Aktif 0 Nonaktif, Edit
+ketika nama konsumen di klik muncul modal untuk tampilan lengkap datanya
+ditambah Alamat, dan Email.
 
-bisa di filter Semua, Tunai, Transfer,QRIS
-paging per 15
+dan untuk insert dan edit
+berikut describenya
+id_konsumen int(11) NO PRI auto_increment
+nama_konsumen varchar(50) YES
+no_hp varchar(15) YES
+alamat text YES
+email varchar(50) YES
+aktif varchar(1) YES 1
