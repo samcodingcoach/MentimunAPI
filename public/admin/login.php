@@ -4,10 +4,17 @@ include '../../config/koneksi.php';
 include '../../config/encryption.php';
 
 $error = '';
+$remember_email = '';
+
+// Check if remember_me cookie is set
+if(isset($_COOKIE['remember_me'])) {
+    $remember_email = $_COOKIE['remember_me'];
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
+    $remember_me = isset($_POST['remember_me']);
 
     if (empty($email) || empty($password)) {
         $error = "Email and password are required.";
@@ -37,6 +44,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['nama_lengkap'] = $row['nama_lengkap'];
                 $_SESSION['jabatan'] = $row['jabatan'];
                 $_SESSION['nama_aplikasi'] = $app_name;
+
+                // Set remember me cookie if checked
+                if ($remember_me) {
+                    setcookie('remember_me', $email, time() + (86400 * 30), "/"); // 30 days
+                } else {
+                    // Unset cookie if not checked
+                    if(isset($_COOKIE['remember_me'])) {
+                        setcookie('remember_me', '', time() - 3600, "/");
+                    }
+                }
+
                 header("location: index.php");
                 exit;
             } else {
@@ -72,12 +90,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
               ?>
               <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                 <div class="form-floating mb-3">
-                  <input class="form-control" id="inputEmail" name="email" type="email" placeholder="name@example.com" required />
+                  <input class="form-control" id="inputEmail" name="email" type="email" placeholder="name@example.com" value="<?php echo htmlspecialchars($remember_email); ?>" required />
                   <label for="inputEmail">Email address</label>
                 </div>
                 <div class="form-floating mb-3">
                   <input class="form-control" id="inputPassword" name="password" type="password" placeholder="Password" required />
                   <label for="inputPassword">Password</label>
+                </div>
+                <div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" name="remember_me" id="rememberMe">
+                  <label class="form-check-label" for="rememberMe">
+                    Remember Me
+                  </label>
                 </div>
                 <div class="d-flex align-items-center justify-content-end mt-4 mb-0">
                   <button class="btn btn-primary" type="submit">Login</button>
