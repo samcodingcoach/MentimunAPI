@@ -76,3 +76,43 @@ AND '?' <- tanggal akhir
 AND state_open_closing.id_user = '?';
 
 pastikan dropdownlist pilih kasir valuenya id_user bukana nama_lengkap
+
+pada kolom tanggal ketika di klik membuka modal untuk detail per kasir
+dengan data query sbg berikut
+SELECT
+proses_pembayaran.kode_payment,
+DATE_FORMAT(proses_pembayaran.tanggal_payment, '%d-%m-%Y') AS tanggal,
+DATE_FORMAT(proses_pembayaran.tanggal_payment, '%H:%i') AS jam,
+CASE
+WHEN metode_pembayaran.kategori = 'Transfer' THEN
+CASE
+WHEN proses_edc.transfer_or_edc = 0 THEN 'Transfer via Bank'
+WHEN proses_edc.transfer_or_edc = 1 THEN 'Transfer via EDC'
+ELSE 'Transfer'
+END
+ELSE metode_pembayaran.kategori
+END AS kategori,
+CASE
+when proses_pembayaran.model_diskon = 'PERSENTASE' THEN CONCAT('-',proses_pembayaran.nilai_persen,'%')
+when proses_pembayaran.model_diskon = 'NOMINAL' THEN CONCAT('-Rp ',FORMAT(proses_pembayaran.nilai_nominal,0))
+END as diskon,
+COALESCE(total_diskon,0) as total_diskon,
+jumlah_uang AS total_bersih,
+jumlah_uang + COALESCE(proses_pembayaran.total_diskon,0) as total_kotor
+
+FROM
+proses_pembayaran
+INNER JOIN
+metode_pembayaran ON proses_pembayaran.id_bayar = metode_pembayaran.id_bayar
+LEFT JOIN
+proses_edc ON proses_pembayaran.kode_payment = proses_edc.kode_payment
+
+    WHERE proses_pembayaran.`status` = 1 and DATE(tanggal_payment) BETWEEN '?1' AND '?2' and id_user = '?3'
+
+ORDER BY
+proses_pembayaran.id_checkout ASC
+
+keterangan ?1 tanggal awal, ?2 tanggal akhir ?3 id_user
+format tanggal YYYY-MM-DD
+
+buat modal minimalis , responsive, paging sesuai dengan pattern yang ada

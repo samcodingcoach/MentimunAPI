@@ -716,7 +716,13 @@ if (!empty($selected_kasir)) {
                     ?>
                     <tr>
                       <td class="text-center fw-bold"><?php echo $no++; ?></td>
-                      <td class="text-center"><?php echo htmlspecialchars($row['tanggal_open']); ?></td>
+                      <td class="text-center">
+                        <a href="#" class="text-decoration-none" onclick="showKasirDetail('<?php echo $tanggal_awal; ?>', '<?php echo $tanggal_akhir; ?>', '<?php echo $row['id_user']; ?>', '<?php echo htmlspecialchars($row['kasir']); ?>')" data-bs-toggle="modal" data-bs-target="#kasirDetailModal">
+                          <span class="text-primary" style="cursor: pointer;">
+                            <i class="bi bi-calendar3"></i> <?php echo htmlspecialchars($row['tanggal_open']); ?>
+                          </span>
+                        </a>
+                      </td>
                       <td><?php echo htmlspecialchars($row['kasir']); ?></td>
                       <td class="text-end">Rp <?php echo number_format($row['cash_awal'], 0, ',', '.'); ?></td>
                       <td class="text-end">Rp <?php echo number_format($row['qris'], 0, ',', '.'); ?></td>
@@ -764,6 +770,52 @@ if (!empty($selected_kasir)) {
       </div>
     </div>
 
+    <!-- Kasir Detail Modal -->
+    <div class="modal fade" id="kasirDetailModal" tabindex="-1">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Detail Transaksi Kasir - <span id="kasir-name"></span></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table class="table table-hover table-sm">
+                <thead class="table-dark">
+                  <tr>
+                    <th>No</th>
+                    <th>Kode Payment</th>
+                    <th>Tanggal</th>
+                    <th>Jam</th>
+                    <th>Kategori</th>
+                    <th>Diskon</th>
+                    <th class="text-end">Total Diskon</th>
+                    <th class="text-end">Total Kotor</th>
+                    <th class="text-end">Total Bersih</th>
+                  </tr>
+                </thead>
+                <tbody id="kasir-detail-tbody">
+                  <tr>
+                    <td colspan="9" class="text-center">
+                      <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Pagination -->
+            <nav aria-label="Page navigation" class="mt-3">
+              <ul class="pagination justify-content-center" id="kasir-detail-pagination">
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <!-- Transfer Detail Modal -->
     <div class="modal fade" id="transferDetailModal" tabindex="-1">
       <div class="modal-dialog modal-lg">
@@ -915,6 +967,178 @@ if (!empty($selected_kasir)) {
         });
       }); // End of DOMContentLoaded
 
+      // Global variables for kasir detail modal
+      let currentKasirPage = 1;
+      let currentKasirData = {
+        tanggal_awal: '',
+        tanggal_akhir: '',
+        id_user: '',
+        kasir_name: ''
+      };
+      
+      // Function to show kasir detail modal
+      function showKasirDetail(tanggalAwal, tanggalAkhir, idUser, kasirName) {
+        currentKasirData = {
+          tanggal_awal: tanggalAwal,
+          tanggal_akhir: tanggalAkhir,
+          id_user: idUser,
+          kasir_name: kasirName
+        };
+        currentKasirPage = 1;
+        
+        // Set kasir name in modal title
+        document.getElementById('kasir-name').textContent = kasirName;
+        
+        // Load data
+        loadKasirDetailData();
+      }
+      
+      // Function to load kasir detail data
+      function loadKasirDetailData() {
+        const tbody = document.getElementById('kasir-detail-tbody');
+        const pagination = document.getElementById('kasir-detail-pagination');
+        
+        // Show loading
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" class="text-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </td>
+          </tr>
+        `;
+        
+        // Fetch data
+        fetch(`get_kasir_detail.php?tanggal_awal=${currentKasirData.tanggal_awal}&tanggal_akhir=${currentKasirData.tanggal_akhir}&id_user=${currentKasirData.id_user}&page=${currentKasirPage}`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(result => {
+            // Clear tbody
+            tbody.innerHTML = '';
+            
+            if (result.data && result.data.length > 0) {
+              // Populate table
+              result.data.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                  <td class="text-center">${((currentKasirPage - 1) * 10) + index + 1}</td>
+                  <td>${item.kode_payment}</td>
+                  <td>${item.tanggal}</td>
+                  <td class="text-center">${item.jam}</td>
+                  <td>${item.kategori}</td>
+                  <td class="text-center">${item.diskon || '-'}</td>
+                  <td class="text-end">Rp ${item.total_diskon_formatted}</td>
+                  <td class="text-end">Rp ${item.total_kotor_formatted}</td>
+                  <td class="text-end fw-bold">Rp ${item.total_bersih_formatted}</td>
+                `;
+                tbody.appendChild(row);
+              });
+              
+              // Update pagination
+              updateKasirPagination(result.pagination);
+            } else {
+              tbody.innerHTML = `
+                <tr>
+                  <td colspan="9" class="text-center text-muted py-4">
+                    <i class="bi bi-inbox display-4 d-block mb-2"></i>
+                    Tidak ada data transaksi
+                  </td>
+                </tr>
+              `;
+              pagination.innerHTML = '';
+            }
+          })
+          .catch(error => {
+            console.error('Error loading kasir detail:', error);
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="9" class="text-center text-danger">
+                  <i class="bi bi-exclamation-triangle display-4 d-block mb-2"></i>
+                  Error loading data: ${error.message}
+                </td>
+              </tr>
+            `;
+          });
+      }
+      
+      // Function to update pagination
+      function updateKasirPagination(paginationData) {
+        const pagination = document.getElementById('kasir-detail-pagination');
+        pagination.innerHTML = '';
+        
+        if (paginationData.total_pages <= 1) {
+          return;
+        }
+        
+        // Previous button
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${paginationData.current_page === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" onclick="goToKasirPage(${paginationData.current_page - 1}); return false;">Previous</a>`;
+        pagination.appendChild(prevLi);
+        
+        // Page numbers
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, paginationData.current_page - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(paginationData.total_pages, startPage + maxVisiblePages - 1);
+        
+        if (endPage - startPage < maxVisiblePages - 1) {
+          startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+        
+        if (startPage > 1) {
+          const firstLi = document.createElement('li');
+          firstLi.className = 'page-item';
+          firstLi.innerHTML = `<a class="page-link" href="#" onclick="goToKasirPage(1); return false;">1</a>`;
+          pagination.appendChild(firstLi);
+          
+          if (startPage > 2) {
+            const dotsLi = document.createElement('li');
+            dotsLi.className = 'page-item disabled';
+            dotsLi.innerHTML = `<span class="page-link">...</span>`;
+            pagination.appendChild(dotsLi);
+          }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+          const pageLi = document.createElement('li');
+          pageLi.className = `page-item ${i === paginationData.current_page ? 'active' : ''}`;
+          pageLi.innerHTML = `<a class="page-link" href="#" onclick="goToKasirPage(${i}); return false;">${i}</a>`;
+          pagination.appendChild(pageLi);
+        }
+        
+        if (endPage < paginationData.total_pages) {
+          if (endPage < paginationData.total_pages - 1) {
+            const dotsLi = document.createElement('li');
+            dotsLi.className = 'page-item disabled';
+            dotsLi.innerHTML = `<span class="page-link">...</span>`;
+            pagination.appendChild(dotsLi);
+          }
+          
+          const lastLi = document.createElement('li');
+          lastLi.className = 'page-item';
+          lastLi.innerHTML = `<a class="page-link" href="#" onclick="goToKasirPage(${paginationData.total_pages}); return false;">${paginationData.total_pages}</a>`;
+          pagination.appendChild(lastLi);
+        }
+        
+        // Next button
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${paginationData.current_page === paginationData.total_pages ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" onclick="goToKasirPage(${paginationData.current_page + 1}); return false;">Next</a>`;
+        pagination.appendChild(nextLi);
+      }
+      
+      // Function to go to specific page
+      function goToKasirPage(page) {
+        if (page < 1) return;
+        currentKasirPage = page;
+        loadKasirDetailData();
+      }
+      
       // Function to show transfer detail modal
       function showTransferDetail(tanggalTransfer, noReferensi, imgSs, statusPemeriksaan, tglPemeriksaan) {
         // Format tanggal transfer
