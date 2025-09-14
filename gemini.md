@@ -45,3 +45,16 @@ nomor_bukti_transaksi varchar(50) YES
 stok_status varchar(1) YES 0
 id_bahan_biaya int(11) YES
 perubahan_biaya varchar(1) YES 0
+
+pada daftar table diatas saya ingin dibuatkan transaksi pembelian/request (pembelian.php)
+kode_request pakai generate number PO-YYMMDD-001
+flow aplikasi pilih bahan dengan dropdownlist searchable,
+pilih vendor dengan dropdownlist searchable, pada vendor dropdownlist menampilkan juga Kode Vendor, Nama Vendor dan Keterangan.
+muncul pilihan satuan yang isinya diambil dari bahan_biaya berdasarkan id_bahan , muncul secara distinct
+harga_est diambil dari table bahan_biaya.harga_satuan berdasarkan id_bahan dan satuan.
+input jumlah_request
+subtotal mengkalikan harga_est \* jumlah_request
+ada pilihan Invoice / Bayar Langsung, jika Invoice isDone 0, jika Bayar Langsung isDone 1
+isDone = 0, (default, tidak perlu di ubah)
+nomor_bukti_transaksi optional isi nanti.
+stok_status tidak ditampilkan
