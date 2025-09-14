@@ -318,9 +318,11 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
           </div>
 
           <!-- Report Header -->
-          <div class="text-center mb-4">
-            <h3>RINGKASAN PENGELUARAN VS PENJUALAN</h3>
-            <h4><?php echo date("d F Y", strtotime($tgl_start)) . ' s.d ' . date("d F Y", strtotime($tgl_end)); ?></h4>
+          <div class="p-3 mb-4 bg-light rounded-3">
+            <div class="container-fluid py-3">
+              <h3 class="display-5 fw-bold">RINGKASAN PENGELUARAN VS PENJUALAN</h3>
+              <p class="fs-4"><?php echo date("d F Y", strtotime($tgl_start)) . ' s.d ' . date("d F Y", strtotime($tgl_end)); ?></p>
+            </div>
           </div>
 
           <!-- Tabs Navigation -->
@@ -343,7 +345,7 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
           </ul>
 
           <!-- Tabs Content -->
-          <div class="tab-content" id="reportTabsContent">
+          <div class="tab-content mt-3" id="reportTabsContent">
             <!-- Section 1: Pengeluaran Pembelian Bahan (PO) -->
             <div class="tab-pane fade show active" id="section1" role="tabpanel" aria-labelledby="section1-tab">
               <div class="mb-4">
