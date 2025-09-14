@@ -14,6 +14,11 @@ $error = '';
 // Get selected date
 $selected_date = isset($_GET['tanggal']) ? $_GET['tanggal'] : date('Y-m-d');
 
+// Get date range for Per Kasir tab
+$tanggal_awal = isset($_GET['tanggal_awal']) ? $_GET['tanggal_awal'] : date('Y-m-d');
+$tanggal_akhir = isset($_GET['tanggal_akhir']) ? $_GET['tanggal_akhir'] : date('Y-m-d');
+$selected_kasir = isset($_GET['kasir']) ? $_GET['kasir'] : '';
+
 // Get active tab
 $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'tunai';
 
@@ -120,6 +125,66 @@ foreach ($qris_data as $row) {
     $amount = str_replace(',', '', $row['nominal']);
     $total_qris += (int)$amount;
 }
+
+// Query to get list of all active cashiers - simplified as per gemini.md line 44
+$kasir_list_sql = "
+    SELECT
+        pegawai.id_user,
+        pegawai.nama_lengkap
+    FROM
+        pegawai
+    WHERE 
+        jabatan = 'Kasir' AND 
+        aktif = 1 
+    ORDER BY 
+        nama_lengkap ASC
+";
+
+$kasir_list_stmt = $conn->prepare($kasir_list_sql);
+$kasir_list_stmt->execute();
+$kasir_list_result = $kasir_list_stmt->get_result();
+$kasir_list = $kasir_list_result->fetch_all(MYSQLI_ASSOC);
+
+// Query for Per Kasir data
+$kasir_data = [];
+$total_kasir = 0;
+if (!empty($selected_kasir)) {
+    $kasir_sql = "
+        SELECT 
+            state_open_closing.id_open, 
+            DATE_FORMAT(tanggal_open, '%d/%m/%Y') as tanggal_open,
+            (state_open_closing.first_cash_drawer - state_open_closing.manual_total_cash) AS cash_awal,
+            state_open_closing.total_qris AS qris,
+            state_open_closing.manual_total_bank AS transfer,
+            state_open_closing.manual_total_cash AS cash,
+            (state_open_closing.total_qris + state_open_closing.manual_total_bank + state_open_closing.manual_total_cash) + 
+            (state_open_closing.first_cash_drawer - state_open_closing.manual_total_cash) AS grand_total,
+            COALESCE(SUM(proses_pembayaran.total_diskon), 0) AS total_diskon,
+            state_open_closing.id_user,
+            pegawai.nama_lengkap AS kasir
+        FROM
+            state_open_closing
+        LEFT JOIN proses_pembayaran ON state_open_closing.id_user = proses_pembayaran.id_user
+            AND DATE(tanggal_open) BETWEEN ? AND ?
+        INNER JOIN pegawai ON state_open_closing.id_user = pegawai.id_user
+        WHERE
+            DATE(tanggal_open) BETWEEN ? AND ?
+            AND state_open_closing.id_user = ?
+        GROUP BY state_open_closing.id_open
+        ORDER BY tanggal_open DESC
+    ";
+    
+    $kasir_stmt = $conn->prepare($kasir_sql);
+    $kasir_stmt->bind_param("sssss", $tanggal_awal, $tanggal_akhir, $tanggal_awal, $tanggal_akhir, $selected_kasir);
+    $kasir_stmt->execute();
+    $kasir_result = $kasir_stmt->get_result();
+    $kasir_data = $kasir_result->fetch_all(MYSQLI_ASSOC);
+    
+    // Calculate total for Per Kasir
+    foreach ($kasir_data as $row) {
+        $total_kasir += $row['grand_total'];
+    }
+}
 ?>
 
 <!doctype html>
@@ -133,6 +198,20 @@ foreach ($qris_data as $row) {
     <link href="../css/admin.css" rel="stylesheet">
     <!-- Flatpickr CSS for Date Picker -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+      .loading-spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(0,0,0,.1);
+        border-radius: 50%;
+        border-top-color: #0d6efd;
+        animation: spin 0.6s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
   </head>
   <body>
     <!-- Top Navbar -->
@@ -340,7 +419,7 @@ foreach ($qris_data as $row) {
             </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link" id="kasir-tab" data-bs-toggle="tab" data-bs-target="#kasir" type="button" role="tab">
-                <i class="bi bi-person-badge"></i> Kasir
+                <i class="bi bi-person-badge"></i> Per Kasir
               </button>
             </li>
             <li class="nav-item" role="presentation">
@@ -569,12 +648,108 @@ foreach ($qris_data as $row) {
               <?php endif; ?>
             </div>
 
-            <!-- Kasir Tab -->
+            <!-- Per Kasir Tab -->
             <div class="tab-pane fade" id="kasir" role="tabpanel">
+              <!-- Filter for Per Kasir -->
+              <div class="mb-4 p-3 bg-light rounded">
+                <form method="GET" class="row g-3 align-items-end" id="kasirFilterForm">
+                  <input type="hidden" name="tab" value="kasir">
+                  <div class="col-md-3">
+                    <label for="tanggal_awal" class="form-label">Tanggal Awal</label>
+                    <input type="date" class="form-control" id="tanggal_awal" name="tanggal_awal" 
+                           value="<?php echo htmlspecialchars($tanggal_awal); ?>">
+                  </div>
+                  <div class="col-md-3">
+                    <label for="tanggal_akhir" class="form-label">Tanggal Akhir</label>
+                    <input type="date" class="form-control" id="tanggal_akhir" name="tanggal_akhir" 
+                           value="<?php echo htmlspecialchars($tanggal_akhir); ?>">
+                  </div>
+                  <div class="col-md-4">
+                    <label for="kasir" class="form-label">Pilih Kasir</label>
+                    <select class="form-select" id="kasir" name="kasir">
+                      <option value="">-- Pilih Kasir --</option>
+                      <?php foreach ($kasir_list as $kasir): ?>
+                      <option value="<?php echo htmlspecialchars($kasir['id_user']); ?>" 
+                              <?php echo ($selected_kasir == $kasir['id_user']) ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($kasir['nama_lengkap']); ?>
+                      </option>
+                      <?php endforeach; ?>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary">
+                      <i class="bi bi-search"></i> Tampilkan
+                    </button>
+                  </div>
+                </form>
+              </div>
+              
+              <!-- Table for Per Kasir -->
+              <?php if (!empty($selected_kasir)): ?>
+              <div class="table-responsive shadow-sm">
+                <table class="table table-hover align-middle">
+                  <thead class="table-dark">
+                    <tr>
+                      <th class="text-center">No</th>
+                      <th class="text-center">Tanggal</th>
+                      <th>Kasir</th>
+                      <th class="text-end">Cash Awal</th>
+                      <th class="text-end">QRIS</th>
+                      <th class="text-end">Transfer</th>
+                      <th class="text-end">Cash</th>
+                      <th class="text-end">Total Diskon</th>
+                      <th class="text-end">Grand Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php if (empty($kasir_data)): ?>
+                    <tr>
+                      <td colspan="9" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
+                        <span class="fs-5">Tidak ada data untuk kasir yang dipilih pada periode tersebut</span>
+                      </td>
+                    </tr>
+                    <?php else: ?>
+                    <?php 
+                    $no = 1;
+                    foreach ($kasir_data as $row): 
+                    ?>
+                    <tr>
+                      <td class="text-center fw-bold"><?php echo $no++; ?></td>
+                      <td class="text-center"><?php echo htmlspecialchars($row['tanggal_open']); ?></td>
+                      <td><?php echo htmlspecialchars($row['kasir']); ?></td>
+                      <td class="text-end">Rp <?php echo number_format($row['cash_awal'], 0, ',', '.'); ?></td>
+                      <td class="text-end">Rp <?php echo number_format($row['qris'], 0, ',', '.'); ?></td>
+                      <td class="text-end">Rp <?php echo number_format($row['transfer'], 0, ',', '.'); ?></td>
+                      <td class="text-end">Rp <?php echo number_format($row['cash'], 0, ',', '.'); ?></td>
+                      <td class="text-end text-danger">Rp <?php echo number_format($row['total_diskon'], 0, ',', '.'); ?></td>
+                      <td class="text-end fw-bold text-primary">Rp <?php echo number_format($row['grand_total'], 0, ',', '.'); ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Total Summary -->
+              <?php if (!empty($kasir_data)): ?>
+              <div class="mt-3 p-3 bg-light rounded border">
+                <div class="row align-items-center">
+                  <div class="col-md-8">
+                    <span class="text-muted">Total Transaksi Per Kasir (<?php echo count($kasir_data); ?> periode)</span>
+                  </div>
+                  <div class="col-md-4 text-end">
+                    <span class="fw-bold fs-4 text-success">Rp <?php echo number_format($total_kasir, 0, ',', '.'); ?></span>
+                  </div>
+                </div>
+              </div>
+              <?php endif; ?>
+              <?php else: ?>
               <div class="text-center py-5">
                 <i class="bi bi-person-badge display-1 text-muted"></i>
-                <p class="mt-3">Tab Kasir akan segera tersedia</p>
+                <p class="mt-3">Silakan pilih rentang tanggal dan kasir untuk melihat laporan</p>
               </div>
+              <?php endif; ?>
             </div>
 
             <!-- Semua Tab -->
@@ -633,15 +808,112 @@ foreach ($qris_data as $row) {
     <!-- Flatpickr JS for Date Picker -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-      // Initialize date picker with Flatpickr
-      flatpickr("#tanggal", {
-        dateFormat: "Y-m-d",
-        maxDate: "today",
-        defaultDate: "<?php echo $selected_date; ?>",
-        locale: {
-          firstDayOfWeek: 1
+      document.addEventListener('DOMContentLoaded', function() {
+        // Initialize date picker with Flatpickr for main date filter
+        if (document.getElementById('tanggal')) {
+          flatpickr("#tanggal", {
+            dateFormat: "Y-m-d",
+            maxDate: "today",
+            defaultDate: "<?php echo $selected_date; ?>",
+            locale: {
+              firstDayOfWeek: 1
+            }
+          });
         }
-      });
+        
+        // Initialize date pickers for Per Kasir tab - simplified without onChange events
+        if (document.getElementById('tanggal_awal')) {
+          flatpickr("#tanggal_awal", {
+            dateFormat: "Y-m-d",
+            maxDate: "today",
+            defaultDate: "<?php echo $tanggal_awal; ?>",
+            locale: {
+              firstDayOfWeek: 1
+            }
+          });
+        }
+        
+        if (document.getElementById('tanggal_akhir')) {
+          flatpickr("#tanggal_akhir", {
+            dateFormat: "Y-m-d",
+            maxDate: "today",
+            defaultDate: "<?php echo $tanggal_akhir; ?>",
+            locale: {
+              firstDayOfWeek: 1
+            }
+          });
+        }
+      
+        // Activate the correct tab based on URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTab = urlParams.get('tab');
+        
+        // Use setTimeout to ensure Bootstrap is fully loaded
+        setTimeout(function() {
+          if (activeTab === 'kasir') {
+            const kasirTabEl = document.getElementById('kasir-tab');
+            if (kasirTabEl) {
+              const kasirTab = new bootstrap.Tab(kasirTabEl);
+              kasirTab.show();
+            }
+          } else if (activeTab === 'transfer') {
+            const transferTabEl = document.getElementById('transfer-tab');
+            if (transferTabEl) {
+              const transferTab = new bootstrap.Tab(transferTabEl);
+              transferTab.show();
+            }
+          } else if (activeTab === 'qris') {
+            const qrisTabEl = document.getElementById('qris-tab');
+            if (qrisTabEl) {
+              const qrisTab = new bootstrap.Tab(qrisTabEl);
+              qrisTab.show();
+            }
+          } else if (activeTab === 'semua') {
+            const semuaTabEl = document.getElementById('semua-tab');
+            if (semuaTabEl) {
+              const semuaTab = new bootstrap.Tab(semuaTabEl);
+              semuaTab.show();
+            }
+          }
+        }, 100);
+      
+        // Prevent form submission on Enter key except for button
+        const kasirForm = document.getElementById('kasirFilterForm');
+        if (kasirForm) {
+          // Only prevent Enter key submission, no validation
+          kasirForm.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') {
+              e.preventDefault();
+              return false;
+            }
+          });
+        }
+        
+        // Handle tab clicks to maintain state
+        document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+          tab.addEventListener('shown.bs.tab', function (e) {
+            const tabId = e.target.id.replace('-tab', '');
+            const url = new URL(window.location);
+            
+            // Update URL parameter for active tab
+            if (tabId === 'tunai') {
+              url.searchParams.delete('tab');
+            } else {
+              url.searchParams.set('tab', tabId);
+            }
+            
+            // For non-kasir tabs, remove kasir-specific parameters
+            if (tabId !== 'kasir') {
+              url.searchParams.delete('tanggal_awal');
+              url.searchParams.delete('tanggal_akhir');
+              url.searchParams.delete('kasir');
+            }
+            
+            // Update URL without page reload
+            window.history.replaceState({}, '', url);
+          });
+        });
+      }); // End of DOMContentLoaded
 
       // Function to show transfer detail modal
       function showTransferDetail(tanggalTransfer, noReferensi, imgSs, statusPemeriksaan, tglPemeriksaan) {
