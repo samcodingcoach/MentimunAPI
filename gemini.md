@@ -119,3 +119,6 @@ ada tombol tambah request, kemudian muncul modal inputan tadi sebelumnya
 
 kenapa diawal pembelian. php ada inputan Request Pembelian Bahan kan sudah ada modal,
 harusnya pembuatan kode_request ketika modal new terbuka dan modal di tutup dan batal , hapus request_bahan
+
+harusnya pada pembelian.php menampil semua data dan dapat di filter berdasarkan tanggal datetimepicker YYYY-MM-DD
+saya lihat anda membuatnya untuk menampilkannya hari ini saja
