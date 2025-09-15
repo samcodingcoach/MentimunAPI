@@ -76,3 +76,7 @@ oke sudah masuk, dan berhasil namun beberapa improvment
 - adanya konfirmasi untuk meyakinkan user untuk submit
 - setelah berhasil, pastikan ada pemberitahuan sukses,
 - setelah berhasil kembali pembayaran_pembelian.php dengan dan langsung memunculkan hasil pencarian yang baru dirubah
+
+oke berhasil
+pada table hasil pencarian, action = bayar. ganti menjadi Terbayar, jika status kolom status PAID , dan jika di klik muncul modal dan bagian Save Changes di hide
+alasan di hide karna sudah terbayar mengindari error

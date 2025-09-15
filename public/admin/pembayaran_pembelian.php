@@ -173,21 +173,39 @@ if (($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) || i
                                     <td><?php echo $row['isInvoice'] == 0 ? 'INV' : 'BAYAR LANGSUNG'; ?></td>
                                     <td><?php echo htmlspecialchars(number_format($row['subtotal'], 0, ',', '.')); ?></td>
                                     <td>
-                                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#bayarModal"
-                                            data-id-request="<?php echo $row['id_request']; ?>"
-                                            data-id-vendor="<?php echo $row['id_vendor']; ?>"
-                                            data-kode-request="<?php echo htmlspecialchars($row['kode_request']); ?>"
-                                            data-nama-bahan="<?php echo htmlspecialchars($row['nama_bahan']); ?>"
-                                            data-vendor="<?php echo htmlspecialchars($row['nama_vendor']); ?>"
-                                            data-status="<?php echo $row['isDone'] == 0 ? 'UNPAID' : 'PAID'; ?>"
-                                            data-tipe="<?php echo $row['isInvoice'] == 0 ? 'INV' : 'BAYAR LANGSUNG'; ?>"
-                                            data-rekening1="<?php echo htmlspecialchars($row['nomor_rekening1']); ?>"
-                                            data-rekening2="<?php echo htmlspecialchars($row['nomor_rekening2']); ?>"
-                                            data-jumlah="<?php echo htmlspecialchars($row['jumlah_request']); ?>"
-                                            data-harga="<?php echo htmlspecialchars($row['harga_est']); ?>"
-                                            data-subtotal="<?php echo htmlspecialchars($row['subtotal']); ?>">
-                                            Bayar
-                                        </button>
+                                        <?php if($row['isDone'] == 0): ?>
+                                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#bayarModal"
+                                                data-id-request="<?php echo $row['id_request']; ?>"
+                                                data-id-vendor="<?php echo $row['id_vendor']; ?>"
+                                                data-kode-request="<?php echo htmlspecialchars($row['kode_request']); ?>"
+                                                data-nama-bahan="<?php echo htmlspecialchars($row['nama_bahan']); ?>"
+                                                data-vendor="<?php echo htmlspecialchars($row['nama_vendor']); ?>"
+                                                data-status="<?php echo $row['isDone'] == 0 ? 'UNPAID' : 'PAID'; ?>"
+                                                data-tipe="<?php echo $row['isInvoice'] == 0 ? 'INV' : 'BAYAR LANGSUNG'; ?>"
+                                                data-rekening1="<?php echo htmlspecialchars($row['nomor_rekening1']); ?>"
+                                                data-rekening2="<?php echo htmlspecialchars($row['nomor_rekening2']); ?>"
+                                                data-jumlah="<?php echo htmlspecialchars($row['jumlah_request']); ?>"
+                                                data-harga="<?php echo htmlspecialchars($row['harga_est']); ?>"
+                                                data-subtotal="<?php echo htmlspecialchars($row['subtotal']); ?>">
+                                                Bayar
+                                            </button>
+                                        <?php else: ?>
+                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#bayarModal"
+                                                data-id-request="<?php echo $row['id_request']; ?>"
+                                                data-id-vendor="<?php echo $row['id_vendor']; ?>"
+                                                data-kode-request="<?php echo htmlspecialchars($row['kode_request']); ?>"
+                                                data-nama-bahan="<?php echo htmlspecialchars($row['nama_bahan']); ?>"
+                                                data-vendor="<?php echo htmlspecialchars($row['nama_vendor']); ?>"
+                                                data-status="<?php echo $row['isDone'] == 0 ? 'UNPAID' : 'PAID'; ?>"
+                                                data-tipe="<?php echo $row['isInvoice'] == 0 ? 'INV' : 'BAYAR LANGSUNG'; ?>"
+                                                data-rekening1="<?php echo htmlspecialchars($row['nomor_rekening1']); ?>"
+                                                data-rekening2="<?php echo htmlspecialchars($row['nomor_rekening2']); ?>"
+                                                data-jumlah="<?php echo htmlspecialchars($row['jumlah_request']); ?>"
+                                                data-harga="<?php echo htmlspecialchars($row['harga_est']); ?>"
+                                                data-subtotal="<?php echo htmlspecialchars($row['subtotal']); ?>">
+                                                Terbayar
+                                            </button>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -340,6 +358,9 @@ if (($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) || i
             var modalJumlah = bayarModal.querySelector('#modal-jumlah');
             var modalHarga = bayarModal.querySelector('#modal-harga');
             var modalSubtotal = bayarModal.querySelector('#modal-subtotal');
+            var saveButton = bayarModal.querySelector('button[name="update_pembayaran"]');
+            var nomorBuktiInput = bayarModal.querySelector('#modal-nomor-bukti');
+            var fileBuktiInput = bayarModal.querySelector('#modal-bukti-transaksi');
 
             modalIdRequest.value = id_request;
             modalIdVendor.value = id_vendor;
@@ -353,6 +374,16 @@ if (($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) || i
             modalJumlah.value = formatNumber(jumlah);
             modalHarga.value = formatNumber(harga);
             modalSubtotal.value = formatNumber(subtotal);
+
+            if (status === 'PAID') {
+                saveButton.style.display = 'none';
+                nomorBuktiInput.disabled = true;
+                fileBuktiInput.disabled = true;
+            } else {
+                saveButton.style.display = 'block';
+                nomorBuktiInput.disabled = false;
+                fileBuktiInput.disabled = false;
+            }
         });
 
         var formPembayaran = document.getElementById('form-pembayaran');
