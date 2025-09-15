@@ -1,8 +1,6 @@
 pada index.php buat dashboard untuk menampilkan hal berikut
 Informasi Terbaru
-
 berikut querynya
-
 SELECT
 id_info,
 judul,

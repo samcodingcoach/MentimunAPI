@@ -325,6 +325,51 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
               <h5 class="card-title">Selamat Datang, <?php echo htmlspecialchars($_SESSION["nama_lengkap"]); ?>!</h5>
             </div>
           </div>
+
+          <div class="row mt-4">
+            <div class="col-12">
+              <h4>Informasi Terbaru</h4>
+            </div>
+          </div>
+
+          <div class="row gy-4">
+            <?php
+            require_once '../../config/koneksi.php';
+            $sql = "SELECT id_info, judul, isi, divisi, gambar, link, pegawai.nama_lengkap, created_time, CASE WHEN TIMESTAMPDIFF(HOUR, created_time, NOW()) < 8 THEN CASE WHEN TIMESTAMPDIFF(HOUR, created_time, NOW()) < 1 THEN CONCAT(TIMESTAMPDIFF(MINUTE, created_time, NOW()), ' menit yang lalu') WHEN TIMESTAMPDIFF(HOUR, created_time, NOW()) = 1 THEN '1 jam yang lalu' ELSE CONCAT(TIMESTAMPDIFF(HOUR, created_time, NOW()), ' jam yang lalu') END ELSE DATE_FORMAT(created_time,'%d %M %Y %H:%i') END AS waktu_tampil FROM informasi INNER JOIN pegawai ON id_users = pegawai.id_user ORDER BY created_time desc LIMIT 3";
+            $result = $conn->query($sql);
+            if ($result->num_rows > 0) {
+                while($row = $result->fetch_assoc()) {
+            ?>
+            <div class="col-lg-4 col-md-6">
+              <div class="card h-100">
+                <?php if (!empty($row["gambar"])) { ?>
+                <img src="../images/info/<?php echo htmlspecialchars($row["gambar"]); ?>" class="card-img-top img-fluid rounded" alt="..." style="height: 200px; object-fit: cover;">
+                <?php } ?>
+                <div class="card-body">
+                  <h5 class="card-title"><?php echo htmlspecialchars($row["judul"]); ?></h5>
+                  <p class="card-text"><?php echo nl2br(htmlspecialchars($row["isi"])); ?></p>
+                  <?php if (!empty($row["link"])) { ?>
+                  <a href="<?php echo htmlspecialchars($row["link"]); ?>" class="btn btn-primary">Go somewhere</a>
+                  <?php } ?>
+                </div>
+                <div class="card-footer">
+                  <small class="text-muted">Oleh <?php echo htmlspecialchars($row["nama_lengkap"]); ?> - <?php echo htmlspecialchars($row["waktu_tampil"]); ?></small>
+                </div>
+              </div>
+            </div>
+            <?php
+                }
+            } else {
+            ?>
+            <div class="col-12">
+              <p class="text-center">Tidak ada informasi terbaru.</p>
+            </div>
+            <?php
+            }
+            $conn->close();
+            ?>
+          </div>
+
         </main>
       </div>
     </div>
