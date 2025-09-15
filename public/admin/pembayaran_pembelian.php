@@ -14,7 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_pembayaran'])) 
     
     $file_bukti_name = '';
     if(isset($_FILES['file_bukti']) && $_FILES['file_bukti']['error'] == 0){
-        $target_dir = "../struk/images/";
+        $target_dir = "../images/bukti_tf/";
         if (!file_exists($target_dir)) {
             mkdir($target_dir, 0777, true);
         }
