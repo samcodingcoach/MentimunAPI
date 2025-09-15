@@ -238,31 +238,31 @@ if (($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) || i
                                     </ul>
                                     <div class="tab-content" id="myTabContent">
                                         <div class="tab-pane fade show active p-2" id="informasi" role="tabpanel" aria-labelledby="informasi-tab">
-                                            <div class="mb-2">
-                                                <label for="modal-nama-bahan" class="form-label">Nama Bahan</label>
-                                                <input type="text" class="form-control form-control-sm" id="modal-nama-bahan" readonly>
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span class="form-label">Nama Bahan</span>
+                                                <span id="modal-nama-bahan"></span>
                                             </div>
-                                            <div class="mb-2">
-                                                <label for="modal-vendor" class="form-label">Vendor</label>
-                                                <input type="text" class="form-control form-control-sm" id="modal-vendor" readonly>
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span class="form-label">Vendor</span>
+                                                <span id="modal-vendor"></span>
                                             </div>
-                                            <div class="mb-2">
-                                                <label for="modal-status" class="form-label">Status</label>
-                                                <input type="text" class="form-control form-control-sm" id="modal-status" readonly>
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span class="form-label">Status</span>
+                                                <span id="modal-status"></span>
                                             </div>
-                                            <div class="mb-2">
-                                                <label for="modal-tipe" class="form-label">Tipe</label>
-                                                <input type="text" class="form-control form-control-sm" id="modal-tipe" readonly>
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span class="form-label">Tipe</span>
+                                                <span id="modal-tipe"></span>
                                             </div>
                                         </div>
                                         <div class="tab-pane fade p-2" id="rekening" role="tabpanel" aria-labelledby="rekening-tab">
-                                            <div class="mb-2">
-                                                <label for="modal-rekening1" class="form-label">Nomor Rek 1</label>
-                                                <input type="text" class="form-control form-control-sm" id="modal-rekening1" readonly>
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span class="form-label">Nomor Rekening 1</span>
+                                                <span id="modal-rekening1"></span>
                                             </div>
-                                            <div class="mb-2">
-                                                <label for="modal-rekening2" class="form-label">Nomor Rekening 2</label>
-                                                <input type="text" class="form-control form-control-sm" id="modal-rekening2" readonly>
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span class="form-label">Nomor Rekening 2</span>
+                                                <span id="modal-rekening2"></span>
                                             </div>
                                         </div>
                                     </div>
@@ -361,12 +361,12 @@ if (($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) || i
             modalIdRequest.value = id_request;
             modalIdVendor.value = id_vendor;
             modalKodeRequest.value = kode_request;
-            modalNamaBahan.value = namaBahan;
-            modalVendor.value = vendor;
-            modalStatus.value = status;
-            modalTipe.value = tipe;
-            modalRekening1.value = rekening1;
-            modalRekening2.value = rekening2;
+            modalNamaBahan.textContent = namaBahan;
+            modalVendor.textContent = vendor;
+            modalStatus.textContent = status;
+            modalTipe.textContent = tipe;
+            modalRekening1.textContent = rekening1;
+            modalRekening2.textContent = rekening2;
             modalJumlah.value = formatNumber(jumlah);
             modalHarga.value = formatNumber(harga);
             modalSubtotal.value = formatNumber(subtotal);
