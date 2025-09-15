@@ -125,6 +125,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
         
+        // Get filtered request data
+        if ($_POST['action'] === 'get_requests') {
+            $filter_tanggal = isset($_POST['tanggal']) ? $_POST['tanggal'] : '';
+            
+            $sql_request = "SELECT
+                id_request,
+                bahan_request.kode_request,
+                bahan_request.tanggal_request,
+                CONCAT(pegawai.jabatan,'-',pegawai.nama_lengkap) as nama_lengkap,
+                grand_total as grand_total
+                FROM
+                bahan_request
+                INNER JOIN
+                pegawai
+                ON
+                bahan_request.id_user = pegawai.id_user 
+                WHERE status=1";
+                
+            // Add date filter if specified
+            if (!empty($filter_tanggal)) {
+                $sql_request .= " AND DATE(tanggal_request) = '$filter_tanggal'";
+            }
+            
+            $sql_request .= " ORDER BY id_request DESC";
+            $result_request = mysqli_query($conn, $sql_request);
+            
+            $requests = [];
+            if ($result_request && mysqli_num_rows($result_request) > 0) {
+                while ($row = mysqli_fetch_assoc($result_request)) {
+                    $requests[] = [
+                        'id_request' => $row['id_request'],
+                        'kode_request' => $row['kode_request'],
+                        'tanggal_request' => date('d M Y', strtotime($row['tanggal_request'])),
+                        'nama_lengkap' => $row['nama_lengkap'],
+                        'grand_total' => 'Rp ' . number_format($row['grand_total'], 0, ',', '.')
+                    ];
+                }
+            }
+            
+            echo json_encode(['success' => true, 'data' => $requests]);
+            exit();
+        }
+        
         // Hapus item dari detail
         if ($_POST['action'] === 'remove_item') {
             $detail_id = intval($_POST['detail_id']);
@@ -371,8 +414,29 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
               </button>
             </div>
             <div class="card-body">
+              <!-- Filter Tanggal -->
+              <div class="row mb-4">
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold">Filter Tanggal:</label>
+                  <div class="input-group">
+                    <input type="date" class="form-control" id="filter_tanggal" value="<?php echo date('Y-m-d'); ?>">
+                    <button class="btn btn-outline-primary" type="button" id="btn_filter">
+                      <i class="bi bi-search"></i> Filter
+                    </button>
+                    <button class="btn btn-outline-secondary" type="button" id="btn_reset_filter">
+                      <i class="bi bi-arrow-clockwise"></i> Reset
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <div class="d-flex align-items-end h-100">
+                    <small class="text-muted">Pilih tanggal untuk memfilter data request pembelian. Kosongkan untuk menampilkan semua data.</small>
+                  </div>
+                </div>
+              </div>
+              
               <div class="table-responsive">
-                <table class="table table-striped table-hover">
+                <table class="table table-striped table-hover" id="table_requests">
                   <thead class="table-dark">
                     <tr>
                       <th>ID</th>
@@ -383,42 +447,8 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                       <th>Aksi</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <?php
-                    // Query untuk menampilkan daftar request/PO
-                    $sql_request = "SELECT
-                        id_request,
-                        bahan_request.kode_request,
-                        bahan_request.tanggal_request,
-                        CONCAT(pegawai.jabatan,'-',pegawai.nama_lengkap) as nama_lengkap,
-                        grand_total as grand_total
-                        FROM
-                        bahan_request
-                        INNER JOIN
-                        pegawai
-                        ON
-                        bahan_request.id_user = pegawai.id_user 
-                        WHERE DATE(tanggal_request) = CURRENT_DATE() and status=1
-                        ORDER BY id_request DESC";
-                    $result_request = mysqli_query($conn, $sql_request);
-                    
-                    if (mysqli_num_rows($result_request) > 0) {
-                        while ($row = mysqli_fetch_assoc($result_request)) {
-                            echo "<tr>";
-                            echo "<td>" . $row['id_request'] . "</td>";
-                            echo "<td>" . $row['kode_request'] . "</td>";
-                            echo "<td>" . date('d M Y', strtotime($row['tanggal_request'])) . "</td>";
-                            echo "<td>" . $row['nama_lengkap'] . "</td>";
-                            echo "<td>Rp " . number_format($row['grand_total'], 0, ',', '.') . "</td>";
-                            echo "<td>";
-                            echo "<a href='pembelian_detail.php?id=" . $row['id_request'] . "' class='btn btn-sm btn-info'><i class='bi bi-eye'></i> Detail</a> ";
-                            echo "</td>";
-                            echo "</tr>";
-                        }
-                    } else {
-                        echo "<tr><td colspan='6' class='text-center'>Tidak ada data request pembelian hari ini</td></tr>";
-                    }
-                    ?>
+                  <tbody id="tbody_requests">
+                    <!-- Data akan dimuat via AJAX -->
                   </tbody>
                 </table>
               </div>
@@ -620,6 +650,82 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                 return num.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             }
         }
+        
+        // === REQUEST LIST FUNCTIONALITY ===
+        
+        // Load requests data
+        function loadRequests(tanggal = '') {
+            $.ajax({
+                url: window.location.href,
+                type: 'POST',
+                data: {
+                    action: 'get_requests',
+                    tanggal: tanggal
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        renderRequestsTable(response.data);
+                    } else {
+                        $('#tbody_requests').html('<tr><td colspan="6" class="text-center text-muted">Error loading data</td></tr>');
+                    }
+                },
+                error: function() {
+                    $('#tbody_requests').html('<tr><td colspan="6" class="text-center text-muted">Error loading data</td></tr>');
+                }
+            });
+        }
+        
+        // Render requests table
+        function renderRequestsTable(requests) {
+            const tbody = $('#tbody_requests');
+            tbody.empty();
+            
+            if (requests.length === 0) {
+                tbody.append('<tr><td colspan="6" class="text-center text-muted">Tidak ada data request pembelian</td></tr>');
+                return;
+            }
+            
+            requests.forEach(function(request) {
+                tbody.append(`
+                    <tr>
+                        <td>${request.id_request}</td>
+                        <td>${request.kode_request}</td>
+                        <td>${request.tanggal_request}</td>
+                        <td>${request.nama_lengkap}</td>
+                        <td>${request.grand_total}</td>
+                        <td>
+                            <a href="pembelian_detail.php?id=${request.id_request}" class="btn btn-sm btn-info">
+                                <i class="bi bi-eye"></i> Detail
+                            </a>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+        
+        // Filter button click
+        $('#btn_filter').on('click', function() {
+            const tanggal = $('#filter_tanggal').val();
+            loadRequests(tanggal);
+        });
+        
+        // Reset filter button click
+        $('#btn_reset_filter').on('click', function() {
+            $('#filter_tanggal').val('');
+            loadRequests('');
+        });
+        
+        // Filter on enter key
+        $('#filter_tanggal').on('keypress', function(e) {
+            if (e.which === 13) {
+                const tanggal = $(this).val();
+                loadRequests(tanggal);
+            }
+        });
+        
+        // Load initial data (today)
+        loadRequests($('#filter_tanggal').val());
         
         // === MODAL FUNCTIONALITY ===
         
@@ -967,7 +1073,9 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                     },
                     success: function(response) {
                         $('#modalAddRequest').modal('hide');
-                        location.reload(); // Refresh untuk melihat data baru
+                        // Refresh table instead of whole page
+                        loadRequests($('#filter_tanggal').val());
+                        alert('Transaksi pembelian berhasil disimpan!');
                     },
                     error: function() {
                         alert('Error menyimpan transaksi');
