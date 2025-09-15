@@ -489,11 +489,9 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
           <?php endif; ?>
 
           <!-- Daftar Request / PO -->
-          <div class="card mb-4">
-            <div class="card-header">
-              <h5 class="card-title mb-0">Daftar Request Pembelian</h5>
-            </div>
-            <div class="card-body">
+          <div class="mb-4">
+            
+            <div>
               <!-- Filter Tanggal -->
               <div class="row mb-4">
                 <div class="col-md-4">
@@ -508,10 +506,7 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                     </button>
                   </div>
                 </div>
-                <div class="col-md-8">
-                  <div class="d-flex align-items-end h-100">
-                    <small class="text-muted">Pilih tanggal untuk memfilter data request pembelian. Kosongkan untuk menampilkan semua data.</small>
-                  </div>
+                
                 </div>
               </div>
               
