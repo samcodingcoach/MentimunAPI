@@ -204,6 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 bahan_request.tanggal_request,
                 CONCAT('[',kategori_bahan.nama_kategori,'] ', bahan.nama_bahan) as nama_bahan,
                 bahan_request_detail.nomor_bukti_transaksi,
+                bahan_request_detail.file_bukti,
                 case
                 when bahan_request_detail.isInvoice = '1' then 'INV'
                 when bahan_request_detail.isInvoice = '0' then 'CASH'
@@ -260,6 +261,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'id_detail_request' => $row['id_detail_request'],
                         'nama_bahan' => $row['nama_bahan'],
                         'nomor_bukti_transaksi' => $row['nomor_bukti_transaksi'] ?: '-',
+                        'file_bukti' => $row['file_bukti'],
                         'payment' => $row['payment'],
                         'isDone' => $row['IsDone'],
                         'nama_vendor' => $row['nama_vendor'],
@@ -651,6 +653,24 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
       </div>
     </div>
 
+    <!-- Modal Bukti Pembayaran -->
+    <div class="modal fade" id="modalBuktiPembayaran" tabindex="-1" aria-labelledby="modalBuktiPembayaranLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalBuktiPembayaranLabel">Bukti Pembayaran</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+            <img src="" id="bukti_pembayaran_image" class="img-fluid mb-3" alt="Bukti Pembayaran">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -813,8 +833,16 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                 let statusClass = detail.isDone === 'PAID' ? 'bg-success' : 'bg-warning';
                 let paymentClass = detail.payment === 'INV' ? 'bg-info' : 'bg-primary';
                 
+                let nomorBuktiHtml = `<small>${detail.nomor_bukti_transaksi}</small>`;
+                if (detail.isDone === 'PAID' && detail.file_bukti) {
+                    nomorBuktiHtml = `
+                        <a href="#" class="text-primary" onclick="showBuktiModal('${detail.file_bukti}')">
+                            <small>${detail.nomor_bukti_transaksi}</small>
+                        </a>`;
+                }
+
                 tbody.append(`
-                    <tr>
+                    <tr id="detail_row_${detail.id_detail_request}">
                         <td>${index + 1}</td>
                         <td><small>${detail.nama_bahan}</small></td>
                         <td><small>${detail.nama_vendor}</small></td>
@@ -828,12 +856,19 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                             <span class="badge ${statusClass}">${detail.isDone}</span>
                         </td>
                         <td class="text-center">
-                            <small>${detail.nomor_bukti_transaksi}</small>
+                            ${nomorBuktiHtml}
                         </td>
                     </tr>
                 `);
             });
         }
+
+        // Show bukti pembayaran modal
+        window.showBuktiModal = function(fileBukti) {
+            const imageUrl = `../struk/images/${fileBukti}`;
+            $('#bukti_pembayaran_image').attr('src', imageUrl);
+            $('#modalBuktiPembayaran').modal('show');
+        };
         
         // === MODAL FUNCTIONALITY ===
         
