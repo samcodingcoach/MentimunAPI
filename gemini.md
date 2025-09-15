@@ -1,82 +1,35 @@
-pada pembayaran_pembelian.php, kita akan lakukan Update bukti Pembayaran
-step 1: buatkan ui untuk searching kode_request / no PO
+pada index.php buat dashboard untuk menampilkan hal berikut
+Informasi Terbaru
 
-berikut querynya:
+berikut querynya
 
 SELECT
-bahan_request.kode_request,
-bahan.nama_bahan,
-vendor.kode_vendor,
-vendor.nama_vendor,
-vendor.nomor_rekening1,
-vendor.nomor_rekening2,
-bahan_request_detail.isDone, //0 = UNPAID, 1 = PAID//
-bahan_request_detail.isInvoice, //0 = INV, 1 = BAYAR LANGSUNG
-bahan_request_detail.nomor_bukti_transaksi,
-bahan_request_detail.jumlah_request,
-bahan_request_detail.harga_est,
-bahan_request_detail.subtotal
+id_info,
+judul,
+isi,
+divisi,
+gambar,
+link,
+pegawai.nama_lengkap,
+created_time,
+CASE
+WHEN TIMESTAMPDIFF(HOUR, created_time, NOW()) < 8 THEN
+CASE
+WHEN TIMESTAMPDIFF(HOUR, created_time, NOW()) < 1 THEN CONCAT(TIMESTAMPDIFF(MINUTE, created_time, NOW()), ' menit yang lalu')
+WHEN TIMESTAMPDIFF(HOUR, created_time, NOW()) = 1 THEN '1 jam yang lalu'
+ELSE CONCAT(TIMESTAMPDIFF(HOUR, created_time, NOW()), ' jam yang lalu')
+END
+ELSE
+DATE_FORMAT(created_time,'%d %M %Y %H:%i')
+END AS waktu_tampil
+
 FROM
-bahan_request
+informasi
 INNER JOIN
-bahan_request_detail
+pegawai
 ON
-bahan_request.id_request = bahan_request_detail.id_request
-INNER JOIN
-bahan
-ON
-bahan_request_detail.id_bahan = bahan.id_bahan
-INNER JOIN
-vendor
-ON
-bahan_request_detail.id_vendor = vendor.id_vendor
+id_users = pegawai.id_user ORDER BY created_time desc
 
-        jika ada maka munculkan table diatas
+tampilkan dalam bentuk bukan table tetapi seperti post artikel yang modern
 
-No,....., Action di isikan Bayar
-
-Cukup sampai sini dulu.
-
-jangan melebihi prompt untuk menjawab
-
-oke sudah bagus,
-update table apa yang tampil
-No, Nama Bahan, Vendor, Status, Tipe,Subtotal
-
-dan saat klik Bayar muncul form
-dengan inputan sebagai berikut
-
-Section Informasi
-Nama Bahan, Vendor, Status, Tipe,
-
-Section Rekening
-Nomor Rek 1 , Nomor Rekening 2
-
-Section Nominal
-Jumlah , Harga, Subtotal
-
-Section Bayar
-Input Nomor Bukti Transaksi
-Input Bukti Transaksi, File image upload
-
-cukup sampai sini dulu desain form modal saja
-
-selanjutnya pembayaran_pembelian.php pada modal pembayaran tombol save changes harusnya melakukan update
-
-query sebagai berikut
-UPDATE bahan_request_detail SET nomor_bukti_transaksi = '?',
-file_bukti = '?', isDone=1 WHERE id_request = '?' and id_vendor = '?'
-
-pastikan dalam form pembayaran ada semua nilai ?
-
-oke sudah masuk, dan berhasil namun beberapa improvment
-
-- validasi gambar tidak lebih dari 1 mb,
-- gambar harus.jpg dan saat di simpan ganti dengan filenametimestamp
-- adanya konfirmasi untuk meyakinkan user untuk submit
-- setelah berhasil, pastikan ada pemberitahuan sukses,
-- setelah berhasil kembali pembayaran_pembelian.php dengan dan langsung memunculkan hasil pencarian yang baru dirubah
-
-oke berhasil
-pada table hasil pencarian, action = bayar. ganti menjadi Terbayar, jika status kolom status PAID , dan jika di klik muncul modal dan bagian Save Changes di hide
-alasan di hide karna sudah terbayar mengindari error
+gambar posisi /public/images/info/

@@ -322,13 +322,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
           
           <div class="row">
             <div class="col-12">
-              <div class="card">
-                <div class="card-body">
-                  <h5 class="card-title">Selamat Datang, <?php echo htmlspecialchars($_SESSION["nama_lengkap"]); ?>!</h5>
-                  <p class="card-text">Role Anda: <span class="badge bg-primary"><?php echo htmlspecialchars($_SESSION["jabatan"]); ?></span></p>
-                  <p class="card-text">Silakan pilih menu di sidebar untuk mulai menggunakan sistem.</p>
-                </div>
-              </div>
+              <h5 class="card-title">Selamat Datang, <?php echo htmlspecialchars($_SESSION["nama_lengkap"]); ?>!</h5>
             </div>
           </div>
         </main>
