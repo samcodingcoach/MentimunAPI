@@ -60,3 +60,5 @@ Input Nomor Bukti Transaksi
 Input Bukti Transaksi, File image upload
 
 cukup sampai sini dulu desain form modal saja
+
+selanjutnya pembayaran_pembelian.php pada modal pembayaran tombol save changes harusnya
