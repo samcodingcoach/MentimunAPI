@@ -329,6 +329,35 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
     <link href="../css/admin.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <style>
+      .btn-close-overlay {
+        position: absolute;
+        top: -15px;
+        right: -15px;
+        z-index: 1056;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: red;
+        opacity: 0.8;
+        padding: 0;
+      }
+      .btn-close-overlay:hover {
+        opacity: 1;
+      }
+      #modalBuktiPembayaran .modal-dialog {
+        max-width: fit-content;
+        margin: 1.75rem auto;
+      }
+      #modalBuktiPembayaran .modal-content {
+        text-align: center;
+        background: transparent;
+        border: none;
+      }
+      #modalBuktiPembayaran .modal-body {
+        padding: 0;
+      }
+    </style>
   </head>
   <body>
     <!-- Top Navbar -->
@@ -655,17 +684,13 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
 
     <!-- Modal Bukti Pembayaran -->
     <div class="modal fade" id="modalBuktiPembayaran" tabindex="-1" aria-labelledby="modalBuktiPembayaranLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
+      <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="modalBuktiPembayaranLabel">Bukti Pembayaran</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body text-center">
-            <img src="" id="bukti_pembayaran_image" class="img-fluid mb-3" alt="Bukti Pembayaran">
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+          <div class="modal-body position-relative">
+            <button type="button" class="btn-close-overlay" data-bs-dismiss="modal" aria-label="Close">
+              <i class="bi bi-x-circle-fill"></i>
+            </button>
+            <img src="" id="bukti_pembayaran_image" class="img-fluid rounded" alt="Bukti Pembayaran">
           </div>
         </div>
       </div>
