@@ -61,4 +61,10 @@ Input Bukti Transaksi, File image upload
 
 cukup sampai sini dulu desain form modal saja
 
-selanjutnya pembayaran_pembelian.php pada modal pembayaran tombol save changes harusnya
+selanjutnya pembayaran_pembelian.php pada modal pembayaran tombol save changes harusnya melakukan update
+
+query sebagai berikut
+UPDATE bahan_request_detail SET nomor_bukti_transaksi = '?',
+file_bukti = '?', isDone=1 WHERE id_request = '?' and id_vendor = '?'
+
+pastikan dalam form pembayaran ada semua nilai ?
