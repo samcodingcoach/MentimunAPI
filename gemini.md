@@ -176,3 +176,8 @@ buat minimalis, readable, responsive. sesuai dengan pattern-patern modal yang la
 select2.min.js:2 Uncaught ReferenceError: jQuery is not defined
 pembelian.php:462 Uncaught ReferenceError: $ is not defined
 at pembelian.php:462:5
+
+pada pembelian.php buatkan
+
+1. di paling bawah sum dari grand total
+2. tambahkan filter search mencari berdasarkan kode request / Nomor PO

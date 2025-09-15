@@ -127,14 +127,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Get filtered request data
         if ($_POST['action'] === 'get_requests') {
-            $filter_tanggal = isset($_POST['tanggal']) ? $_POST['tanggal'] : '';
-            
+            $filter_tanggal = $_POST['tanggal'] ?? '';
+            $filter_kode = $_POST['kode'] ?? '';
+
             $sql_request = "SELECT
                 id_request,
                 bahan_request.kode_request,
                 bahan_request.tanggal_request,
                 CONCAT(pegawai.jabatan,'-',pegawai.nama_lengkap) as nama_lengkap,
-                grand_total as grand_total
+                grand_total
                 FROM
                 bahan_request
                 INNER JOIN
@@ -142,16 +143,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ON
                 bahan_request.id_user = pegawai.id_user 
                 WHERE status=1";
-                
-            // Add date filter if specified
+            
+            $params = [];
+            $types = '';
+
             if (!empty($filter_tanggal)) {
-                $sql_request .= " AND DATE(tanggal_request) = '$filter_tanggal'";
+                $sql_request .= " AND DATE(tanggal_request) = ?";
+                $params[] = $filter_tanggal;
+                $types .= 's';
+            }
+
+            if (!empty($filter_kode)) {
+                $sql_request .= " AND bahan_request.kode_request LIKE ?";
+                $kode_param = "%" . $filter_kode . "%";
+                $params[] = $kode_param;
+                $types .= 's';
+            }
+
+            $sql_request .= " ORDER BY id_request DESC";
+            
+            $stmt = mysqli_prepare($conn, $sql_request);
+
+            if (!empty($types)) {
+                mysqli_stmt_bind_param($stmt, $types, ...$params);
             }
             
-            $sql_request .= " ORDER BY id_request DESC";
-            $result_request = mysqli_query($conn, $sql_request);
+            mysqli_stmt_execute($stmt);
+            $result_request = mysqli_stmt_get_result($stmt);
             
             $requests = [];
+            $grand_total_sum = 0;
             if ($result_request && mysqli_num_rows($result_request) > 0) {
                 while ($row = mysqli_fetch_assoc($result_request)) {
                     $requests[] = [
@@ -161,10 +182,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'nama_lengkap' => $row['nama_lengkap'],
                         'grand_total' => 'Rp ' . number_format($row['grand_total'], 0, ',', '.')
                     ];
+                    $grand_total_sum += $row['grand_total'];
                 }
             }
             
-            echo json_encode(['success' => true, 'data' => $requests]);
+            echo json_encode([
+                'success' => true, 
+                'data' => $requests,
+                'grand_total_sum_formatted' => 'Rp ' . number_format($grand_total_sum, 0, ',', '.')
+            ]);
             exit();
         }
         
@@ -492,21 +518,23 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
           <div class="mb-4">
             
             <div>
-              <!-- Filter Tanggal -->
-              <div class="row mb-4">
+              <!-- Filter Tanggal & Kode -->
+              <div class="row mb-4 align-items-end">
                 <div class="col-md-4">
-                  <label class="form-label fw-semibold">Filter Tanggal:</label>
-                  <div class="input-group">
-                    <input type="date" class="form-control" id="filter_tanggal" value="<?php echo date('Y-m-d'); ?>">
-                    <button class="btn btn-outline-primary" type="button" id="btn_filter">
-                      <i class="bi bi-search"></i> Filter
-                    </button>
-                    <button class="btn btn-outline-secondary" type="button" id="btn_reset_filter">
-                      <i class="bi bi-arrow-clockwise"></i> Reset
-                    </button>
-                  </div>
+                  <label for="filter_tanggal" class="form-label fw-semibold">Filter Tanggal:</label>
+                  <input type="date" class="form-control" id="filter_tanggal" value="<?php echo date('Y-m-d'); ?>">
                 </div>
-                
+                <div class="col-md-4">
+                    <label for="filter_kode" class="form-label fw-semibold">Cari Kode Request / No. PO:</label>
+                    <input type="text" class="form-control" id="filter_kode" placeholder="Masukkan kode request...">
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary" type="button" id="btn_filter">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    <button class="btn btn-secondary ms-2" type="button" id="btn_reset_filter">
+                        <i class="bi bi-arrow-clockwise"></i> Reset
+                    </button>
                 </div>
               </div>
               
@@ -525,6 +553,9 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                   <tbody id="tbody_requests">
                     <!-- Data akan dimuat via AJAX -->
                   </tbody>
+                  <tfoot class="table-dark">
+                    <!-- Total akan dimuat via AJAX -->
+                  </tfoot>
                 </table>
               </div>
             </div>
@@ -785,32 +816,37 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
         // === REQUEST LIST FUNCTIONALITY ===
         
         // Load requests data
-        function loadRequests(tanggal = '') {
+        function loadRequests(tanggal = '', kode = '') {
             $.ajax({
                 url: window.location.href,
                 type: 'POST',
                 data: {
                     action: 'get_requests',
-                    tanggal: tanggal
+                    tanggal: tanggal,
+                    kode: kode
                 },
                 dataType: 'json',
                 success: function(response) {
                     if (response.success) {
-                        renderRequestsTable(response.data);
+                        renderRequestsTable(response.data, response.grand_total_sum_formatted);
                     } else {
                         $('#tbody_requests').html('<tr><td colspan="6" class="text-center text-muted">Error loading data</td></tr>');
+                        $('tfoot').empty();
                     }
                 },
                 error: function() {
                     $('#tbody_requests').html('<tr><td colspan="6" class="text-center text-muted">Error loading data</td></tr>');
+                    $('tfoot').empty();
                 }
             });
         }
         
         // Render requests table
-        function renderRequestsTable(requests) {
+        function renderRequestsTable(requests, grandTotalSumFormatted) {
             const tbody = $('#tbody_requests');
+            const tfoot = $('tfoot');
             tbody.empty();
+            tfoot.empty();
             
             if (requests.length === 0) {
                 tbody.append('<tr><td colspan="6" class="text-center text-muted">Tidak ada data request pembelian</td></tr>');
@@ -833,30 +869,41 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                     </tr>
                 `);
             });
+
+            tfoot.append(`
+                <tr>
+                    <td colspan="4" class="text-end fw-bold">Total</td>
+                    <td class="fw-bold">${grandTotalSumFormatted}</td>
+                    <td></td>
+                </tr>
+            `);
         }
         
         // Filter button click
         $('#btn_filter').on('click', function() {
             const tanggal = $('#filter_tanggal').val();
-            loadRequests(tanggal);
+            const kode = $('#filter_kode').val();
+            loadRequests(tanggal, kode);
         });
         
         // Reset filter button click
         $('#btn_reset_filter').on('click', function() {
             $('#filter_tanggal').val('');
-            loadRequests('');
+            $('#filter_kode').val('');
+            loadRequests('', '');
         });
         
         // Filter on enter key
-        $('#filter_tanggal').on('keypress', function(e) {
+        $('#filter_tanggal, #filter_kode').on('keypress', function(e) {
             if (e.which === 13) {
-                const tanggal = $(this).val();
-                loadRequests(tanggal);
+                const tanggal = $('#filter_tanggal').val();
+                const kode = $('#filter_kode').val();
+                loadRequests(tanggal, kode);
             }
         });
         
         // Load initial data (today)
-        loadRequests($('#filter_tanggal').val());
+        loadRequests($('#filter_tanggal').val(), $('#filter_kode').val());
         
         // === DETAIL MODAL FUNCTIONALITY ===
         
