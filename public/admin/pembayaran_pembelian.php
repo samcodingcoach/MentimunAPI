@@ -130,19 +130,17 @@ if (($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) || i
                 }
                 ?>
 
-                <div class="card">
-                    <div class="card-header">
-                        Pencarian Kode Request / No PO
-                    </div>
-                    <div class="card-body">
+                <div>
+                   
                         <form action="pembayaran_pembelian.php" method="post">
                             <div class="mb-3">
                                 <label for="kode_request" class="form-label">Kode Request / No PO</label>
-                                <input type="text" class="form-control" id="kode_request" name="kode_request" value="<?php echo htmlspecialchars($kode_request_value); ?>" required>
+                                <div class="d-flex">
+                                    <input type="text" class="form-control" id="kode_request" name="kode_request" value="<?php echo htmlspecialchars($kode_request_value); ?>" required>
+                                    <button type="submit" class="btn btn-primary ms-2">Cari</button>
+                                </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Cari</button>
                         </form>
-                    </div>
                 </div>
 
                 <?php if (!empty($search_result)): ?>
