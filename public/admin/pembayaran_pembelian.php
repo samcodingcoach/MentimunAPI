@@ -11,31 +11,61 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_pembayaran'])) 
     $id_request = $_POST['id_request'];
     $id_vendor = $_POST['id_vendor'];
     $nomor_bukti_transaksi = $_POST['nomor_bukti_transaksi'];
+    $kode_request = $_POST['kode_request'];
     
     $file_bukti_name = '';
+    $upload_error = '';
+
     if(isset($_FILES['file_bukti']) && $_FILES['file_bukti']['error'] == 0){
         $target_dir = "../images/bukti_tf/";
         if (!file_exists($target_dir)) {
             mkdir($target_dir, 0777, true);
         }
-        $file_bukti_name = basename($_FILES["file_bukti"]["name"]);
-        $target_file = $target_dir . $file_bukti_name;
-        move_uploaded_file($_FILES["file_bukti"]["tmp_name"], $target_file);
+
+        $file = $_FILES['file_bukti'];
+        $file_size = $file['size'];
+        $file_ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+        if ($file_size > 1024 * 1024) {
+            $upload_error = "Ukuran file tidak boleh lebih dari 1 MB.";
+        }
+
+        if ($file_ext !== 'jpg') {
+            $upload_error = "File harus berupa JPG.";
+        }
+
+        if (empty($upload_error)) {
+            $file_bukti_name = date('YmdHis') . '_' . uniqid() . '.jpg';
+            $target_file = $target_dir . $file_bukti_name;
+            if (!move_uploaded_file($file["tmp_name"], $target_file)) {
+                $upload_error = "Gagal mengunggah file.";
+            }
+        }
     }
 
-    $sql_update = "UPDATE bahan_request_detail SET nomor_bukti_transaksi = ?, file_bukti = ?, isDone=1 WHERE id_request = ? and id_vendor = ?";
-    if($stmt_update = $conn->prepare($sql_update)){
-        $stmt_update->bind_param("ssii", $nomor_bukti_transaksi, $file_bukti_name, $id_request, $id_vendor);
-        $stmt_update->execute();
-        $stmt_update->close();
+    if (empty($upload_error)) {
+        $sql_update = "UPDATE bahan_request_detail SET nomor_bukti_transaksi = ?, file_bukti = ?, isDone=1 WHERE id_request = ? and id_vendor = ?";
+        if($stmt_update = $conn->prepare($sql_update)){
+            $stmt_update->bind_param("ssii", $nomor_bukti_transaksi, $file_bukti_name, $id_request, $id_vendor);
+            if ($stmt_update->execute()) {
+                $_SESSION['success_message'] = "Pembayaran berhasil disimpan.";
+            }
+            $stmt_update->close();
+        }
+        header("location: pembayaran_pembelian.php?kode_request=" . urlencode($kode_request));
+        exit;
+    } else {
+        $_SESSION['error_message'] = $upload_error;
+        header("location: pembayaran_pembelian.php?kode_request=" . urlencode($kode_request));
+        exit;
     }
-    header("location: pembayaran_pembelian.php");
-    exit;
 }
 
 $search_result = [];
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) {
-    $kode_request = $_POST['kode_request'];
+$kode_request_value = '';
+if (($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) || isset($_GET['kode_request'])) {
+    $kode_request = isset($_POST['kode_request']) ? $_POST['kode_request'] : $_GET['kode_request'];
+    $kode_request_value = $kode_request;
 
     $sql = "SELECT
                 br.id_request,
@@ -89,6 +119,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) {
                     <h1 class="h2">Pembayaran Pembelian</h1>
                 </div>
 
+                <?php
+                if (isset($_SESSION['success_message'])) {
+                    echo '<div class="alert alert-success">' . $_SESSION['success_message'] . '</div>';
+                    unset($_SESSION['success_message']);
+                }
+                if (isset($_SESSION['error_message'])) {
+                    echo '<div class="alert alert-danger">' . $_SESSION['error_message'] . '</div>';
+                    unset($_SESSION['error_message']);
+                }
+                ?>
+
                 <div class="card">
                     <div class="card-header">
                         Pencarian Kode Request / No PO
@@ -97,7 +138,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) {
                         <form action="pembayaran_pembelian.php" method="post">
                             <div class="mb-3">
                                 <label for="kode_request" class="form-label">Kode Request / No PO</label>
-                                <input type="text" class="form-control" id="kode_request" name="kode_request" required>
+                                <input type="text" class="form-control" id="kode_request" name="kode_request" value="<?php echo htmlspecialchars($kode_request_value); ?>" required>
                             </div>
                             <button type="submit" class="btn btn-primary">Cari</button>
                         </form>
@@ -135,6 +176,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) {
                                         <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#bayarModal"
                                             data-id-request="<?php echo $row['id_request']; ?>"
                                             data-id-vendor="<?php echo $row['id_vendor']; ?>"
+                                            data-kode-request="<?php echo htmlspecialchars($row['kode_request']); ?>"
                                             data-nama-bahan="<?php echo htmlspecialchars($row['nama_bahan']); ?>"
                                             data-vendor="<?php echo htmlspecialchars($row['nama_vendor']); ?>"
                                             data-status="<?php echo $row['isDone'] == 0 ? 'UNPAID' : 'PAID'; ?>"
@@ -153,7 +195,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) {
                         </table>
                     </div>
                 </div>
-                <?php elseif ($_SERVER["REQUEST_METHOD"] == "POST"): ?>
+                <?php elseif (($_SERVER["REQUEST_METHOD"] == "POST" || isset($_GET['kode_request'])) && empty($search_result)): ?>
                 <div class="alert alert-warning mt-4" role="alert">
                     Data tidak ditemukan.
                 </div>
@@ -163,7 +205,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) {
                 <div class="modal fade" id="bayarModal" tabindex="-1" aria-labelledby="bayarModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
-                            <form action="pembayaran_pembelian.php" method="post" enctype="multipart/form-data">
+                            <form id="form-pembayaran" action="pembayaran_pembelian.php" method="post" enctype="multipart/form-data">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="bayarModalLabel">Form Pembayaran</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -171,6 +213,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) {
                                 <div class="modal-body">
                                     <input type="hidden" name="id_request" id="modal-id-request">
                                     <input type="hidden" name="id_vendor" id="modal-id-vendor">
+                                    <input type="hidden" name="kode_request" id="modal-kode-request">
                                     <ul class="nav nav-tabs" id="myTab" role="tablist">
                                         <li class="nav-item" role="presentation">
                                             <button class="nav-link active" id="informasi-tab" data-bs-toggle="tab" data-bs-target="#informasi" type="button" role="tab" aria-controls="informasi" aria-selected="true">Informasi</button>
@@ -245,7 +288,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) {
                                             </div>
                                             <div class="mb-2">
                                                 <label for="modal-bukti-transaksi" class="form-label">Input Bukti Transaksi</label>
-                                                <input type="file" class="form-control form-control-sm" id="modal-bukti-transaksi" name="file_bukti">
+                                                <input type="file" class="form-control form-control-sm" id="modal-bukti-transaksi" name="file_bukti" accept=".jpg">
                                             </div>
                                         </div>
                                     </div>
@@ -274,6 +317,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) {
             var button = event.relatedTarget;
             var id_request = button.getAttribute('data-id-request');
             var id_vendor = button.getAttribute('data-id-vendor');
+            var kode_request = button.getAttribute('data-kode-request');
             var namaBahan = button.getAttribute('data-nama-bahan');
             var vendor = button.getAttribute('data-vendor');
             var status = button.getAttribute('data-status');
@@ -286,6 +330,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) {
 
             var modalIdRequest = bayarModal.querySelector('#modal-id-request');
             var modalIdVendor = bayarModal.querySelector('#modal-id-vendor');
+            var modalKodeRequest = bayarModal.querySelector('#modal-kode-request');
             var modalNamaBahan = bayarModal.querySelector('#modal-nama-bahan');
             var modalVendor = bayarModal.querySelector('#modal-vendor');
             var modalStatus = bayarModal.querySelector('#modal-status');
@@ -298,6 +343,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) {
 
             modalIdRequest.value = id_request;
             modalIdVendor.value = id_vendor;
+            modalKodeRequest.value = kode_request;
             modalNamaBahan.value = namaBahan;
             modalVendor.value = vendor;
             modalStatus.value = status;
@@ -307,6 +353,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) {
             modalJumlah.value = formatNumber(jumlah);
             modalHarga.value = formatNumber(harga);
             modalSubtotal.value = formatNumber(subtotal);
+        });
+
+        var formPembayaran = document.getElementById('form-pembayaran');
+        formPembayaran.addEventListener('submit', function(event) {
+            var fileInput = document.getElementById('modal-bukti-transaksi');
+            if (fileInput.files.length > 0) {
+                var file = fileInput.files[0];
+                var fileType = file.type;
+                var fileSize = file.size;
+
+                if (fileType !== 'image/jpeg') {
+                    alert('File harus berupa JPG.');
+                    event.preventDefault();
+                    return;
+                }
+
+                if (fileSize > 1024 * 1024) {
+                    alert('Ukuran file tidak boleh lebih dari 1 MB.');
+                    event.preventDefault();
+                    return;
+                }
+            }
+            
+            if (!confirm('Apakah Anda yakin ingin menyimpan pembayaran ini?')) {
+                event.preventDefault();
+            }
         });
     </script>
 </body>

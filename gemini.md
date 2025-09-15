@@ -68,3 +68,11 @@ UPDATE bahan_request_detail SET nomor_bukti_transaksi = '?',
 file_bukti = '?', isDone=1 WHERE id_request = '?' and id_vendor = '?'
 
 pastikan dalam form pembayaran ada semua nilai ?
+
+oke sudah masuk, dan berhasil namun beberapa improvment
+
+- validasi gambar tidak lebih dari 1 mb,
+- gambar harus.jpg dan saat di simpan ganti dengan filenametimestamp
+- adanya konfirmasi untuk meyakinkan user untuk submit
+- setelah berhasil, pastikan ada pemberitahuan sukses,
+- setelah berhasil kembali pembayaran_pembelian.php dengan dan langsung memunculkan hasil pencarian yang baru dirubah
