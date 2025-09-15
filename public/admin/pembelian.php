@@ -553,7 +553,7 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                   <tbody id="tbody_requests">
                     <!-- Data akan dimuat via AJAX -->
                   </tbody>
-                  <tfoot class="table-dark">
+                  <tfoot class="table">
                     <!-- Total akan dimuat via AJAX -->
                   </tfoot>
                 </table>
@@ -782,11 +782,7 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
               </table>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              <i class="bi bi-x-circle"></i> Tutup
-            </button>
-          </div>
+          
         </div>
       </div>
     </div>
