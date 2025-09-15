@@ -168,6 +168,86 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
         
+        // Get request detail data
+        if ($_POST['action'] === 'get_request_detail') {
+            $id_request = intval($_POST['id_request']);
+            
+            $sql_detail = "SELECT
+                bahan_request_detail.id_detail_request,
+                bahan_request.kode_request,
+                bahan_request.tanggal_request,
+                CONCAT('[',kategori_bahan.nama_kategori,'] ', bahan.nama_bahan) as nama_bahan,
+                bahan_request_detail.nomor_bukti_transaksi,
+                case
+                when bahan_request_detail.isInvoice = '1' then 'INV'
+                when bahan_request_detail.isInvoice = '0' then 'CASH'
+                end as payment,
+                CASE
+                when bahan_request_detail.isDone = 0 then 'UNPAID'
+                when bahan_request_detail.isDone = 1 then 'PAID'
+                END as IsDone,
+                vendor.nama_vendor,
+                bahan_request_detail.jumlah_request,
+                bahan_request_detail.harga_est as jumlah_harga,
+                FORMAT(bahan_request_detail.subtotal,0) as subtotal
+                FROM
+                bahan_request_detail
+                INNER JOIN
+                bahan
+                ON
+                bahan_request_detail.id_bahan = bahan.id_bahan
+                INNER JOIN
+                vendor
+                ON
+                bahan_request_detail.id_vendor = vendor.id_vendor
+                INNER JOIN
+                kategori_bahan
+                ON
+                bahan.id_kategori = kategori_bahan.id_kategori
+                INNER JOIN
+                bahan_request
+                ON
+                bahan_request_detail.id_request = bahan_request.id_request
+                WHERE
+                bahan_request_detail.id_request = ?
+                ORDER BY
+                id_detail_request DESC";
+                
+            $stmt_detail = mysqli_prepare($conn, $sql_detail);
+            mysqli_stmt_bind_param($stmt_detail, "i", $id_request);
+            mysqli_stmt_execute($stmt_detail);
+            $result_detail = mysqli_stmt_get_result($stmt_detail);
+            
+            $details = [];
+            $request_info = null;
+            
+            if ($result_detail && mysqli_num_rows($result_detail) > 0) {
+                while ($row = mysqli_fetch_assoc($result_detail)) {
+                    if (!$request_info) {
+                        $request_info = [
+                            'kode_request' => $row['kode_request'],
+                            'tanggal_request' => date('d M Y', strtotime($row['tanggal_request']))
+                        ];
+                    }
+                    
+                    $details[] = [
+                        'id_detail_request' => $row['id_detail_request'],
+                        'nama_bahan' => $row['nama_bahan'],
+                        'nomor_bukti_transaksi' => $row['nomor_bukti_transaksi'] ?: '-',
+                        'payment' => $row['payment'],
+                        'isDone' => $row['IsDone'],
+                        'nama_vendor' => $row['nama_vendor'],
+                        'jumlah_request' => $row['jumlah_request'],
+                        'jumlah_harga' => number_format($row['jumlah_harga'], 0, ',', '.'),
+                        'subtotal' => $row['subtotal']
+                    ];
+                }
+            }
+            
+            echo json_encode(['success' => true, 'request_info' => $request_info, 'details' => $details]);
+            exit();
+        }
+        
         // Hapus item dari detail
         if ($_POST['action'] === 'remove_item') {
             $detail_id = intval($_POST['detail_id']);
@@ -393,10 +473,6 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
               <i class="bi bi-plus-circle"></i> Tambah Request
             </button>
           </div>
-          <div>
-              
-            
-          </div>
 
           <?php if ($message): ?>
           <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -413,12 +489,14 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
           <?php endif; ?>
 
           <!-- Daftar Request / PO -->
-          <div class="mb-4">
-            
-            <div>
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Daftar Request Pembelian</h5>
+            </div>
+            <div class="card-body">
               <!-- Filter Tanggal -->
               <div class="row mb-4">
-                <div class="col-md-12">
+                <div class="col-md-4">
                   <label class="form-label fw-semibold">Filter Tanggal:</label>
                   <div class="input-group">
                     <input type="date" class="form-control" id="filter_tanggal" value="<?php echo date('Y-m-d'); ?>">
@@ -430,14 +508,18 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                     </button>
                   </div>
                 </div>
-                
+                <div class="col-md-8">
+                  <div class="d-flex align-items-end h-100">
+                    <small class="text-muted">Pilih tanggal untuk memfilter data request pembelian. Kosongkan untuk menampilkan semua data.</small>
+                  </div>
+                </div>
               </div>
               
               <div class="table-responsive">
-                <table class="table table-hover" id="table_requests">
+                <table class="table table-striped table-hover" id="table_requests">
                   <thead class="table-dark">
                     <tr>
-                                            <th>No.</th>
+                      <th>No.</th>
                       <th>Kode Request</th>
                       <th>Tanggal</th>
                       <th>Pegawai</th>
@@ -627,8 +709,64 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
       </div>
     </div>
 
-    <script src="../js/bootstrap.bundle.min.js"></script>
+    <!-- Modal Detail Request -->
+    <div class="modal fade" id="modalDetailRequest" tabindex="-1" aria-labelledby="modalDetailRequestLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalDetailRequestLabel">Detail Request Pembelian</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Request Info -->
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label"><strong>Kode Request:</strong></label>
+                  <input type="text" class="form-control" id="detail_kode_request" readonly>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label"><strong>Tanggal Request:</strong></label>
+                  <input type="text" class="form-control" id="detail_tanggal_request" readonly>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Detail Items Table -->
+            <div class="table-responsive">
+              <table class="table table-striped table-hover" id="table_detail_items">
+                <thead class="table-dark">
+                  <tr>
+                    <th width="5%">No</th>
+                    <th width="25%">Bahan</th>
+                    <th width="15%">Vendor</th>
+                    <th width="8%">Qty</th>
+                    <th width="10%">Harga</th>
+                    <th width="12%">Subtotal</th>
+                    <th width="8%">Payment</th>
+                    <th width="8%">Status</th>
+                    <th width="9%">No. Bukti</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody_detail_items">
+                  <!-- Data akan dimuat via AJAX -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i class="bi bi-x-circle"></i> Tutup
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     
     <script>
@@ -693,9 +831,9 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                         <td>${request.nama_lengkap}</td>
                         <td>${request.grand_total}</td>
                         <td>
-                            <a href="pembelian_detail.php?id=${request.id_request}" class="btn btn-sm btn-info">
+                            <button type="button" class="btn btn-sm btn-info" onclick="showDetailModal(${request.id_request})">
                                 <i class="bi bi-eye"></i> Detail
-                            </a>
+                            </button>
                         </td>
                     </tr>
                 `);
@@ -724,6 +862,76 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
         
         // Load initial data (today)
         loadRequests($('#filter_tanggal').val());
+        
+        // === DETAIL MODAL FUNCTIONALITY ===
+        
+        // Show detail modal function (global)
+        window.showDetailModal = function(idRequest) {
+            $.ajax({
+                url: window.location.href,
+                type: 'POST',
+                data: {
+                    action: 'get_request_detail',
+                    id_request: idRequest
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success && response.request_info && response.details.length > 0) {
+                        // Fill request info
+                        $('#detail_kode_request').val(response.request_info.kode_request);
+                        $('#detail_tanggal_request').val(response.request_info.tanggal_request);
+                        
+                        // Render detail table
+                        renderDetailTable(response.details);
+                        
+                        // Show modal
+                        $('#modalDetailRequest').modal('show');
+                    } else {
+                        alert('Data detail tidak ditemukan atau request kosong.');
+                    }
+                },
+                error: function() {
+                    alert('Error loading detail data.');
+                }
+            });
+        };
+        
+        // Render detail table
+        function renderDetailTable(details) {
+            const tbody = $('#tbody_detail_items');
+            tbody.empty();
+            
+            if (details.length === 0) {
+                tbody.append('<tr><td colspan="9" class="text-center text-muted">Tidak ada detail item</td></tr>');
+                return;
+            }
+            
+            details.forEach(function(detail, index) {
+                // Status badge class
+                let statusClass = detail.isDone === 'PAID' ? 'bg-success' : 'bg-warning';
+                let paymentClass = detail.payment === 'INV' ? 'bg-info' : 'bg-primary';
+                
+                tbody.append(`
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><small>${detail.nama_bahan}</small></td>
+                        <td><small>${detail.nama_vendor}</small></td>
+                        <td class="text-center">${detail.jumlah_request}</td>
+                        <td class="text-end">Rp ${detail.jumlah_harga}</td>
+                        <td class="text-end">Rp ${detail.subtotal}</td>
+                        <td class="text-center">
+                            <span class="badge ${paymentClass}">${detail.payment}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge ${statusClass}">${detail.isDone}</span>
+                        </td>
+                        <td class="text-center">
+                            <small>${detail.nomor_bukti_transaksi}</small>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
         
         // === MODAL FUNCTIONALITY ===
         

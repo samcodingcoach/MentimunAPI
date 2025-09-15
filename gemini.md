@@ -124,3 +124,55 @@ harusnya pada pembelian.php menampil semua data dan dapat di filter berdasarkan 
 saya lihat anda membuatnya untuk menampilkannya hari ini saja
 
 Pilih tanggal untuk memfilter data request pembelian. Kosongkan untuk menampilkan semua data.
+
+kolom action tombol detail di klik munculkan modal Detail Request
+berikut querynya
+
+SELECT
+bahan_request_detail.id_detail_request,
+bahan_request.kode_request,bahan_request.tanggal_request,
+CONCAT('[',kategori_bahan.nama_kategori,'] ', bahan.nama_bahan) as nama_bahan,
+bahan_request_detail.nomor_bukti_transaksi,
+case
+when bahan_request_detail.isInvoice = '1' then 'INV'
+when bahan_request_detail.isInvoice = '0' then 'CASH'
+end as payment,
+CASE
+when bahan_request_detail.isDone = 0 then 'UNPAID'
+when bahan_request_detail.isDone = 1 then 'PAID'
+END as IsDone,
+vendor.nama_vendor,
+bahan_request_detail.jumlah_request,
+bahan_request_detail.harga_est as jumlah_harga,
+FORMAT(bahan_request_detail.subtotal,0) as subtotal
+
+FROM
+bahan_request_detail
+INNER JOIN
+bahan
+ON
+bahan_request_detail.id_bahan = bahan.id_bahan
+INNER JOIN
+vendor
+ON
+bahan_request_detail.id_vendor = vendor.id_vendor
+INNER JOIN
+kategori_bahan
+ON
+bahan.id_kategori = kategori_bahan.id_kategori
+INNER JOIN
+bahan_request
+ON
+bahan_request_detail.id_request = bahan_request.id_request
+WHERE
+bahan_request_detail.id_request = X
+ORDER BY
+id_detail_request DESC
+
+adalah id_request paramater dari row request.id_request
+
+buat minimalis, readable, responsive. sesuai dengan pattern-patern modal yang lainnya.
+
+select2.min.js:2 Uncaught ReferenceError: jQuery is not defined
+pembelian.php:462 Uncaught ReferenceError: $ is not defined
+at pembelian.php:462:5
