@@ -36,4 +36,27 @@ bahan_request_detail.id_vendor = vendor.id_vendor
 No,....., Action di isikan Bayar
 
 Cukup sampai sini dulu.
+
 jangan melebihi prompt untuk menjawab
+
+oke sudah bagus,
+update table apa yang tampil
+No, Nama Bahan, Vendor, Status, Tipe,Subtotal
+
+dan saat klik Bayar muncul form
+dengan inputan sebagai berikut
+
+Section Informasi
+Nama Bahan, Vendor, Status, Tipe,
+
+Section Rekening
+Nomor Rek 1 , Nomor Rekening 2
+
+Section Nominal
+Jumlah , Harga, Subtotal
+
+Section Bayar
+Input Nomor Bukti Transaksi
+Input Bukti Transaksi, File image upload
+
+cukup sampai sini dulu desain form modal saja

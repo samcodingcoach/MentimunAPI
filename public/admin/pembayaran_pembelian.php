@@ -86,16 +86,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th>Kode Request</th>
                                     <th>Nama Bahan</th>
                                     <th>Vendor</th>
-                                    <th>No. Rekening 1</th>
-                                    <th>No. Rekening 2</th>
                                     <th>Status</th>
                                     <th>Tipe</th>
-                                    <th>No. Bukti</th>
-                                    <th>Jumlah</th>
-                                    <th>Harga Est</th>
                                     <th>Subtotal</th>
                                     <th>Action</th>
                                 </tr>
@@ -104,19 +98,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <?php foreach ($search_result as $index => $row): ?>
                                 <tr>
                                     <td><?php echo $index + 1; ?></td>
-                                    <td><?php echo htmlspecialchars($row['kode_request']); ?></td>
                                     <td><?php echo htmlspecialchars($row['nama_bahan']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['kode_vendor'] . ' - ' . $row['nama_vendor']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['nomor_rekening1']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['nomor_rekening2']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['nama_vendor']); ?></td>
                                     <td><?php echo $row['isDone'] == 0 ? 'UNPAID' : 'PAID'; ?></td>
                                     <td><?php echo $row['isInvoice'] == 0 ? 'INV' : 'BAYAR LANGSUNG'; ?></td>
-                                    <td><?php echo htmlspecialchars($row['nomor_bukti_transaksi']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['jumlah_request']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['harga_est']); ?></td>
                                     <td><?php echo htmlspecialchars($row['subtotal']); ?></td>
                                     <td>
-                                        <button class="btn btn-success btn-sm">Bayar</button>
+                                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#bayarModal"
+                                            data-nama-bahan="<?php echo htmlspecialchars($row['nama_bahan']); ?>"
+                                            data-vendor="<?php echo htmlspecialchars($row['nama_vendor']); ?>"
+                                            data-status="<?php echo $row['isDone'] == 0 ? 'UNPAID' : 'PAID'; ?>"
+                                            data-tipe="<?php echo $row['isInvoice'] == 0 ? 'INV' : 'BAYAR LANGSUNG'; ?>"
+                                            data-rekening1="<?php echo htmlspecialchars($row['nomor_rekening1']); ?>"
+                                            data-rekening2="<?php echo htmlspecialchars($row['nomor_rekening2']); ?>"
+                                            data-jumlah="<?php echo htmlspecialchars($row['jumlah_request']); ?>"
+                                            data-harga="<?php echo htmlspecialchars($row['harga_est']); ?>"
+                                            data-subtotal="<?php echo htmlspecialchars($row['subtotal']); ?>">
+                                            Bayar
+                                        </button>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -130,10 +129,137 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
                 <?php endif; ?>
 
+                <!-- Modal -->
+                <div class="modal fade" id="bayarModal" tabindex="-1" aria-labelledby="bayarModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="bayarModalLabel">Form Pembayaran</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h5>Informasi</h5>
+                                            <div class="mb-3">
+                                                <label for="modal-nama-bahan" class="form-label">Nama Bahan</label>
+                                                <input type="text" class="form-control" id="modal-nama-bahan" readonly>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="modal-vendor" class="form-label">Vendor</label>
+                                                <input type="text" class="form-control" id="modal-vendor" readonly>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="modal-status" class="form-label">Status</label>
+                                                <input type="text" class="form-control" id="modal-status" readonly>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="modal-tipe" class="form-label">Tipe</label>
+                                                <input type="text" class="form-control" id="modal-tipe" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5>Rekening</h5>
+                                            <div class="mb-3">
+                                                <label for="modal-rekening1" class="form-label">Nomor Rek 1</label>
+                                                <input type="text" class="form-control" id="modal-rekening1" readonly>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="modal-rekening2" class="form-label">Nomor Rekening 2</label>
+                                                <input type="text" class="form-control" id="modal-rekening2" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <h5>Nominal</h5>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="mb-3">
+                                                        <label for="modal-jumlah" class="form-label">Jumlah</label>
+                                                        <input type="text" class="form-control" id="modal-jumlah" readonly>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="mb-3">
+                                                        <label for="modal-harga" class="form-label">Harga</label>
+                                                        <input type="text" class="form-control" id="modal-harga" readonly>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="mb-3">
+                                                        <label for="modal-subtotal" class="form-label">Subtotal</label>
+                                                        <input type="text" class="form-control" id="modal-subtotal" readonly>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <h5>Bayar</h5>
+                                            <div class="mb-3">
+                                                <label for="modal-nomor-bukti" class="form-label">Input Nomor Bukti Transaksi</label>
+                                                <input type="text" class="form-control" id="modal-nomor-bukti">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="modal-bukti-transaksi" class="form-label">Input Bukti Transaksi</label>
+                                                <input type="file" class="form-control" id="modal-bukti-transaksi">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Save changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </main>
         </div>
     </div>
 
     <script src="../js/bootstrap.bundle.min.js"></script>
+    <script>
+        var bayarModal = document.getElementById('bayarModal');
+        bayarModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var namaBahan = button.getAttribute('data-nama-bahan');
+            var vendor = button.getAttribute('data-vendor');
+            var status = button.getAttribute('data-status');
+            var tipe = button.getAttribute('data-tipe');
+            var rekening1 = button.getAttribute('data-rekening1');
+            var rekening2 = button.getAttribute('data-rekening2');
+            var jumlah = button.getAttribute('data-jumlah');
+            var harga = button.getAttribute('data-harga');
+            var subtotal = button.getAttribute('data-subtotal');
+
+            var modalNamaBahan = bayarModal.querySelector('#modal-nama-bahan');
+            var modalVendor = bayarModal.querySelector('#modal-vendor');
+            var modalStatus = bayarModal.querySelector('#modal-status');
+            var modalTipe = bayarModal.querySelector('#modal-tipe');
+            var modalRekening1 = bayarModal.querySelector('#modal-rekening1');
+            var modalRekening2 = bayarModal.querySelector('#modal-rekening2');
+            var modalJumlah = bayarModal.querySelector('#modal-jumlah');
+            var modalHarga = bayarModal.querySelector('#modal-harga');
+            var modalSubtotal = bayarModal.querySelector('#modal-subtotal');
+
+            modalNamaBahan.value = namaBahan;
+            modalVendor.value = vendor;
+            modalStatus.value = status;
+            modalTipe.value = tipe;
+            modalRekening1.value = rekening1;
+            modalRekening2.value = rekening2;
+            modalJumlah.value = jumlah;
+            modalHarga.value = harga;
+            modalSubtotal.value = subtotal;
+        });
+    </script>
 </body>
 </html>
