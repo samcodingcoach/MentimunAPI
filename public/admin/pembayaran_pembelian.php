@@ -144,33 +144,31 @@ if (($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) || i
                 </div>
 
                 <?php if (!empty($search_result)): ?>
-                <div class="card mt-4">
-                    <div class="card-header">
-                        Hasil Pencarian
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-striped">
+                <div class="mt-4">
+                   
+                   
+                        <table class="table table-responsive">
                             <thead>
                                 <tr>
-                                    <th>No</th>
+                                    <th class="text-center">No</th>
                                     <th>Nama Bahan</th>
                                     <th>Vendor</th>
-                                    <th>Status</th>
-                                    <th>Tipe</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Tipe</th>
                                     <th>Subtotal</th>
-                                    <th>Action</th>
+                                    <th class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($search_result as $index => $row): ?>
                                 <tr>
-                                    <td><?php echo $index + 1; ?></td>
+                                    <td class="text-center"><?php echo $index + 1; ?></td>
                                     <td><?php echo htmlspecialchars($row['nama_bahan']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['nama_vendor']); ?></td>
-                                    <td><?php echo $row['isDone'] == 0 ? 'UNPAID' : 'PAID'; ?></td>
-                                    <td><?php echo $row['isInvoice'] == 0 ? 'INV' : 'BAYAR LANGSUNG'; ?></td>
-                                    <td><?php echo htmlspecialchars(number_format($row['subtotal'], 0, ',', '.')); ?></td>
-                                    <td>
+                                    <td ><?php echo htmlspecialchars($row['nama_vendor']); ?></td>
+                                    <td class="text-center"><?php echo $row['isDone'] == 0 ? 'UNPAID' : 'PAID'; ?></td>
+                                    <td class="text-center"><?php echo $row['isInvoice'] == 0 ? 'INV' : 'BAYAR LANGSUNG'; ?></td>
+                                    <td class="text-end"><?php echo htmlspecialchars(number_format($row['subtotal'], 0, ',', '.')); ?></td>
+                                    <td class="text-center">
                                         <?php if($row['isDone'] == 0): ?>
                                             <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#bayarModal"
                                                 data-id-request="<?php echo $row['id_request']; ?>"
@@ -209,7 +207,7 @@ if (($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) || i
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
-                    </div>
+                  
                 </div>
                 <?php elseif (($_SERVER["REQUEST_METHOD"] == "POST" || isset($_GET['kode_request'])) && empty($search_result)): ?>
                 <div class="alert alert-warning mt-4" role="alert">
