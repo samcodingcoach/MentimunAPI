@@ -437,7 +437,7 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                 <table class="table table-hover" id="table_requests">
                   <thead class="table-dark">
                     <tr>
-                      <th>ID</th>
+                                            <th>No.</th>
                       <th>Kode Request</th>
                       <th>Tanggal</th>
                       <th>Pegawai</th>
@@ -684,10 +684,10 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                 return;
             }
             
-            requests.forEach(function(request) {
+            requests.forEach(function(request, index) {
                 tbody.append(`
                     <tr>
-                        <td>${request.id_request}</td>
+                        <td>${index + 1}</td>
                         <td>${request.kode_request}</td>
                         <td>${request.tanggal_request}</td>
                         <td>${request.nama_lengkap}</td>
