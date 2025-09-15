@@ -122,3 +122,5 @@ harusnya pembuatan kode_request ketika modal new terbuka dan modal di tutup dan 
 
 harusnya pada pembelian.php menampil semua data dan dapat di filter berdasarkan tanggal datetimepicker YYYY-MM-DD
 saya lihat anda membuatnya untuk menampilkannya hari ini saja
+
+Pilih tanggal untuk memfilter data request pembelian. Kosongkan untuk menampilkan semua data.

@@ -389,6 +389,13 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2">Transaksi Pembelian</h1>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddRequest">
+              <i class="bi bi-plus-circle"></i> Tambah Request
+            </button>
+          </div>
+          <div>
+              
+            
           </div>
 
           <?php if ($message): ?>
@@ -406,17 +413,12 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
           <?php endif; ?>
 
           <!-- Daftar Request / PO -->
-          <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <h5 class="card-title mb-0">Daftar Request Pembelian</h5>
-              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddRequest">
-                <i class="bi bi-plus-circle"></i> Tambah Request
-              </button>
-            </div>
-            <div class="card-body">
+          <div class="mb-4">
+            
+            <div>
               <!-- Filter Tanggal -->
               <div class="row mb-4">
-                <div class="col-md-4">
+                <div class="col-md-12">
                   <label class="form-label fw-semibold">Filter Tanggal:</label>
                   <div class="input-group">
                     <input type="date" class="form-control" id="filter_tanggal" value="<?php echo date('Y-m-d'); ?>">
@@ -428,15 +430,11 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                     </button>
                   </div>
                 </div>
-                <div class="col-md-8">
-                  <div class="d-flex align-items-end h-100">
-                    <small class="text-muted">Pilih tanggal untuk memfilter data request pembelian. Kosongkan untuk menampilkan semua data.</small>
-                  </div>
-                </div>
+                
               </div>
               
               <div class="table-responsive">
-                <table class="table table-striped table-hover" id="table_requests">
+                <table class="table table-hover" id="table_requests">
                   <thead class="table-dark">
                     <tr>
                       <th>ID</th>
