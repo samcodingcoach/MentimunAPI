@@ -366,6 +366,37 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
             </div>
             <?php
             }
+            ?>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-12">
+              <h4>Ringkasan Hari Ini</h4>
+            </div>
+          </div>
+
+          <div class="row gy-4">
+            <?php
+            $sql_invoice = "SELECT SUM(vi.total_dengan_ppn) AS total_invoice FROM pesanan INNER JOIN pegawai ON pegawai.id_user = pesanan.id_user INNER JOIN view_invoice vi ON vi.id_pesanan = pesanan.id_pesanan WHERE status_checkout = '0' AND tgl_cart = CURDATE()";
+            $result_invoice = $conn->query($sql_invoice);
+            $total_invoice = 0;
+            if ($result_invoice && $result_invoice->num_rows > 0) {
+                $row_invoice = $result_invoice->fetch_assoc();
+                if ($row_invoice['total_invoice']) {
+                    $total_invoice = $row_invoice['total_invoice'];
+                }
+            }
+            ?>
+            <div class="col-lg-3 col-md-6">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-receipt fs-1 text-primary"></i>
+                        <h6 class="card-title mt-2">Invoice Belum Checkout</h6>
+                        <p class="card-text fs-5 mb-0">Rp<?php echo number_format($total_invoice, 0, ',', '.'); ?></p>
+                    </div>
+                </div>
+            </div>
+            <?php
             $conn->close();
             ?>
           </div>

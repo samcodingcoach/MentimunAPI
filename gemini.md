@@ -1,33 +1,22 @@
-pada index.php buat dashboard untuk menampilkan hal berikut
-Informasi Terbaru
+dibawah dashboard informasi terbaru
+
+selanjutnya dashboard untuk menampilkan invoice hari ini
 berikut querynya
+
 SELECT
-id_info,
-judul,
-isi,
-divisi,
-gambar,
-link,
-pegawai.nama_lengkap,
-created_time,
-CASE
-WHEN TIMESTAMPDIFF(HOUR, created_time, NOW()) < 8 THEN
-CASE
-WHEN TIMESTAMPDIFF(HOUR, created_time, NOW()) < 1 THEN CONCAT(TIMESTAMPDIFF(MINUTE, created_time, NOW()), ' menit yang lalu')
-WHEN TIMESTAMPDIFF(HOUR, created_time, NOW()) = 1 THEN '1 jam yang lalu'
-ELSE CONCAT(TIMESTAMPDIFF(HOUR, created_time, NOW()), ' jam yang lalu')
-END
-ELSE
-DATE_FORMAT(created_time,'%d %M %Y %H:%i')
-END AS waktu_tampil
-
+SUM(vi.total_dengan_ppn) AS total_invoice
 FROM
-informasi
-INNER JOIN
-pegawai
-ON
-id_users = pegawai.id_user ORDER BY created_time desc
+pesanan
+INNER JOIN pegawai ON pegawai.id_user = pesanan.id_user
+INNER JOIN view_invoice vi ON vi.id_pesanan = pesanan.id_pesanan
+WHERE
+status_checkout = '0'
+AND tgl_cart = CURDATE()
 
-tampilkan dalam bentuk bukan table tetapi seperti post artikel yang modern
-
-gambar posisi /public/images/info/
+kemudian di row yang sama Ringkasan hari ini tambakan setelah card Invoice
+SELECT
+sum(jumlah_uang) AS total_transaksi
+FROM
+proses_pembayaran
+WHERE
+DATE(tanggal_payment) = CURDATE()
