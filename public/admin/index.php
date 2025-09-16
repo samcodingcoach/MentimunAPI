@@ -523,7 +523,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
             <div class="col-lg-4 col-md-6">
                 <h5>Pembatalan</h5>
                 <?php
-                $sql_batal_list = "SELECT DATE_FORMAT(TIME(dapur_batal.waktu),'%H:%i') as waktu, produk_menu.nama_produk, produk_menu.kode_produk, pesanan_detail.ta_dinein, pesanan_detail.qty, produk_sell.harga_jual, dapur_batal.alasan FROM dapur_batal INNER JOIN dapur_order_detail ON dapur_batal.id_order_detail = dapur_order_detail.id_order_detail INNER JOIN pesanan_detail ON dapur_order_detail.id_pesanan_detail = pesanan_detail.id_pesanan_detail INNER JOIN produk_sell ON pesanan_detail.id_produk_sell = produk_sell.id_produk_sell INNER JOIN produk_menu ON produk_sell.id_produk = produk_menu.id_produk WHERE DATE(dapur_batal.waktu) = CURDATE() ORDER BY dapur_batal.id_batal desc limit 15";
+                $sql_batal_list = "SELECT DATE_FORMAT( TIME ( dapur_order_detail.tgl_update ), '%H:%i' ) AS waktu, produk_menu.nama_produk, produk_menu.kode_produk, pesanan_detail.ta_dinein, produk_sell.harga_jual, kategori_menu.nama_kategori FROM dapur_order_detail INNER JOIN pesanan_detail ON dapur_order_detail.id_pesanan_detail = pesanan_detail.id_pesanan_detail INNER JOIN produk_sell ON pesanan_detail.id_produk_sell = produk_sell.id_produk_sell INNER JOIN produk_menu ON produk_sell.id_produk = produk_menu.id_produk INNER JOIN kategori_menu ON produk_menu.id_kategori = kategori_menu.id_kategori WHERE DATE ( tgl_update ) = CURDATE() AND dapur_order_detail.ready = 3 ORDER BY id_order_detail DESC limit 15";
                 $result_batal_list = $conn->query($sql_batal_list);
                 if ($result_batal_list && $result_batal_list->num_rows > 0) {
                     while($row = $result_batal_list->fetch_assoc()) {
@@ -544,7 +544,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                             <div class="card-body py-1">
                                 <h6 class="card-title mb-0"><?php echo htmlspecialchars($row['nama_produk']); ?></h6>
                                 <small class="text-muted"><?php echo htmlspecialchars($row['waktu']); ?></small>
-                                <p class="card-text mb-0">Alasan: <?php echo htmlspecialchars($row['alasan']); ?></p>
+                                <p class="card-text mb-0">Harga: Rp<?php echo number_format($row['harga_jual'], 0, ',', '.'); ?></p>
                             </div>
                         </div>
                     </div>
