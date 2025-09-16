@@ -386,6 +386,16 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                     $total_invoice = $row_invoice['total_invoice'];
                 }
             }
+
+            $sql_transaksi = "SELECT sum(jumlah_uang) AS total_transaksi FROM proses_pembayaran WHERE DATE(tanggal_payment) = CURDATE()";
+            $result_transaksi = $conn->query($sql_transaksi);
+            $total_transaksi = 0;
+            if ($result_transaksi && $result_transaksi->num_rows > 0) {
+                $row_transaksi = $result_transaksi->fetch_assoc();
+                if ($row_transaksi['total_transaksi']) {
+                    $total_transaksi = $row_transaksi['total_transaksi'];
+                }
+            }
             ?>
             <div class="col-lg-3 col-md-6">
                 <div class="card text-center">
@@ -393,6 +403,15 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                         <i class="bi bi-receipt fs-1 text-primary"></i>
                         <h6 class="card-title mt-2">Invoice Belum Checkout</h6>
                         <p class="card-text fs-5 mb-0">Rp<?php echo number_format($total_invoice, 0, ',', '.'); ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-cash-coin fs-1 text-success"></i>
+                        <h6 class="card-title mt-2">Total Transaksi Hari Ini</h6>
+                        <p class="card-text fs-5 mb-0">Rp<?php echo number_format($total_transaksi, 0, ',', '.'); ?></p>
                     </div>
                 </div>
             </div>
