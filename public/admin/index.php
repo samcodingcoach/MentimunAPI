@@ -459,7 +459,14 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 <div class="card mb-3">
                     <div class="row g-0">
                         <div class="col-md-4">
-                            <img src="../images/<?php echo htmlspecialchars($row['kode_produk']); ?>.jpg" class="img-fluid rounded-start" alt="...">
+                            <?php
+                            $image_path = '../images/' . htmlspecialchars($row['kode_produk']) . '.jpg';
+                            if (file_exists($image_path)) {
+                                echo '<img src="' . $image_path . '" class="img-fluid rounded-start" alt="...">';
+                            } else {
+                                echo '<img src="https://via.placeholder.com/150" class="img-fluid rounded-start" alt="Placeholder">';
+                            }
+                            ?>
                         </div>
                         <div class="col-md-8">
                             <div class="card-body py-1">
@@ -488,7 +495,14 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 <div class="card mb-3">
                     <div class="row g-0">
                         <div class="col-md-4">
-                            <img src="../images/<?php echo htmlspecialchars($row['kode_produk']); ?>.jpg" class="img-fluid rounded-start" alt="...">
+                            <?php
+                            $image_path = '../images/' . htmlspecialchars($row['kode_produk']) . '.jpg';
+                            if (file_exists($image_path)) {
+                                echo '<img src="' . $image_path . '" class="img-fluid rounded-start" alt="...">';
+                            } else {
+                                echo '<img src="https://via.placeholder.com/150" class="img-fluid rounded-start" alt="Placeholder">';
+                            }
+                            ?>
                         </div>
                         <div class="col-md-8">
                             <div class="card-body py-1">
@@ -517,7 +531,14 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 <div class="card mb-3">
                     <div class="row g-0">
                         <div class="col-md-4">
-                            <img src="../images/<?php echo htmlspecialchars($row['kode_produk']); ?>.jpg" class="img-fluid rounded-start" alt="...">
+                            <?php
+                            $image_path = '../images/' . htmlspecialchars($row['kode_produk']) . '.jpg';
+                            if (file_exists($image_path)) {
+                                echo '<img src="' . $image_path . '" class="img-fluid rounded-start" alt="...">';
+                            } else {
+                                echo '<img src="https://via.placeholder.com/150" class="img-fluid rounded-start" alt="Placeholder">';
+                            }
+                            ?>
                         </div>
                         <div class="col-md-8">
                             <div class="card-body py-1">
