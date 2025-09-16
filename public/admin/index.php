@@ -396,6 +396,20 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                     $total_transaksi = $row_transaksi['total_transaksi'];
                 }
             }
+
+            $sql_batal = "SELECT COALESCE(SUM(produk_sell.harga_jual),0) AS total_nilai_batal, COUNT(*) AS jumlah_batal FROM dapur_batal INNER JOIN dapur_order_detail ON dapur_batal.id_order_detail = dapur_order_detail.id_order_detail INNER JOIN pesanan ON dapur_batal.id_pesanan = pesanan.id_pesanan INNER JOIN pesanan_detail ON dapur_order_detail.id_pesanan_detail = pesanan_detail.id_pesanan_detail INNER JOIN produk_sell ON pesanan_detail.id_produk_sell = produk_sell.id_produk_sell INNER JOIN meja ON pesanan.id_meja = meja.id_meja INNER JOIN view_produk ON produk_sell.id_produk = view_produk.id_produk INNER JOIN pegawai ON dapur_batal.id_user = pegawai.id_user WHERE DATE(waktu)=CURDATE()";
+            $result_batal = $conn->query($sql_batal);
+            $total_nilai_batal = 0;
+            $jumlah_batal = 0;
+            if ($result_batal && $result_batal->num_rows > 0) {
+                $row_batal = $result_batal->fetch_assoc();
+                if ($row_batal['total_nilai_batal']) {
+                    $total_nilai_batal = $row_batal['total_nilai_batal'];
+                }
+                if ($row_batal['jumlah_batal']) {
+                    $jumlah_batal = $row_batal['jumlah_batal'];
+                }
+            }
             ?>
             <div class="col-lg-3 col-md-6">
                 <div class="card text-center">
@@ -412,6 +426,16 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                         <i class="bi bi-cash-coin fs-1 text-success"></i>
                         <h6 class="card-title mt-2">Total Transaksi Hari Ini</h6>
                         <p class="card-text fs-5 mb-0">Rp<?php echo number_format($total_transaksi, 0, ',', '.'); ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-x-circle fs-1 text-danger"></i>
+                        <h6 class="card-title mt-2">Total Batal Hari Ini</h6>
+                        <p class="card-text fs-5 mb-0">Rp<?php echo number_format($total_nilai_batal, 0, ',', '.'); ?></p>
+                        <small class="text-muted"><?php echo $jumlah_batal; ?> item</small>
                     </div>
                 </div>
             </div>
