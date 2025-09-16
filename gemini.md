@@ -1,45 +1,36 @@
-dibawah dashboard informasi terbaru
+dibawah dashboard ringkasan hari ini
 
-selanjutnya dashboard untuk menampilkan invoice hari ini
+buatkan row dibagi 3 kolom (menampilkan daftar menu yang terakhir di pesan, 1. Makanan, Minuman,Pembatalan)
+fokus ke kolom pertama yaitu makanan,
 berikut querynya
 
 SELECT
-SUM(vi.total_dengan_ppn) AS total_invoice
+DATE_FORMAT(TIME(dapur_order_detail.tgl_update),'%H:%i') as waktu,
+produk_menu.nama_produk,
+produk_menu.kode_produk,
+pesanan_detail.ta_dinein,
+pesanan_detail.qty,
+produk_sell.harga_jual,
+kategori_menu.nama_kategori
 FROM
-pesanan
-INNER JOIN pegawai ON pegawai.id_user = pesanan.id_user
-INNER JOIN view_invoice vi ON vi.id_pesanan = pesanan.id_pesanan
-WHERE
-status_checkout = '0'
-AND tgl_cart = CURDATE()
+dapur_order_detail
+INNER JOIN
+pesanan_detail
+ON
+dapur_order_detail.id_pesanan_detail = pesanan_detail.id_pesanan_detail
+INNER JOIN
+produk_sell
+ON
+pesanan_detail.id_produk_sell = produk_sell.id_produk_sell
+INNER JOIN
+produk_menu
+ON
+produk_sell.id_produk = produk_menu.id_produk
+INNER JOIN
+kategori_menu
+ON
+produk_menu.id_kategori = kategori_menu.id_kategori
+WHERE dapur_order_detail.ready >=0 and DATE(tgl_update) = CURDATE() and dapur_order_detail.ready >=2 ORDER BY id_order_detail desc limit 15
 
-kemudian di row yang sama Ringkasan hari ini tambakan setelah card Invoice
-SELECT
-sum(jumlah_uang) AS total_transaksi
-FROM
-proses_pembayaran
-WHERE
-DATE(tanggal_payment) = CURDATE()
-
-kemudian di row yang sama Ringkasan hari ini tambahkan setelah card Total Transaksi hari ini
-SELECT
-COALESCE(SUM(produk_sell.harga_jual),0) AS total_nilai_batal,
-COUNT(\*) AS jumlah_batal
-FROM
-dapur_batal
-INNER JOIN dapur_order_detail
-ON dapur_batal.id_order_detail = dapur_order_detail.id_order_detail
-INNER JOIN pesanan
-ON dapur_batal.id_pesanan = pesanan.id_pesanan
-INNER JOIN pesanan_detail
-ON dapur_order_detail.id_pesanan_detail = pesanan_detail.id_pesanan_detail
-INNER JOIN produk_sell
-ON pesanan_detail.id_produk_sell = produk_sell.id_produk_sell
-INNER JOIN meja
-ON pesanan.id_meja = meja.id_meja
-INNER JOIN view_produk
-ON produk_sell.id_produk = view_produk.id_produk
-INNER JOIN pegawai
-ON dapur_batal.id_user = pegawai.id_user
-WHERE
-DATE(waktu)=CURDATE()
+tamplikan dalam bentuk card, untuk munculkan gambar terdapat di ../images/{kode_produk}.jpg
+tampilkan nama_kategori = 'Makanan' di kolom 1 dan kolom 2 'Minuman'

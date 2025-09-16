@@ -411,7 +411,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                 }
             }
             ?>
-            <div class="col-lg-3 col-md-6">
+            <div class="col-lg-4 col-md-6">
                 <div class="card text-center">
                     <div class="card-body">
                         <i class="bi bi-receipt fs-1 text-primary"></i>
@@ -420,7 +420,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                     </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6">
+            <div class="col-lg-4 col-md-6">
                 <div class="card text-center">
                     <div class="card-body">
                         <i class="bi bi-cash-coin fs-1 text-success"></i>
@@ -429,7 +429,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                     </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6">
+            <div class="col-lg-4 col-md-6">
                 <div class="card text-center">
                     <div class="card-body">
                         <i class="bi bi-x-circle fs-1 text-danger"></i>
@@ -439,9 +439,103 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
                     </div>
                 </div>
             </div>
-            <?php
-            $conn->close();
-            ?>
+          </div>
+
+          <div class="row mt-4">
+            <div class="col-12">
+              <h4>Aktifitas Terkini</h4>
+            </div>
+          </div>
+
+          <div class="row gy-4">
+            <div class="col-lg-4 col-md-6">
+                <h5>Makanan</h5>
+                <?php
+                $sql_makanan = "SELECT DATE_FORMAT(TIME(dapur_order_detail.tgl_update),'%H:%i') as waktu, produk_menu.nama_produk, produk_menu.kode_produk, pesanan_detail.ta_dinein, pesanan_detail.qty, produk_sell.harga_jual, kategori_menu.nama_kategori FROM dapur_order_detail INNER JOIN pesanan_detail ON dapur_order_detail.id_pesanan_detail = pesanan_detail.id_pesanan_detail INNER JOIN produk_sell ON pesanan_detail.id_produk_sell = produk_sell.id_produk_sell INNER JOIN produk_menu ON produk_sell.id_produk = produk_menu.id_produk INNER JOIN kategori_menu ON produk_menu.id_kategori = kategori_menu.id_kategori WHERE dapur_order_detail.ready >=0 and DATE(tgl_update) = CURDATE() and dapur_order_detail.ready >=2 and kategori_menu.nama_kategori = 'Makanan' ORDER BY id_order_detail desc limit 15";
+                $result_makanan = $conn->query($sql_makanan);
+                if ($result_makanan && $result_makanan->num_rows > 0) {
+                    while($row = $result_makanan->fetch_assoc()) {
+                ?>
+                <div class="card mb-3">
+                    <div class="row g-0">
+                        <div class="col-md-4">
+                            <img src="../images/<?php echo htmlspecialchars($row['kode_produk']); ?>.jpg" class="img-fluid rounded-start" alt="...">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body py-1">
+                                <h6 class="card-title mb-0"><?php echo htmlspecialchars($row['nama_produk']); ?></h6>
+                                <small class="text-muted"><?php echo htmlspecialchars($row['waktu']); ?></small>
+                                <p class="card-text mb-0">Qty: <?php echo htmlspecialchars($row['qty']); ?> - <?php echo htmlspecialchars($row['ta_dinein']); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php
+                    }
+                } else {
+                    echo "<p>Tidak ada data makanan.</p>";
+                }
+                ?>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <h5>Minuman</h5>
+                <?php
+                $sql_minuman = "SELECT DATE_FORMAT(TIME(dapur_order_detail.tgl_update),'%H:%i') as waktu, produk_menu.nama_produk, produk_menu.kode_produk, pesanan_detail.ta_dinein, pesanan_detail.qty, produk_sell.harga_jual, kategori_menu.nama_kategori FROM dapur_order_detail INNER JOIN pesanan_detail ON dapur_order_detail.id_pesanan_detail = pesanan_detail.id_pesanan_detail INNER JOIN produk_sell ON pesanan_detail.id_produk_sell = produk_sell.id_produk_sell INNER JOIN produk_menu ON produk_sell.id_produk = produk_menu.id_produk INNER JOIN kategori_menu ON produk_menu.id_kategori = kategori_menu.id_kategori WHERE dapur_order_detail.ready >=0 and DATE(tgl_update) = CURDATE() and dapur_order_detail.ready >=2 and kategori_menu.nama_kategori = 'Minuman' ORDER BY id_order_detail desc limit 15";
+                $result_minuman = $conn->query($sql_minuman);
+                if ($result_minuman && $result_minuman->num_rows > 0) {
+                    while($row = $result_minuman->fetch_assoc()) {
+                ?>
+                <div class="card mb-3">
+                    <div class="row g-0">
+                        <div class="col-md-4">
+                            <img src="../images/<?php echo htmlspecialchars($row['kode_produk']); ?>.jpg" class="img-fluid rounded-start" alt="...">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body py-1">
+                                <h6 class="card-title mb-0"><?php echo htmlspecialchars($row['nama_produk']); ?></h6>
+                                <small class="text-muted"><?php echo htmlspecialchars($row['waktu']); ?></small>
+                                <p class="card-text mb-0">Qty: <?php echo htmlspecialchars($row['qty']); ?> - <?php echo htmlspecialchars($row['ta_dinein']); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php
+                    }
+                } else {
+                    echo "<p>Tidak ada data minuman.</p>";
+                }
+                ?>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <h5>Pembatalan</h5>
+                <?php
+                $sql_batal_list = "SELECT DATE_FORMAT(TIME(dapur_batal.waktu),'%H:%i') as waktu, produk_menu.nama_produk, produk_menu.kode_produk, pesanan_detail.ta_dinein, pesanan_detail.qty, produk_sell.harga_jual, dapur_batal.alasan FROM dapur_batal INNER JOIN dapur_order_detail ON dapur_batal.id_order_detail = dapur_order_detail.id_order_detail INNER JOIN pesanan_detail ON dapur_order_detail.id_pesanan_detail = pesanan_detail.id_pesanan_detail INNER JOIN produk_sell ON pesanan_detail.id_produk_sell = produk_sell.id_produk_sell INNER JOIN produk_menu ON produk_sell.id_produk = produk_menu.id_produk WHERE DATE(dapur_batal.waktu) = CURDATE() ORDER BY dapur_batal.id_batal desc limit 15";
+                $result_batal_list = $conn->query($sql_batal_list);
+                if ($result_batal_list && $result_batal_list->num_rows > 0) {
+                    while($row = $result_batal_list->fetch_assoc()) {
+                ?>
+                <div class="card mb-3">
+                    <div class="row g-0">
+                        <div class="col-md-4">
+                            <img src="../images/<?php echo htmlspecialchars($row['kode_produk']); ?>.jpg" class="img-fluid rounded-start" alt="...">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body py-1">
+                                <h6 class="card-title mb-0"><?php echo htmlspecialchars($row['nama_produk']); ?></h6>
+                                <small class="text-muted"><?php echo htmlspecialchars($row['waktu']); ?></small>
+                                <p class="card-text mb-0">Alasan: <?php echo htmlspecialchars($row['alasan']); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php
+                    }
+                } else {
+                    echo "<p>Tidak ada data pembatalan.</p>";
+                }
+                $conn->close();
+                ?>
+            </div>
           </div>
 
         </main>
