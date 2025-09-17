@@ -4,9 +4,6 @@ error_reporting(E_ALL & ~E_NOTICE);
 
 include "../../config/koneksi.php";
 
-// Mengambil nilai kategori dari parameter GET, dengan default 1 jika tidak ada.
-$kategori = isset($_GET['id_kategori']) ? intval($_GET['id_kategori']) : 1;
-
 $sql = "
 SELECT
     ps.id_produk_sell,
@@ -20,16 +17,27 @@ FROM
 INNER JOIN
     view_produk vp ON ps.id_produk = vp.id_produk
 WHERE 
-    ps.tgl_release = CURDATE() AND vp.id_kategori = ?
-ORDER BY 
-    vp.nama_kategori ASC, vp.nama_produk ASC";
+    ps.tgl_release = CURDATE()";
+
+$params = array();
+$types = "";
+
+if (isset($_GET['id_kategori']) && !empty($_GET['id_kategori'])) {
+    $sql .= " AND vp.id_kategori = ?";
+    $params[] = intval($_GET['id_kategori']);
+    $types .= "i";
+}
+
+$sql .= " ORDER BY vp.nama_kategori ASC, vp.nama_produk ASC";
 
 // Menyiapkan statement
 $stmt = mysqli_prepare($conn, $sql);
 
 if ($stmt) {
-    // Mengikat parameter
-    mysqli_stmt_bind_param($stmt, "i", $kategori);
+    // Mengikat parameter jika ada
+    if (!empty($params)) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
 
     // Menjalankan statement
     mysqli_stmt_execute($stmt);
@@ -54,7 +62,7 @@ if ($stmt) {
     mysqli_stmt_close($stmt);
 } else {
     // Penanganan error jika statement gagal disiapkan
-    echo json_encode(array("error" => "Gagal menyiapkan statement SQL."));
+    echo json_encode(array("error" => "Gagal menyiapkan statement SQL: " . mysqli_error($conn)));
 }
 
 // Menutup koneksi
