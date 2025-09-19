@@ -38,7 +38,7 @@ if (mysqli_num_rows($resultCheck) > 0) {
         $id_konsumen = mysqli_insert_id($conn);
         $response = [
             'status' => 'success',
-            'message' => 'Insert Success',
+            'message' => 'Berhasil mendaftarkan member baru.',
             'id_konsumen' => $id_konsumen
         ];
     } else {
