@@ -7,7 +7,7 @@ $nama_promo = $_GET['nama_promo'];
 
 include "../../config/koneksi.php";
 $sql = "SELECT
-	id_promo,pilihan_promo,nominal,min_pembelian,deskripsi
+	id_promo,pilihan_promo,persen,nominal,min_pembelian,deskripsi
 FROM
 	promo
 WHERE
