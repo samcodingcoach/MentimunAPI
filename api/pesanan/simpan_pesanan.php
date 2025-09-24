@@ -4,11 +4,7 @@ ini_set('display_errors', 1);
 
 header("Content-Type: application/json; charset=UTF-8");
 
-// Ganti dengan path file koneksi Anda yang benar
-include "../../config/koneksi.php";
-
-// Memaksa mysqli untuk melempar 'exception' jika ada error database
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+include "../../config/koneksi.php"; // File ini membuat variabel $conn
 
 $json_data = file_get_contents("php://input");
 $data = json_decode($json_data, true);
@@ -19,60 +15,64 @@ if ($data === null) {
     exit();
 }
 
-$conn->begin_transaction();
+// Mulai transaksi
+mysqli_begin_transaction($conn);
 
 try {
-    // Hitung Nomor Antrian
+    // ---- BAGIAN 1: PESANAN & DETAIL ----
     $query_antri = "SELECT COUNT(id_pesanan) as antrian_hari_ini FROM pesanan WHERE DATE(tgl_cart) = CURDATE()";
-    $result_antri = $conn->query($query_antri);
-    $row_antri = $result_antri->fetch_assoc();
+    $result_antri = mysqli_query($conn, $query_antri);
+    $row_antri = mysqli_fetch_assoc($result_antri);
     $nomor_antri_baru = $row_antri['antrian_hari_ini'] + 1;
 
-    // Casting tipe data
-    $id_user = (int)$data['id_user'];
-    $id_konsumen = (int)$data['id_konsumen'];
-    $total_cart = (double)$data['total_cart'];
-    $id_meja = (int)$data['id_meja'];
+    $stmt_pesanan = mysqli_prepare($conn, "INSERT INTO pesanan (id_user, id_konsumen, total_cart, status_checkout, id_meja, deviceid, nomor_antri) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    mysqli_stmt_bind_param($stmt_pesanan, "iidsisi", $data['id_user'], $data['id_konsumen'], $data['total_cart'], $data['status_checkout'], $data['id_meja'], $data['deviceid'], $nomor_antri_baru);
+    mysqli_stmt_execute($stmt_pesanan);
+    $id_pesanan_baru = mysqli_insert_id($conn);
 
-    // Insert ke tabel 'pesanan'
-    $stmt_pesanan = $conn->prepare("INSERT INTO pesanan (id_user, id_konsumen, total_cart, status_checkout, id_meja, deviceid, nomor_antri) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt_pesanan->bind_param("iidsisi", $id_user, $id_konsumen, $total_cart, $data['status_checkout'], $id_meja, $data['deviceid'], $nomor_antri_baru);
-    $stmt_pesanan->execute();
-    
-    if ($stmt_pesanan->affected_rows === 0) {
-        throw new Exception("Gagal menyimpan data pesanan utama.");
-    }
-
-    $id_pesanan_baru = $conn->insert_id;
-
-    // Insert ke tabel 'pesanan_detail'
-    $stmt_detail = $conn->prepare("INSERT INTO pesanan_detail (id_pesanan, id_produk_sell, qty, ta_dinein) VALUES (?, ?, ?, ?)");
-    
+    $stmt_detail = mysqli_prepare($conn, "INSERT INTO pesanan_detail (id_pesanan, id_produk_sell, qty, ta_dinein) VALUES (?, ?, ?, ?)");
     foreach ($data['pesanan_detail'] as $detail) {
-        $id_produk_sell = (int)$detail['id_produk_sell'];
-        $qty = (int)$detail['qty'];
-        
-        $stmt_detail->bind_param("iiis", $id_pesanan_baru, $id_produk_sell, $qty, $detail['ta_dinein']);
-        $stmt_detail->execute();
-
-        if ($stmt_detail->affected_rows === 0) {
-            throw new Exception("Gagal menyimpan detail untuk produk ID: " . $id_produk_sell);
-        }
+        mysqli_stmt_bind_param($stmt_detail, "iiis", $id_pesanan_baru, $detail['id_produk_sell'], $detail['qty'], $detail['ta_dinein']);
+        mysqli_stmt_execute($stmt_detail);
     }
     
-    $conn->commit();
-    echo json_encode([
-        'status' => 'success', 
-        'message' => 'Pesanan berhasil disimpan.', 
-        'id_pesanan' => $id_pesanan_baru,
-        'nomor_antri' => $nomor_antri_baru
-    ]);
+    // ---- BAGIAN 2: PEMBAYARAN & DETAIL PEMBAYARAN ----
+    $pembayaran = $data['proses_pembayaran'];
+    $detail_pembayaran = $pembayaran['pembayaran_detail'];
+
+    $query_inc = "SELECT COUNT(id_checkout) as inc_hari_ini FROM proses_pembayaran WHERE DATE(tanggal_payment) = CURDATE()";
+    $result_inc = mysqli_query($conn, $query_inc);
+    $row_inc = mysqli_fetch_assoc($result_inc);
+    $increment = str_pad($row_inc['inc_hari_ini'] + 1, 4, '0', STR_PAD_LEFT);
+    $kode_payment = "POS-" . $data['id_meja'] . "-" . date("ymd") . $increment;
+    $id_tagihan = "INV-" . $data['id_meja'] . "-" . date("ymd") . $increment;
+    
+    $stmt_pembayaran = mysqli_prepare($conn, "INSERT INTO proses_pembayaran (kode_payment, id_pesanan, id_bayar, id_user, status, jumlah_uang, jumlah_dibayarkan, kembalian, id_tagihan, model_diskon, nilai_nominal, total_diskon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    mysqli_stmt_bind_param($stmt_pembayaran, "siiisdddssdd", 
+        $kode_payment, $id_pesanan_baru, $pembayaran['id_bayar'], $pembayaran['id_user'], $pembayaran['status'], 
+        $pembayaran['jumlah_uang'], $pembayaran['jumlah_dibayarkan'], $pembayaran['kembalian'], 
+        $id_tagihan, $pembayaran['model_diskon'], $pembayaran['nilai_nominal'], $pembayaran['total_diskon']
+    );
+    mysqli_stmt_execute($stmt_pembayaran);
+
+    $stmt_pembayaran_detail = mysqli_prepare($conn, "INSERT INTO proses_pembayaran_detail (kode_payment, subtotal, biaya_pengemasan, service_charge, promo_diskon, ppn_resto) VALUES (?, ?, ?, ?, ?, ?)");
+    mysqli_stmt_bind_param($stmt_pembayaran_detail, "sddddd", 
+        $kode_payment, $detail_pembayaran['subtotal'], $detail_pembayaran['biaya_pengemasan'], 
+        $detail_pembayaran['service_charge'], $detail_pembayaran['promo_diskon'], $detail_pembayaran['ppn_resto']
+    );
+    mysqli_stmt_execute($stmt_pembayaran_detail);
+
+    // Jika semua berhasil, commit
+    mysqli_commit($conn);
+    
+    echo json_encode(['status' => 'success', 'message' => 'Pesanan dan pembayaran berhasil disimpan.']);
 
 } catch (Exception $e) {
-    $conn->rollback();
+    // Jika ada error, rollback
+    mysqli_rollback($conn);
     http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => 'Query Gagal: ' . $e->getMessage()]);
 }
 
-$conn->close();
+mysqli_close($conn);
 ?>
