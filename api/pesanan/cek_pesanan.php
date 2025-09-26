@@ -38,7 +38,7 @@ if (mysqli_num_rows($result_meja) > 0) {
                     FROM
                         pesanan p
                         INNER JOIN konsumen k ON p.id_konsumen = k.id_konsumen 
-                    WHERE p.status_checkout=1 AND p.id_meja = $id_meja";
+                    WHERE p.status_checkout=1 AND p.id_meja = $id_meja AND DATE(p.tgl_cart) = CURDATE() ORDER BY p.tgl_cart DESC LIMIT 1";
     
     $result_pesanan = mysqli_query($conn, $sql_pesanan);
 
