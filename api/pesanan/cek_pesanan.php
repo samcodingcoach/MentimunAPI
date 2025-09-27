@@ -48,18 +48,29 @@ if (mysqli_num_rows($result_meja) > 0) {
 
         // 3. Mengambil detail pesanan (item-item) berdasarkan id_pesanan
         $sql_detail = "SELECT
-                            pd.id_pesanan, 
-                            pd.id_produk_sell, 
-                            pm.kode_produk, 
-                            pm.nama_produk, 
-                            ps.harga_jual, 
-                            pd.qty, 
-                            pd.ta_dinein, 
-                            pd.ket
-                        FROM
-                            pesanan_detail pd
-                            INNER JOIN produk_sell ps ON pd.id_produk_sell = ps.id_produk_sell
-                            INNER JOIN produk_menu pm ON ps.id_produk = pm.id_produk 
+	pd.id_pesanan, 
+	pd.id_produk_sell, 
+	pm.kode_produk, 
+	pm.nama_produk, 
+	ps.harga_jual, 
+	pd.qty, 
+	pd.ta_dinein, 
+	pd.ket, 
+	kategori_menu.nama_kategori
+FROM
+	pesanan_detail AS pd
+	INNER JOIN
+	produk_sell AS ps
+	ON 
+		pd.id_produk_sell = ps.id_produk_sell
+	INNER JOIN
+	produk_menu AS pm
+	ON 
+		ps.id_produk = pm.id_produk
+	INNER JOIN
+	kategori_menu
+	ON 
+		pm.id_kategori = kategori_menu.id_kategori
                         WHERE pd.id_pesanan = $id_pesanan";
 
         $result_detail = mysqli_query($conn, $sql_detail);
