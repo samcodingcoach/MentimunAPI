@@ -1,7 +1,7 @@
 <?php
 
 error_reporting(E_ALL & ~E_NOTICE);
-include "../config/koneksi.php";
+include "../../config/koneksi.php";
 
 // Ambil serverKey dari database
 $query = "SELECT serverkeymidtrans FROM perusahaan ORDER BY id_app DESC LIMIT 1";
@@ -13,8 +13,7 @@ if ($result && mysqli_num_rows($result) > 0) {
 } 
 else 
 {
-    // Fallback jika gagal ambil dari DB
-    // $serverKey = 'SB-Mid-server-IV-Hqe8N16ymtZ4Z55HnxyhY'; // Optional fallback key
+    
 }
 
 // require_once dirname(__FILE__) . '/vendor/autoload.php'; // Jika pakai Composer
