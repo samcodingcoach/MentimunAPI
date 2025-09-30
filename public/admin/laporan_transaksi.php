@@ -1445,8 +1445,8 @@ foreach ($semua_data as $row) {
 const imgContainer = document.getElementById('modal-img-container');
 if (imgSs && imgSs !== '') {
   imgContainer.innerHTML = `
-    <a href="../struk/images/${imgSs}" target="_blank" class="d-block">
-      <img src="../struk/images/${imgSs}" class="img-fluid rounded border" style="max-height: 400px;" alt="Bukti Transfer">
+    <a href="../images/bukti_tf/${imgSs}" target="_blank" class="d-block">
+      <img src="../images/bukti_tf/${imgSs}" class="img-fluid rounded border" style="max-height: 400px;" alt="Bukti Transfer">
     </a>
     <p class="mt-2 text-muted small">Klik gambar untuk melihat ukuran penuh</p>
   `;
