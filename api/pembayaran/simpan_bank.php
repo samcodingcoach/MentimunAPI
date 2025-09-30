@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-$required_fields = ['kode_payment', 'transfer_or_edc', 'nama_bank', 'nama_pengirim', 'no_referensi'];
+$required_fields = ['kode_payment', 'transfer_or_edc', 'nama_bank', 'nama_pengirim', 'no_referensi', 'nominal_transfer'];
 foreach ($required_fields as $field) {
     if (!isset($_POST[$field]) || $_POST[$field] === '') {
         http_response_code(400);
@@ -25,6 +25,8 @@ $transfer_or_edc = $_POST['transfer_or_edc'];
 $nama_bank = $_POST['nama_bank'];
 $nama_pengirim = $_POST['nama_pengirim'];
 $no_referensi = $_POST['no_referensi'];
+$nominal_transfer = $_POST['nominal_transfer'];
+
 
 $img_ss = ''; // Hanya simpan nama file
 
@@ -68,23 +70,29 @@ mysqli_begin_transaction($conn);
 
 try {
     $stmt = mysqli_prepare($conn, "
-        INSERT INTO proses_edc (
-            kode_payment, transfer_or_edc, nama_bank, nama_pengirim, 
-            nominal_transfer, tanggal_transfer, no_referensi, img_ss
-        ) VALUES (?, ?, ?, ?, 0.0, NOW(), ?, ?)
+        UPDATE proses_edc 
+        SET 
+            transfer_or_edc = ?, 
+            nama_bank = ?, 
+            nama_pengirim = ?, 
+            no_referensi = ?, 
+            img_ss = ?,
+            nominal_transfer = ?
+        WHERE 
+            kode_payment = ?
     ");
 
-    mysqli_stmt_bind_param($stmt, "ssssss", 
-        $kode_payment,
+        mysqli_stmt_bind_param($stmt, "sssssss", 
         $transfer_or_edc,
         $nama_bank,
         $nama_pengirim,
         $no_referensi,
-        $img_ss  // <-- hanya nama file
+        $img_ss,
+        $nominal_transfer,
+        $kode_payment
     );
 
     mysqli_stmt_execute($stmt);
-    $id_proses_edc = mysqli_insert_id($conn);
     mysqli_stmt_close($stmt);
 
     mysqli_commit($conn);
@@ -94,8 +102,7 @@ try {
 
     echo json_encode([
         'status' => 'success',
-        'message' => 'Data pembayaran berhasil disimpan.',
-        'id' => $id_proses_edc,
+        'message' => 'Data pembayaran berhasil diupdate.',
         'img_file_name' => $img_ss,        // nama file saja
         'img_url' => $full_img_url         // URL lengkap untuk frontend (opsional)
     ]);

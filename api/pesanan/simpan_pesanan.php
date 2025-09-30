@@ -53,7 +53,6 @@ try {
         $row_inc = $result_inc->fetch_assoc();
         $increment = str_pad($row_inc['inc_hari_ini'] + 1, 4, '0', STR_PAD_LEFT);
         $kode_payment = "POS-" . $data['id_meja'] . "-" . date("ymd") . $increment;
-        //$id_tagihan = "INV-" . $data['id_meja'] . "-" . date("ymd") . $increment;
         
         $stmt_pembayaran = $conn->prepare("INSERT INTO proses_pembayaran (kode_payment, id_pesanan, id_bayar, id_user, status, jumlah_uang, jumlah_dibayarkan, kembalian, model_diskon, nilai_nominal, total_diskon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt_pembayaran->bind_param("siiisdddsdd", $kode_payment, $id_pesanan_baru, $pembayaran['id_bayar'], $pembayaran['id_user'], $pembayaran['status'], $pembayaran['jumlah_uang'], $pembayaran['jumlah_dibayarkan'], $pembayaran['kembalian'], $pembayaran['model_diskon'], $pembayaran['nilai_nominal'], $pembayaran['total_diskon']);
@@ -66,7 +65,8 @@ try {
     }
 
     $conn->commit();
-    echo json_encode(['status' => 'success', 'message' => 'Transaksi berhasil disimpan.']);
+    echo json_encode(['status' => 'success', 'message' => 'Transaksi berhasil disimpan.', 
+    'kode_payment' => $kode_payment]);
 
 } catch (Exception $e) {
     $conn->rollback();
