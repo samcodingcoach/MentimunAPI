@@ -3,7 +3,7 @@ require_once 'config.php'; // Konfigurasi Midtrans
 $data = json_decode(file_get_contents('php://input'), true);
 
 $orderId = $data['order_id'];
-$grossAmount = '15000'; //$data['gross_amount'];
+$grossAmount = $data['gross_amount'];
 
 // Data transaksi
 $params = [

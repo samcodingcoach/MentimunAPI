@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE);
-include "../config/koneksi.php";
+include "config.php";
 $order_id = $_GET['kode_payment'];  // Ambil Order ID dari parameter URL
 $url = "https://api.sandbox.midtrans.com/v2/$order_id/status";  // Endpoint status transaksi
 
@@ -10,7 +10,7 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'Accept: application/json',
     'Content-Type: application/json',
-    'Authorization: Basic ' . base64_encode('SB-Mid-server-IV-Hqe8N16ymtZ4Z55HnxyhY:')  // Ganti dengan server key Anda
+    'Authorization: Basic ' . base64_encode($serverKey . ':')  // Ganti dengan server key Anda
 ]);
 
 $response = curl_exec($ch);
