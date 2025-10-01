@@ -2,7 +2,10 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 header("Content-Type: application/json; charset=UTF-8");
+
+// Include both database and Midtrans configurations
 include "../../config/koneksi.php";
+require_once __DIR__ . '/../midtrans/config.php';
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 $json_data = file_get_contents("php://input");
@@ -30,6 +33,9 @@ if (!$kode_payment_existing) {
     echo json_encode(['status' => 'error', 'message' => 'Kode payment tidak ditemukan dalam data.']);
     exit();
 }
+
+// Initialize QRIS URL variable
+$qrisUrl = null;
 
 mysqli_begin_transaction($conn);
 
@@ -79,11 +85,17 @@ try {
     }
     
     // ---- 4. UPDATE TABEL proses_pembayaran ----
+    // If payment method is QRIS (id_bayar = 3), force status to 0 (pending)
+    $payment_status = $pembayaran['status'];
+    if ((int)$pembayaran['id_bayar'] === 3) {
+        $payment_status = 0;
+    }
+
     $stmt_pembayaran = mysqli_prepare($conn, "UPDATE proses_pembayaran SET id_bayar = ?, status = ?, jumlah_uang = ?, jumlah_dibayarkan = ?, kembalian = ?, model_diskon = ?, nilai_nominal = ?, total_diskon = ? WHERE kode_payment = ?");
     
     mysqli_stmt_bind_param($stmt_pembayaran, "isdddsdds", 
         $pembayaran['id_bayar'], 
-        $pembayaran['status'], 
+        $payment_status, 
         $pembayaran['jumlah_uang'], 
         $pembayaran['jumlah_dibayarkan'], 
         $pembayaran['kembalian'], 
@@ -108,8 +120,40 @@ try {
     mysqli_stmt_execute($stmt_pembayaran_detail);
     mysqli_stmt_close($stmt_pembayaran_detail);
 
+    // ---- 6. QRIS Generation Logic ----
+    // Check if the payment method is QRIS (id_bayar = 3)
+    if ((int)$pembayaran['id_bayar'] === 3) {
+        // Prepare parameters for Midtrans API call
+        $params = [
+            'payment_type' => 'qris',
+            'transaction_details' => [
+                'order_id' => $kode_payment_existing, // Use the existing kode_payment
+                'gross_amount' => $pembayaran['jumlah_uang'], // Use the total amount
+            ],
+        ];
+
+        // The Midtrans call is inside the main try block.
+        // If it fails, it will throw an Exception, which will be caught
+        // by the outer catch block, triggering a full database rollback.
+        $qrisTransaction = \Midtrans\CoreApi::charge($params);
+        $qrisUrl = $qrisTransaction->actions[0]->url;
+    }
+
     mysqli_commit($conn);
-    echo json_encode(['status' => 'success', 'message' => 'Pesanan berhasil diperbarui dan dibayar.']);
+
+    // Prepare the final JSON response
+    $response = [
+        'status' => 'success',
+        'message' => 'Pesanan berhasil diperbarui dan dibayar.'
+    ];
+
+    // Add the qris_url to the response if it was generated
+    if ($qrisUrl !== null) {
+        $response['qris_url'] = $qrisUrl;
+        $response['message'] = 'Transaksi Qris Berhasil.'; // Overwrite message for QRIS
+    }
+
+    echo json_encode($response);
 
 } catch (Exception $e) {
     mysqli_rollback($conn);
