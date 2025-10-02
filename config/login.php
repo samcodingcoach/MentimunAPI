@@ -27,7 +27,7 @@ $stmt = mysqli_prepare($conn, $sql2);
 mysqli_stmt_bind_param($stmt, "s", $email);
 mysqli_stmt_execute($stmt);
 $result_sql2 = mysqli_stmt_get_result($stmt);
-// 🔒 Selesai perubahan
+
 
 if ($result_sql2) 
 {
