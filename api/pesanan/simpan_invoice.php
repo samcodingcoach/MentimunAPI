@@ -20,7 +20,7 @@ mysqli_begin_transaction($conn);
 
 try {
     // ---- 1. GENERATE KODE UNIK ----
-    $query_inc = "SELECT COUNT(id_pesanan) as inc_hari_ini FROM pesanan WHERE DATE(tgl_cart) = CURDATE()";
+    $query_inc = "SELECT COUNT(id_pesanan) as inc_hari_ini FROM pesanan WHERE DATE(tgl_cart) = CURDATE() and id_tagihan is not null";
     $result_inc = mysqli_query($conn, $query_inc);
     $row_inc = mysqli_fetch_assoc($result_inc);
     $increment = str_pad($row_inc['inc_hari_ini'] + 1, 4, '0', STR_PAD_LEFT);
