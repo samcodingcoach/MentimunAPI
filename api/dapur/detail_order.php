@@ -5,6 +5,12 @@ error_reporting(E_ALL & ~E_NOTICE);
 include "../../config/koneksi.php";
 $id = $_GET['id_order'];
 
+if (empty($id)) {
+    echo json_encode(['error' => 'id_order is required']);
+    http_response_code(400);
+    exit;
+}
+
 
 $sql = "SELECT
 	dapur_order_detail.id_order, 
@@ -14,9 +20,9 @@ $sql = "SELECT
 	view_produk2.nama_kategori, 
 	dapur_order_detail.ready, 
 	dapur_order_detail.tgl_update, 
-	dapur_order_detail.waktu_batal, 
-	dapur_order_detail.waktu_ready, 
-	dapur_order_detail.waktu_delivered, 
+	DATE_FORMAT(waktu_batal,'%H:%m') as waktu_batal, 
+	DATE_FORMAT(dapur_order_detail.waktu_ready,'%H:%m') as waktu_ready, 
+  	DATE_FORMAT(dapur_order_detail.waktu_delivered,'%H:%m') as waktu_delivered, 
 	pesanan_detail.ta_dinein, 
 	pesanan_detail.qty
 FROM
