@@ -37,7 +37,7 @@ $data = [];
 
 if (mysqli_num_rows($result) > 0) {
 	while($row = mysqli_fetch_assoc($result)) {
-		$row['mode_pesanan'] = ($row['id_meja'] >= 1) ? 'DINE IN' : 'TAKEAWAY';
+		$row['mode_pesanan'] = ($row['id_meja'] >= 1) ? 'bag_takeaway.png' : 'dine.png';
 		$row['keterangan'] = ($row['status'] == 1) ? 'DIBAYARKAN' : 'BELUM BAYAR';
 		$data[] = $row;
 	}
