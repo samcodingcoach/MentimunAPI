@@ -100,7 +100,7 @@ try {
     // Prepare the final JSON response
     $response = [
         'status' => 'success',
-        'message' => 'Transaksi Qris Berhasil.',
+        'message' => 'Transaksi Berhasil.',
         'kode_payment' => $kode_payment
     ];
 
