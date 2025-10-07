@@ -91,9 +91,9 @@ try {
         $payment_status = 0;
     }
 
-    $stmt_pembayaran = mysqli_prepare($conn, "UPDATE proses_pembayaran SET id_bayar = ?, status = ?, jumlah_uang = ?, jumlah_dibayarkan = ?, kembalian = ?, model_diskon = ?, nilai_nominal = ?, total_diskon = ? WHERE kode_payment = ?");
+    $stmt_pembayaran = mysqli_prepare($conn, "UPDATE proses_pembayaran SET id_bayar = ?, status = ?, jumlah_uang = ?, jumlah_dibayarkan = ?, kembalian = ?, model_diskon = ?, nilai_nominal = ?, total_diskon = ?,id_promo = ? WHERE kode_payment = ?");
     
-    mysqli_stmt_bind_param($stmt_pembayaran, "isdddsdds", 
+    mysqli_stmt_bind_param($stmt_pembayaran, "isdddsddis", 
         $pembayaran['id_bayar'], 
         $payment_status, 
         $pembayaran['jumlah_uang'], 
@@ -102,6 +102,7 @@ try {
         $pembayaran['model_diskon'], 
         $pembayaran['nilai_nominal'], 
         $pembayaran['total_diskon'],
+        $pembayaran['id_promo'],
         $kode_payment_existing
     );
     mysqli_stmt_execute($stmt_pembayaran);
@@ -144,7 +145,8 @@ try {
     // Prepare the final JSON response
     $response = [
         'status' => 'success',
-        'message' => 'Pesanan berhasil diperbarui dan dibayar.'
+        'message' => 'Pesanan berhasil diperbarui dan dibayar.',
+        'kode_payment' => $kode_payment_existing
     ];
 
     // Add the qris_url to the response if it was generated

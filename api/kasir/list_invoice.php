@@ -3,22 +3,14 @@ header('Content-Type: application/json');
 error_reporting(E_ALL & ~E_NOTICE);
 
 include "../../config/koneksi.php";
-/* $id = $_GET['id_order'];
-
-if (empty($id)) {
-    echo json_encode(['error' => 'id_order is required']);
-    http_response_code(400);
-    exit;
-} */
-
 
 $sql = "SELECT
 	proses_pembayaran.kode_payment, 
-	DATE_FORMAT(proses_pembayaran.tanggal_payment,'%H:%i') as tgl, 
+	DATE_FORMAT(proses_pembayaran.tanggal_payment,'%H:%i') AS tgl, 
 	konsumen.nama_konsumen, 
-	pesanan.total_cart, 
 	pesanan.id_meja, 
-	proses_pembayaran.id_tagihan
+	proses_pembayaran.id_tagihan, 
+	view_invoice.total_dengan_ppn as total_cart
 FROM
 	proses_pembayaran
 	INNER JOIN
@@ -29,10 +21,14 @@ FROM
 	konsumen
 	ON 
 		pesanan.id_konsumen = konsumen.id_konsumen
-    
-  WHERE DATE(tanggal_payment) = CURDATE()
-  AND proses_pembayaran.id_tagihan IS NOT NULL
-    
+	INNER JOIN
+	view_invoice
+	ON 
+		pesanan.id_pesanan = view_invoice.id_pesanan
+WHERE
+	DATE(tanggal_payment) = CURDATE() AND
+	proses_pembayaran.id_tagihan IS NOT NULL AND
+	proses_pembayaran.`status` = 0
 ";
 
 $result = mysqli_query($conn, $sql);
@@ -40,6 +36,7 @@ $data = [];
 
 if (mysqli_num_rows($result) > 0) {
 	while($row = mysqli_fetch_assoc($result)) {
+		$row['total_cart'] = floor($row['total_cart'] / 100) * 100;
 		$data[] = $row;
 	}
 }

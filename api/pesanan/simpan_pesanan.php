@@ -65,8 +65,8 @@ try {
             $payment_status = 0;
         }
         
-        $stmt_pembayaran = $conn->prepare("INSERT INTO proses_pembayaran (kode_payment, id_pesanan, id_bayar, id_user, status, jumlah_uang, jumlah_dibayarkan, kembalian, model_diskon, nilai_nominal, total_diskon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt_pembayaran->bind_param("siiisdddsdd", $kode_payment, $id_pesanan_baru, $pembayaran['id_bayar'], $pembayaran['id_user'], $payment_status, $pembayaran['jumlah_uang'], $pembayaran['jumlah_dibayarkan'], $pembayaran['kembalian'], $pembayaran['model_diskon'], $pembayaran['nilai_nominal'], $pembayaran['total_diskon']);
+        $stmt_pembayaran = $conn->prepare("INSERT INTO proses_pembayaran (kode_payment, id_pesanan, id_bayar, id_user, status, jumlah_uang, jumlah_dibayarkan, kembalian, model_diskon, nilai_nominal, total_diskon,id_promo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)");
+        $stmt_pembayaran->bind_param("siiisdddsddi", $kode_payment, $id_pesanan_baru, $pembayaran['id_bayar'], $pembayaran['id_user'], $payment_status, $pembayaran['jumlah_uang'], $pembayaran['jumlah_dibayarkan'], $pembayaran['kembalian'], $pembayaran['model_diskon'], $pembayaran['nilai_nominal'], $pembayaran['total_diskon'],$pembayaran['id_promo']);
         $stmt_pembayaran->execute();
 
         $stmt_pembayaran_detail = $conn->prepare("INSERT INTO proses_pembayaran_detail (kode_payment, subtotal, biaya_pengemasan, service_charge, promo_diskon, ppn_resto) 
