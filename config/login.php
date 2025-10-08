@@ -55,12 +55,12 @@ if ($result_sql2)
     }
     else
     {
-        $response = ['status' => 'failed','message' => 'Password atau Email Salah'];     
+        $response = ['status' => 'failed','message' => 'Kasir tidak terdaftar hari ini / telah closing'];     
     }      
 } 
 else 
 {
-    $response = ['status' => 'error',  'message' => 'Gagal menyimpan data: ' . mysqli_error($conn)];
+    $response = ['status' => 'error',  'message' => 'Gagal mengambil data: ' . mysqli_error($conn)];
 }
 
 header('Content-Type: application/json');
