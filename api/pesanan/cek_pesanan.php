@@ -1,19 +1,14 @@
 <?php
-// Mengatur agar laporan error ditampilkan, kecuali notice
 error_reporting(E_ALL & ~E_NOTICE);
-// Mengatur header output sebagai JSON
 header('Content-Type: application/json');
 
-// Menyertakan file koneksi database
 include "../../config/koneksi.php";
 
-// Memeriksa apakah parameter id_meja ada di URL
 if (!isset($_GET['id_meja'])) {
     echo json_encode(['error' => 'Parameter id_meja tidak ditemukan']);
     exit;
 }
 
-// Mengamankan input id_meja
 $id_meja = mysqli_real_escape_string($conn, $_GET['id_meja']);
 
 // Array utama untuk menampung semua data
