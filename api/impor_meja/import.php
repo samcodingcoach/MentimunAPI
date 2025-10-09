@@ -19,7 +19,7 @@ if (empty($id_pesanan) || empty($id_importer)) {
     try {
         // Pindahkan detail pesanan dari pesanan lama ke pesanan baru (importer)
         $stmt1 = mysqli_prepare($conn, "UPDATE pesanan_detail SET id_pesanan = ? WHERE id_pesanan = ?");
-        mysqli_stmt_bind_param($stmt1, "ii", $id_importer, $id_pesanan);
+        mysqli_stmt_bind_param($stmt1, "ii", $id_pesanan,$id_importer);
         mysqli_stmt_execute($stmt1);
         mysqli_stmt_close($stmt1);
 
@@ -29,11 +29,13 @@ if (empty($id_pesanan) || empty($id_importer)) {
         mysqli_stmt_execute($stmt2);
         mysqli_stmt_close($stmt2);
 
+
+
         mysqli_commit($conn);
 
         $response = [
             'status' => 'success',
-            'message' => 'Import dan update status berhasil.'
+            'message' => 'Import Pesanan Berhasil.'
         ];
     } catch (Exception $e) {
         mysqli_rollback($conn);
