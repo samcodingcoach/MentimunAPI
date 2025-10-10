@@ -83,46 +83,53 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
             case 'update_biaya':
                 $id_bahan = $_POST['id_bahan_biaya']; // This refers to the ingredient ID
-                // Remove any non-numeric characters except decimal point and minus sign
+                // Remove dots (thousand separators) to get the actual numeric value
                 $harga_formatted = trim($_POST['harga_formatted']);
-                $harga = preg_replace('/[^0-9.-]/', '', $harga_formatted);
-                $satuan = trim($_POST['satuan']);
+                $harga = str_replace('.', '', $harga_formatted); // Remove dots (thousand separators) to get actual value
                 
-                if (!empty($id_bahan) && !empty($harga) && !empty($satuan)) {
-                    // Check if harga is numeric
-                    if (!is_numeric($harga) || $harga < 0) {
-                        $error = 'Harga harus berupa angka positif!';
-                    } else {
-                        // Check if bahan_biaya table exists
-                        $table_check = $conn->query("SHOW TABLES LIKE 'bahan_biaya'");
-                        if ($table_check->num_rows == 0) {
-                            // Create the table if it doesn't exist with your specified structure
-                            $create_table_sql = "CREATE TABLE bahan_biaya (
-                                id_bahan_biaya INT(11) NOT NULL AUTO_INCREMENT,
-                                id_bahan INT(11) DEFAULT 0,
-                                satuan VARCHAR(15) DEFAULT NULL,
-                                harga_satuan DOUBLE DEFAULT 0,
-                                tanggal DATE DEFAULT (CURRENT_DATE),
-                                id_user INT(11) DEFAULT 0,
-                                PRIMARY KEY (id_bahan_biaya)
-                            )";
-                            $conn->query($create_table_sql);
-                        }
-                        
-                        // Insert new record with id_user from session
-                        $id_user = isset($_SESSION['id_user']) ? $_SESSION['id_user'] : 0; // Get user ID from session or default to 0
-                        
-                        $stmt = $conn->prepare("INSERT INTO bahan_biaya (id_bahan, satuan, harga_satuan, id_user) VALUES (?, ?, ?, ?)");
-                        $stmt->bind_param("isdi", $id_bahan, $satuan, $harga, $id_user);
-                        
-                        if ($stmt->execute()) {
-                            $message = 'Data biaya bahan berhasil disimpan!';
-                        } else {
-                            $error = 'Error: ' . $conn->error;
-                        }
-                    }
+                // Validate that the cleaned value contains only numbers
+                if (!is_numeric($harga)) {
+                    $error = 'Harga harus berupa angka yang valid!';
                 } else {
-                    $error = 'Semua field wajib diisi!';
+                    $harga = (double)$harga; // Convert to double
+                    $satuan = trim($_POST['satuan']);
+                    
+                    if (!empty($id_bahan) && !empty($harga) && !empty($satuan)) {
+                        // Check if harga is numeric and positive
+                        if ($harga < 0) {
+                            $error = 'Harga harus berupa angka positif!';
+                        } else {
+                            // Check if bahan_biaya table exists
+                            $table_check = $conn->query("SHOW TABLES LIKE 'bahan_biaya'");
+                            if ($table_check->num_rows == 0) {
+                                // Create the table if it doesn't exist with your specified structure
+                                $create_table_sql = "CREATE TABLE bahan_biaya (
+                                    id_bahan_biaya INT(11) NOT NULL AUTO_INCREMENT,
+                                    id_bahan INT(11) DEFAULT 0,
+                                    satuan VARCHAR(15) DEFAULT NULL,
+                                    harga_satuan DOUBLE DEFAULT 0,
+                                    tanggal DATE DEFAULT (CURRENT_DATE),
+                                    id_user INT(11) DEFAULT 0,
+                                    PRIMARY KEY (id_bahan_biaya)
+                                )";
+                                $conn->query($create_table_sql);
+                            }
+                            
+                            // Insert new record with id_user from session
+                            $id_user = isset($_SESSION['id_user']) ? $_SESSION['id_user'] : 0; // Get user ID from session or default to 0
+                            
+                            $stmt = $conn->prepare("INSERT INTO bahan_biaya (id_bahan, satuan, harga_satuan, id_user) VALUES (?, ?, ?, ?)");
+                            $stmt->bind_param("isdi", $id_bahan, $satuan, $harga, $id_user);
+                            
+                            if ($stmt->execute()) {
+                                $message = 'Data biaya bahan berhasil disimpan!';
+                            } else {
+                                $error = 'Error: ' . $conn->error;
+                            }
+                        }
+                    } else {
+                        $error = 'Semua field wajib diisi!';
+                    }
                 }
                 break;
         }

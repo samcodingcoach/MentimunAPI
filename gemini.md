@@ -29,3 +29,5 @@ id_user int(11) YES
 insert kolom id_bahan,satuan,harga_satuan, id_user
 id_user diambil dari $\_SESSION['id_user'] = $row['id_user'];
 kemudian ketika selesai beri info alert
+
+berhasil melakukan insert , masalahnya untuk harga ketik 5.000 yang tersimpan malah 5 , harusnya anda jadikan double langsung tersimpan 5000
