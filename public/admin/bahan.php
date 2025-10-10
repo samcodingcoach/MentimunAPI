@@ -83,7 +83,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
             case 'update_biaya':
                 $id_bahan_biaya = $_POST['id_bahan_biaya'];
-                $harga = trim($_POST['harga']);
+                // Remove any non-numeric characters except decimal point and minus sign
+                $harga_formatted = trim($_POST['harga_formatted']);
+                $harga = preg_replace('/[^0-9.-]/', '', $harga_formatted);
                 $satuan = trim($_POST['satuan']);
                 
                 if (!empty($id_bahan_biaya) && !empty($harga) && !empty($satuan)) {
@@ -284,6 +286,34 @@ if (!empty($params)) {
       .col-fit {
         width: 1px;
         white-space: nowrap;
+      }
+      .searchable-select {
+        position: relative;
+      }
+      .searchable-select .form-control {
+        cursor: pointer;
+      }
+      .searchable-select .dropdown-menu {
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      .searchable-select .search-input {
+        border: none;
+        outline: none;
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        border-bottom: 1px solid #dee2e6;
+      }
+      .searchable-select .dropdown-item {
+        cursor: pointer;
+      }
+      .searchable-select .dropdown-item:hover {
+        background-color: #f8f9fa;
+      }
+      .searchable-select .dropdown-item.active {
+        background-color: #0d6efd;
+        color: white;
       }
     </style>
   </head>
@@ -775,18 +805,195 @@ if (!empty($params)) {
              
              <div class="mb-3">
                <label for="harga" class="form-label">Harga <span class="text-danger">*</span></label>
-               <input type="number" class="form-control" id="harga" name="harga" step="0.01" required>
+               <input type="text" class="form-control" id="harga" name="harga_formatted" placeholder="0" required>
+               <input type="hidden" id="harga_hidden" name="harga">
+               <div class="form-text">Contoh: 100.000 / 20.000 / 2000</div>
              </div>
              
              <div class="mb-3">
                <label for="satuan" class="form-label">Satuan <span class="text-danger">*</span></label>
-               <input type="text" class="form-control" id="satuan" name="satuan" required>
+               <div class="searchable-select">
+                 <input type="text" class="form-control" id="satuan_display" placeholder="Pilih atau ketik satuan..." required>
+                 <input type="hidden" id="satuan_hidden" name="satuan" required>
+                 <div class="dropdown-menu" id="satuan_dropdown">
+                   <input type="text" class="search-input" id="satuan_search" placeholder="Cari atau masukkan satuan...">
+                   <div id="satuan_options">
+                     <div class="dropdown-item" data-value="buah">buah</div>
+                     <div class="dropdown-item" data-value="pcs">pcs</div>
+                     <div class="dropdown-item" data-value="kg">kg</div>
+                     <div class="dropdown-item" data-value="g">g</div>
+                     <div class="dropdown-item" data-value="mg">mg</div>
+                     <div class="dropdown-item" data-value="l">l</div>
+                     <div class="dropdown-item" data-value="ml">ml</div>
+                     <div class="dropdown-item" data-value="ons">ons</div>
+                     <div class="dropdown-item" data-value="pon">pon</div>
+                     <div class="dropdown-item" data-value="lt">lt</div>
+                     <div class="dropdown-item" data-value="gr">gr</div>
+                     <div class="dropdown-item" data-value="bh">bh</div>
+                     <div class="dropdown-item" data-value="bhg">bhg</div>
+                     <div class="dropdown-item" data-value="btr">btr</div>
+                     <div class="dropdown-item" data-value="btg">btg</div>
+                     <div class="dropdown-item" data-value="bks">bks</div>
+                     <div class="dropdown-item" data-value="ltr">ltr</div>
+                     <div class="dropdown-item" data-value="bwk">bwk</div>
+                     <div class="dropdown-item" data-value="dus">dus</div>
+                     <div class="dropdown-item" data-value="pack">pack</div>
+                   </div>
+                 </div>
+               </div>
              </div>
            </div>
            <div class="modal-footer">
              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
              <button type="submit" class="btn btn-primary">Update</button>
            </div>
+         </form>
+       </div>
+     </div>
+   </div>
+
+   <script>
+     // Handle form submission success
+     document.addEventListener('DOMContentLoaded', function() {
+       <?php if ($message): ?>
+         // Close biaya modal after successful operation if it's open
+         setTimeout(function() {
+           var biayaModal = bootstrap.Modal.getInstance(document.getElementById('biayaModal'));
+           if (biayaModal) {
+             biayaModal.hide();
+           }
+         }, 100);
+       <?php endif; ?>
+     });
+     
+     // Format number with thousand separators
+     function formatNumber(num) {
+       // Remove any non-numeric characters except decimal point and minus sign
+       num = num.toString().replace(/[^0-9]/g, '');
+       // Add thousand separators
+       return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+     }
+     
+     // Add event listener for harga input
+     document.getElementById('harga').addEventListener('input', function(e) {
+       let value = e.target.value;
+       // Remove any non-numeric characters except decimal point and minus sign
+       value = value.replace(/[^\d]/g, '');
+       // Format the number
+       let formattedValue = formatNumber(value);
+       // Update the display
+       e.target.value = formattedValue;
+       // Update the hidden input with the numeric value
+       document.getElementById('harga_hidden').value = value;
+     });
+     
+     // Initialize satuan searchable dropdown
+     document.addEventListener('DOMContentLoaded', function() {
+       const satuanDisplay = document.getElementById('satuan_display');
+       const satuanHidden = document.getElementById('satuan_hidden');
+       const satuanDropdown = document.getElementById('satuan_dropdown');
+       const satuanSearch = document.getElementById('satuan_search');
+       const satuanOptionsContainer = document.getElementById('satuan_options');
+       const satuanAllOptions = satuanOptionsContainer.querySelectorAll('.dropdown-item');
+       
+       // Show dropdown when clicking display input
+       satuanDisplay.addEventListener('click', function() {
+         satuanDropdown.style.display = 'block';
+         satuanSearch.focus();
+       });
+       
+       // Hide dropdown when clicking outside
+       document.addEventListener('click', function(e) {
+         if (!e.target.closest('.searchable-select')) {
+           satuanDropdown.style.display = 'none';
+         }
+       });
+       
+       // Search functionality for satuan
+       satuanSearch.addEventListener('input', function() {
+         const searchTerm = this.value.toLowerCase();
+         satuanAllOptions.forEach(option => {
+           const text = option.textContent.toLowerCase();
+           if (text.includes(searchTerm)) {
+             option.style.display = 'block';
+           } else {
+             option.style.display = 'none';
+           }
+         });
+       });
+       
+       // Select option from dropdown
+       satuanAllOptions.forEach(option => {
+         option.addEventListener('click', function() {
+           const value = this.getAttribute('data-value');
+           
+           satuanHidden.value = value;
+           satuanDisplay.value = value;
+           satuanDropdown.style.display = 'none';
+           satuanSearch.value = '';
+           
+           // Show all options again
+           satuanAllOptions.forEach(opt => opt.style.display = 'block');
+         });
+       });
+       
+       // Allow manual entry - when user types and then clicks away, use the typed value
+       satuanDisplay.addEventListener('blur', function() {
+         if (this.value.trim() !== '' && !satuanHidden.value) {
+           satuanHidden.value = this.value.trim();
+         }
+       });
+       
+       // Also update the hidden field when typing
+       satuanDisplay.addEventListener('input', function() {
+         // Check if the typed value matches any predefined options
+         const typedValue = this.value.toLowerCase();
+         let matched = false;
+         
+         satuanAllOptions.forEach(option => {
+           const optionText = option.textContent.toLowerCase();
+           if (optionText === typedValue) {
+             satuanHidden.value = option.getAttribute('data-value');
+             matched = true;
+           }
+         });
+         
+         // If no match found, use the typed value
+         if (!matched) {
+           satuanHidden.value = this.value.trim();
+         }
+       });
+       
+       // Clear search when dropdown is shown
+       satuanDisplay.addEventListener('focus', function() {
+         satuanSearch.value = '';
+         satuanAllOptions.forEach(opt => opt.style.display = 'block');
+       });
+     });
+   </script>
+   
+   <script>
+     // Add validation to ensure the hidden fields are populated before form submission
+     document.querySelector('#biayaModal form').addEventListener('submit', function(e) {
+       // Update hidden field if it's empty but the display field has a value
+       const hargaDisplay = document.getElementById('harga').value;
+       const hargaHidden = document.getElementById('harga_hidden');
+       if (hargaHidden.value === '' && hargaDisplay !== '') {
+         // Remove formatting and set the numeric value
+         const numericValue = hargaDisplay.replace(/[^\d]/g, '');
+         hargaHidden.value = numericValue;
+       }
+       
+       // Update satuan hidden if it's empty but the display field has a value
+       const satuanDisplay = document.getElementById('satuan_display').value;
+       const satuanHidden = document.getElementById('satuan_hidden');
+       if (satuanHidden.value === '' && satuanDisplay !== '') {
+         satuanHidden.value = satuanDisplay;
+       }
+     });
+   </script>
+ </body>
+</html>
          </form>
        </div>
      </div>
@@ -952,7 +1159,9 @@ if (!empty($params)) {
        
        // Clear and reset inputs
        document.getElementById('harga').value = '';
-       document.getElementById('satuan').value = '';
+       document.getElementById('harga_hidden').value = '';
+       document.getElementById('satuan_display').value = '';
+       document.getElementById('satuan_hidden').value = '';
        
        // Show modal
        var modal = new bootstrap.Modal(document.getElementById('biayaModal'));
@@ -970,6 +1179,111 @@ if (!empty($params)) {
            }
          }, 100);
        <?php endif; ?>
+     });
+     
+     // Format number with thousand separators
+     function formatNumber(num) {
+       // Remove any non-numeric characters except decimal point and minus sign
+       num = num.toString().replace(/[^0-9]/g, '');
+       // Add thousand separators
+       return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+     }
+     
+     // Add event listener for harga input
+     document.getElementById('harga').addEventListener('input', function(e) {
+       let value = e.target.value;
+       // Remove any non-numeric characters except decimal point and minus sign
+       value = value.replace(/[^\d]/g, '');
+       // Format the number
+       let formattedValue = formatNumber(value);
+       // Update the display
+       e.target.value = formattedValue;
+       // Update the hidden input with the numeric value
+       document.getElementById('harga_hidden').value = value;
+     });
+     
+     // Initialize satuan searchable dropdown
+     document.addEventListener('DOMContentLoaded', function() {
+       const satuanDisplay = document.getElementById('satuan_display');
+       const satuanHidden = document.getElementById('satuan_hidden');
+       const satuanDropdown = document.getElementById('satuan_dropdown');
+       const satuanSearch = document.getElementById('satuan_search');
+       const satuanOptionsContainer = document.getElementById('satuan_options');
+       const satuanAllOptions = satuanOptionsContainer.querySelectorAll('.dropdown-item');
+       
+       // Show dropdown when clicking display input
+       satuanDisplay.addEventListener('click', function() {
+         satuanDropdown.style.display = 'block';
+         satuanSearch.focus();
+       });
+       
+       // Hide dropdown when clicking outside
+       document.addEventListener('click', function(e) {
+         if (!e.target.closest('.searchable-select')) {
+           satuanDropdown.style.display = 'none';
+         }
+       });
+       
+       // Search functionality for satuan
+       satuanSearch.addEventListener('input', function() {
+         const searchTerm = this.value.toLowerCase();
+         satuanAllOptions.forEach(option => {
+           const text = option.textContent.toLowerCase();
+           if (text.includes(searchTerm)) {
+             option.style.display = 'block';
+           } else {
+             option.style.display = 'none';
+           }
+         });
+       });
+       
+       // Select option from dropdown
+       satuanAllOptions.forEach(option => {
+         option.addEventListener('click', function() {
+           const value = this.getAttribute('data-value');
+           
+           satuanHidden.value = value;
+           satuanDisplay.value = value;
+           satuanDropdown.style.display = 'none';
+           satuanSearch.value = '';
+           
+           // Show all options again
+           satuanAllOptions.forEach(opt => opt.style.display = 'block');
+         });
+       });
+       
+       // Allow manual entry - when user types and then clicks away, use the typed value
+       satuanDisplay.addEventListener('blur', function() {
+         if (this.value.trim() !== '' && !satuanHidden.value) {
+           satuanHidden.value = this.value.trim();
+         }
+       });
+       
+       // Also update the hidden field when typing
+       satuanDisplay.addEventListener('input', function() {
+         // Check if the typed value matches any predefined options
+         const typedValue = this.value.toLowerCase();
+         let matched = false;
+         
+         satuanAllOptions.forEach(option => {
+           const optionText = option.textContent.toLowerCase();
+           if (optionText === typedValue) {
+             satuanHidden.value = option.getAttribute('data-value');
+             matched = true;
+           }
+         });
+         
+         // If no match found, use the typed value
+         if (!matched) {
+           satuanHidden.value = this.value.trim();
+         }
+       });
+       
+       // Clear search when dropdown is shown
+       satuanDisplay.addEventListener('focus', function() {
+         satuanSearch.value = '';
+         satuanAllOptions.forEach(opt => opt.style.display = 'block');
+       });
      });
    </script>
  </body>
