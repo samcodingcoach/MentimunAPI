@@ -5,11 +5,12 @@ error_reporting(E_ALL & ~E_NOTICE);
 include "../../config/koneksi.php";
 
 $sql = "SELECT
-	dapur_order.id_order,
+	dapur_order.id_order, 
 	dapur_order.kode_payment, 
 	dapur_order.waktu_terima, 
 	dapur_order.id_tagihan, 
-	count(dapur_order_detail.id_pesanan_detail) as total_item, 
+	count(dapur_order_detail.id_pesanan_detail) AS total_item, 
+	pesanan.nomor_antri,
 	SUM(CASE WHEN dapur_order_detail.ready = 1 THEN 1 ELSE 0 END) AS siap,
 	SUM(CASE WHEN dapur_order_detail.ready = 2 THEN 1 ELSE 0 END) AS tersaji,
 	SUM(CASE WHEN dapur_order_detail.ready = 3 THEN 1 ELSE 0 END) AS batal
@@ -19,9 +20,16 @@ FROM
 	dapur_order_detail
 	ON 
 		dapur_order.id_order = dapur_order_detail.id_order
-		WHERE DATE(waktu_terima) = CURDATE()
-		GROUP BY dapur_order.id_order 
-		ORDER BY id_order DESC";
+	INNER JOIN
+	pesanan
+	ON 
+		dapur_order.id_pesanan = pesanan.id_pesanan
+WHERE
+	DATE(waktu_terima) = CURDATE()
+GROUP BY
+	dapur_order.id_order
+ORDER BY
+	id_order asc";
 
 $result = mysqli_query($conn, $sql);
 $data = [];
