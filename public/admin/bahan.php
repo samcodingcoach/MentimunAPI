@@ -228,6 +228,10 @@ if (!empty($params)) {
         background-color: #0d6efd;
         color: white;
       }
+      .col-fit {
+        width: 1px;
+        white-space: nowrap;
+      }
     </style>
   </head>
 
@@ -572,11 +576,11 @@ if (!empty($params)) {
            <table class="table table-striped table-hover">
              <thead>
                <tr>
-                 <th>No</th>
-                 <th>Kode Bahan</th>
+                 <th class="col-fit">No</th>
+                 <th class="col-fit">Kode Bahan</th>
                  <th>Nama Bahan</th>
-                 <th>Kategori</th>
-                 <th>Aksi</th>
+                 <th class="col-fit">Kategori</th>
+                 <th class="col-fit">Aksi</th>
                </tr>
              </thead>
              <tbody>
@@ -584,11 +588,11 @@ if (!empty($params)) {
                  <?php $no = $offset + 1; ?>
                  <?php while ($row = $result->fetch_assoc()): ?>
                    <tr>
-                     <td><?php echo $no++; ?></td>
-                     <td><?php echo htmlspecialchars($row['kode_bahan']); ?></td>
+                     <td class="col-fit"><?php echo $no++; ?></td>
+                     <td class="col-fit"><?php echo htmlspecialchars($row['kode_bahan']); ?></td>
                      <td><?php echo htmlspecialchars($row['nama_bahan']); ?></td>
-                     <td><?php echo htmlspecialchars($row['nama_kategori'] ?? 'Tidak ada kategori'); ?></td>
-                     <td>
+                     <td class="col-fit"><?php echo htmlspecialchars($row['nama_kategori'] ?? 'Tidak ada kategori'); ?></td>
+                     <td class="col-fit">
                        <button type="button" class="btn btn-warning btn-sm" onclick="editBahan(<?php echo $row['id_bahan']; ?>, '<?php echo htmlspecialchars($row['nama_bahan']); ?>', '<?php echo htmlspecialchars($row['kode_bahan']); ?>', <?php echo $row['id_kategori']; ?>)">
                          <i class="bi bi-pencil"></i> Edit
                        </button>
