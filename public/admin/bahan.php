@@ -82,13 +82,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 break;
                 
             case 'update_biaya':
-                $id_bahan_biaya = $_POST['id_bahan_biaya'];
+                $id_bahan = $_POST['id_bahan_biaya']; // This refers to the ingredient ID
                 // Remove any non-numeric characters except decimal point and minus sign
                 $harga_formatted = trim($_POST['harga_formatted']);
                 $harga = preg_replace('/[^0-9.-]/', '', $harga_formatted);
                 $satuan = trim($_POST['satuan']);
                 
-                if (!empty($id_bahan_biaya) && !empty($harga) && !empty($satuan)) {
+                if (!empty($id_bahan) && !empty($harga) && !empty($satuan)) {
                     // Check if harga is numeric
                     if (!is_numeric($harga) || $harga < 0) {
                         $error = 'Harga harus berupa angka positif!';
@@ -96,37 +96,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         // Check if bahan_biaya table exists
                         $table_check = $conn->query("SHOW TABLES LIKE 'bahan_biaya'");
                         if ($table_check->num_rows == 0) {
-                            // Create the table if it doesn't exist
+                            // Create the table if it doesn't exist with your specified structure
                             $create_table_sql = "CREATE TABLE bahan_biaya (
-                                id_bahan_biaya INT AUTO_INCREMENT PRIMARY KEY,
-                                id_bahan INT NOT NULL,
-                                satuan VARCHAR(50) NOT NULL,
-                                harga_satuan DECIMAL(15,2) NOT NULL,
-                                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                FOREIGN KEY (id_bahan) REFERENCES bahan(id_bahan) ON DELETE CASCADE
+                                id_bahan_biaya INT(11) NOT NULL AUTO_INCREMENT,
+                                id_bahan INT(11) DEFAULT 0,
+                                satuan VARCHAR(15) DEFAULT NULL,
+                                harga_satuan DOUBLE DEFAULT 0,
+                                tanggal DATE DEFAULT (CURRENT_DATE),
+                                id_user INT(11) DEFAULT 0,
+                                PRIMARY KEY (id_bahan_biaya)
                             )";
                             $conn->query($create_table_sql);
                         }
                         
-                        // Check if there's an existing record for this bahan and satuan combination
-                        $stmt = $conn->prepare("SELECT id_bahan_biaya FROM bahan_biaya WHERE id_bahan = ? AND satuan = ?");
-                        $stmt->bind_param("is", $id_bahan_biaya, $satuan);
-                        $stmt->execute();
-                        $result = $stmt->get_result();
+                        // Insert new record with id_user from session
+                        $id_user = isset($_SESSION['id_user']) ? $_SESSION['id_user'] : 0; // Get user ID from session or default to 0
                         
-                        if ($result->num_rows > 0) {
-                            // Update existing record
-                            $stmt = $conn->prepare("UPDATE bahan_biaya SET harga_satuan = ? WHERE id_bahan = ? AND satuan = ?");
-                            $stmt->bind_param("dis", $harga, $id_bahan_biaya, $satuan);
-                        } else {
-                            // Insert new record
-                            $stmt = $conn->prepare("INSERT INTO bahan_biaya (id_bahan, satuan, harga_satuan) VALUES (?, ?, ?)");
-                            $stmt->bind_param("isd", $id_bahan_biaya, $satuan, $harga);
-                        }
+                        $stmt = $conn->prepare("INSERT INTO bahan_biaya (id_bahan, satuan, harga_satuan, id_user) VALUES (?, ?, ?, ?)");
+                        $stmt->bind_param("isdi", $id_bahan, $satuan, $harga, $id_user);
                         
                         if ($stmt->execute()) {
-                            $message = 'Data biaya bahan berhasil diperbarui!';
+                            $message = 'Data biaya bahan berhasil disimpan!';
                         } else {
                             $error = 'Error: ' . $conn->error;
                         }
