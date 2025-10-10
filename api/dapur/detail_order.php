@@ -20,6 +20,8 @@ $sql = "SELECT
 	view_produk2.nama_kategori, 
 	dapur_order_detail.ready, 
 	dapur_order_detail.tgl_update, 
+	dapur_order_detail.id_order_detail, 
+	pesanan_detail.id_pesanan,
 	DATE_FORMAT(waktu_batal,'%H:%m') as waktu_batal, 
 	DATE_FORMAT(dapur_order_detail.waktu_ready,'%H:%m') as waktu_ready, 
   	DATE_FORMAT(dapur_order_detail.waktu_delivered,'%H:%m') as waktu_delivered, 
