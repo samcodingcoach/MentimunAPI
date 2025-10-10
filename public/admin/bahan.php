@@ -80,6 +80,59 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $error = 'Semua field wajib diisi!';
                 }
                 break;
+                
+            case 'update_biaya':
+                $id_bahan_biaya = $_POST['id_bahan_biaya'];
+                $harga = trim($_POST['harga']);
+                $satuan = trim($_POST['satuan']);
+                
+                if (!empty($id_bahan_biaya) && !empty($harga) && !empty($satuan)) {
+                    // Check if harga is numeric
+                    if (!is_numeric($harga) || $harga < 0) {
+                        $error = 'Harga harus berupa angka positif!';
+                    } else {
+                        // Check if bahan_biaya table exists
+                        $table_check = $conn->query("SHOW TABLES LIKE 'bahan_biaya'");
+                        if ($table_check->num_rows == 0) {
+                            // Create the table if it doesn't exist
+                            $create_table_sql = "CREATE TABLE bahan_biaya (
+                                id_bahan_biaya INT AUTO_INCREMENT PRIMARY KEY,
+                                id_bahan INT NOT NULL,
+                                satuan VARCHAR(50) NOT NULL,
+                                harga_satuan DECIMAL(15,2) NOT NULL,
+                                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                FOREIGN KEY (id_bahan) REFERENCES bahan(id_bahan) ON DELETE CASCADE
+                            )";
+                            $conn->query($create_table_sql);
+                        }
+                        
+                        // Check if there's an existing record for this bahan and satuan combination
+                        $stmt = $conn->prepare("SELECT id_bahan_biaya FROM bahan_biaya WHERE id_bahan = ? AND satuan = ?");
+                        $stmt->bind_param("is", $id_bahan_biaya, $satuan);
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+                        
+                        if ($result->num_rows > 0) {
+                            // Update existing record
+                            $stmt = $conn->prepare("UPDATE bahan_biaya SET harga_satuan = ? WHERE id_bahan = ? AND satuan = ?");
+                            $stmt->bind_param("dis", $harga, $id_bahan_biaya, $satuan);
+                        } else {
+                            // Insert new record
+                            $stmt = $conn->prepare("INSERT INTO bahan_biaya (id_bahan, satuan, harga_satuan) VALUES (?, ?, ?)");
+                            $stmt->bind_param("isd", $id_bahan_biaya, $satuan, $harga);
+                        }
+                        
+                        if ($stmt->execute()) {
+                            $message = 'Data biaya bahan berhasil diperbarui!';
+                        } else {
+                            $error = 'Error: ' . $conn->error;
+                        }
+                    }
+                } else {
+                    $error = 'Semua field wajib diisi!';
+                }
+                break;
         }
     }
 }
@@ -596,7 +649,7 @@ if (!empty($params)) {
                        <button type="button" class="btn btn-warning btn-sm" onclick="editBahan(<?php echo $row['id_bahan']; ?>, '<?php echo htmlspecialchars($row['nama_bahan']); ?>', '<?php echo htmlspecialchars($row['kode_bahan']); ?>', <?php echo $row['id_kategori']; ?>)">
                          <i class="bi bi-pencil"></i> Edit
                        </button>
-                       <button type="button" class="btn btn-info btn-sm ms-1">
+                       <button type="button" class="btn btn-info btn-sm ms-1" onclick="biayaBahan(<?php echo $row['id_bahan']; ?>, '<?php echo htmlspecialchars($row['nama_bahan']); ?>')">
                          <i class="bi bi-cash-coin"></i> Biaya
                        </button>
                      </td>
@@ -696,6 +749,43 @@ if (!empty($params)) {
            <div class="modal-footer">
              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
              <button type="submit" class="btn btn-primary"><?php echo $edit_data ? 'Perbarui' : 'Simpan'; ?></button>
+           </div>
+         </form>
+       </div>
+     </div>
+   </div>
+
+   <!-- Biaya Modal -->
+   <div class="modal fade" id="biayaModal" tabindex="-1" aria-labelledby="biayaModalLabel" aria-hidden="true">
+     <div class="modal-dialog">
+       <div class="modal-content">
+         <div class="modal-header">
+           <h5 class="modal-title" id="biayaModalLabel">Biaya Bahan</h5>
+           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+         </div>
+         <form method="POST">
+           <div class="modal-body">
+             <input type="hidden" name="action" value="update_biaya">
+             <input type="hidden" name="id_bahan_biaya" id="id_bahan_biaya" value="">
+             
+             <div class="mb-3">
+               <label for="nama_bahan_biaya" class="form-label">Nama Bahan</label>
+               <input type="text" class="form-control" id="nama_bahan_biaya" readonly>
+             </div>
+             
+             <div class="mb-3">
+               <label for="harga" class="form-label">Harga <span class="text-danger">*</span></label>
+               <input type="number" class="form-control" id="harga" name="harga" step="0.01" required>
+             </div>
+             
+             <div class="mb-3">
+               <label for="satuan" class="form-label">Satuan <span class="text-danger">*</span></label>
+               <input type="text" class="form-control" id="satuan" name="satuan" required>
+             </div>
+           </div>
+           <div class="modal-footer">
+             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+             <button type="submit" class="btn btn-primary">Update</button>
            </div>
          </form>
        </div>
@@ -854,6 +944,33 @@ if (!empty($params)) {
        var modal = new bootstrap.Modal(document.getElementById('bahanModal'));
        modal.show();
      }
+     
+     function biayaBahan(id, nama) {
+       // Set values for the biaya modal
+       document.getElementById('id_bahan_biaya').value = id;
+       document.getElementById('nama_bahan_biaya').value = nama;
+       
+       // Clear and reset inputs
+       document.getElementById('harga').value = '';
+       document.getElementById('satuan').value = '';
+       
+       // Show modal
+       var modal = new bootstrap.Modal(document.getElementById('biayaModal'));
+       modal.show();
+     }
+     
+     // Handle form submission success
+     document.addEventListener('DOMContentLoaded', function() {
+       <?php if ($message): ?>
+         // Close biaya modal after successful operation if it's open
+         setTimeout(function() {
+           var biayaModal = bootstrap.Modal.getInstance(document.getElementById('biayaModal'));
+           if (biayaModal) {
+             biayaModal.hide();
+           }
+         }, 100);
+       <?php endif; ?>
+     });
    </script>
  </body>
 </html>

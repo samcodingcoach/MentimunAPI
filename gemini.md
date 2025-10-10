@@ -6,3 +6,8 @@ Kode Bahan: Fit
 Nama Bahan \*
 Kategori fit
 Aksi Fit
+
+Ketika tombol biaya di klik muncul modal,
+design modal yang sudah ada ,ikuti pattern di halaman ini.
+tambahkan input harga dan satuan
+tambahkan tombol update
