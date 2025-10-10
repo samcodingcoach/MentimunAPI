@@ -592,6 +592,9 @@ if (!empty($params)) {
                        <button type="button" class="btn btn-warning btn-sm" onclick="editBahan(<?php echo $row['id_bahan']; ?>, '<?php echo htmlspecialchars($row['nama_bahan']); ?>', '<?php echo htmlspecialchars($row['kode_bahan']); ?>', <?php echo $row['id_kategori']; ?>)">
                          <i class="bi bi-pencil"></i> Edit
                        </button>
+                       <button type="button" class="btn btn-info btn-sm ms-1">
+                         <i class="bi bi-cash-coin"></i> Biaya
+                       </button>
                      </td>
                    </tr>
                  <?php endwhile; ?>
