@@ -363,9 +363,6 @@ if (isset($_GET['edit'])) {
 
 // Get categories for dropdown
 $categories_result = $conn->query("SELECT id_kategori, nama_kategori FROM kategori_menu ORDER BY nama_kategori ASC");
-$categories = $categories_result->fetch_all(MYSQLI_ASSOC);
-?>
-
 <!doctype html>
 <html lang="id" data-bs-theme="light">
 <head>
