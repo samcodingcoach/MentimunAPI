@@ -224,11 +224,7 @@ if (!empty($params)) {
                                     <td><strong><?php echo htmlspecialchars($metode['kategori']); ?></strong></td>
                                     <td><?php echo htmlspecialchars($metode['no_rek']); ?></td>
                                     <td>
-                                        <?php if (stripos($metode['kategori'], 'qris') !== false): ?>
-                                            <strong class="text-success"><?php echo number_format((float)$metode['biaya_admin'], 2, ',', '.'); ?>%</strong>
-                                        <?php else: ?>
-                                            <strong class="text-success">Rp <?php echo number_format((float)$metode['biaya_admin'], 0, ',', '.'); ?></strong>
-                                        <?php endif; ?>
+                                        <strong class="text-success">Rp <?php echo number_format((float)$metode['biaya_admin'], 0, ',', '.'); ?></strong>
                                     </td>
                                     <td>
                                         <?php if ($metode['pramusaji'] == '1'): ?>
@@ -320,10 +316,9 @@ if (!empty($params)) {
                             <label class="col-sm-3 col-form-label">Biaya Admin</label>
                             <div class="col-sm-9">
                                 <div class="input-group">
-                                    <span class="input-group-text">Rp / %</span>
+                                    <span class="input-group-text">Rp</span>
                                     <input type="number" step="0.01" name="biaya_admin" id="edit_biaya_admin" class="form-control" placeholder="0">
                                 </div>
-                                <small class="text-muted">Untuk Qris gunakan persen (contoh: 0.7 untuk 0.7%), untuk lainnya gunakan Rupiah</small>
                             </div>
                         </div>
                         
