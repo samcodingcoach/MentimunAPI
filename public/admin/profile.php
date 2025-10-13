@@ -96,355 +96,173 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 ?>
 
+
 <!doctype html>
-<html lang="en">
-  <head>
+<html lang="id" data-bs-theme="light">
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Profile - Admin Dashboard</title>
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="../css/admin.css" rel="stylesheet">
-  </head>
-  <body>
-    <!-- Top Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="navbar-brand" href="#"><?php echo isset($_SESSION['nama_aplikasi']) ? htmlspecialchars($_SESSION['nama_aplikasi']) : 'Resto007 Admin'; ?></a>
-        <div class="navbar-nav ms-auto">
-          <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-              <?php echo htmlspecialchars($_SESSION["nama_lengkap"]); ?> (<?php echo htmlspecialchars($_SESSION["jabatan"]); ?>)
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="profile.php">Profile</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="logout.php">Logout</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <title>Profil Saya - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="../css/newadmin.css" rel="stylesheet">
+</head>
+<body>
+    <?php include '_header_new.php'; ?>
+    
+    <?php include '_sidebar_new.php'; ?>
 
-    <div class="container-fluid">
-      <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
-          <div class="position-sticky pt-3">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <a class="nav-link" href="index.php">
-                  <i class="bi bi-house-door"></i>
-                  <span>Beranda</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="informasi.php">
-                  <i class="bi bi-info-circle"></i>
-                  <span>Informasi</span>
-                </a>
-              </li>
-              
-              <?php if($_SESSION["jabatan"] == "Admin"): ?>
-              <!-- Master Menu - Admin Only -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#masterMenu" role="button">
-                  <i class="bi bi-gear-fill"></i>
-                  <span>Master</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="masterMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pegawai.php"><i class="bi bi-people"></i> Pegawai</a></li>
-                    <li class="nav-item"><a class="nav-link" href="vendor.php"><i class="bi bi-truck"></i> Vendor</a></li>
-                    <li class="nav-item"><a class="nav-link" href="meja.php"><i class="bi bi-table"></i> Meja</a></li>
-                    <li class="nav-item"><a class="nav-link" href="metode_pembayaran.php"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
-                  </ul>
+    <main class="main-content" id="mainContent">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1"><i class="bi bi-person-circle me-2"></i>Profil Saya</h2>
+                    <p class="text-muted mb-0">Kelola informasi profil dan keamanan akun Anda</p>
                 </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <!-- Produk Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#produkMenu" role="button">
-                  <i class="bi bi-box-seam"></i>
-                  <span>Produk</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="produkMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="kategori_menu.php"><i class="bi bi-tags"></i> Kategori Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="menu.php"><i class="bi bi-card-list"></i> Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-collection"></i> Kategori Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="bahan.php"><i class="bi bi-basket"></i> Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-journal-text"></i> Resep</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <!-- Pembelian Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#pembelianMenu" role="button">
-                  <i class="bi bi-cart-plus"></i>
-                  <span>Pembelian</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="pembelianMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="pembelian.php"><i class="bi bi-clipboard-check"></i> Pesanan Pembelian</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembayaran_pembelian.php"><i class="bi bi-currency-dollar"></i> Pembayaran</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Kasir"): ?>
-              <!-- Penjualan Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#penjualanMenu" role="button">
-                  <i class="bi bi-cash-coin"></i>
-                  <span>Penjualan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="penjualanMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
-                    <?php if($_SESSION["jabatan"] == "Admin"): ?>
-                    <li class="nav-item"><a class="nav-link" href="promo.php"><i class="bi bi-percent"></i> Promo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
-                    <?php endif; ?>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin"): ?>
-              <!-- Laporan Menu - Admin Only -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#laporanMenu" role="button">
-                  <i class="bi bi-file-earmark-text"></i>
-                  <span>Laporan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="laporanMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="laporan_penjualan.php"><i class="bi bi-graph-up"></i> Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="laporan_pembelian.php"><i class="bi bi-cart-check"></i> Pembelian</a></li>
-                    <li class="nav-item"><a class="nav-link" href="laporan_stok.php"><i class="bi bi-boxes"></i> Stok</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <!-- Pengaturan Menu - Admin Only -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#pengaturanMenu" role="button">
-                  <i class="bi bi-gear"></i>
-                  <span>Pengaturan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="pengaturanMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="backup.php"><i class="bi bi-download"></i> Backup Data</a></li>
-                    <li class="nav-item"><a class="nav-link" href="restore.php"><i class="bi bi-upload"></i> Restore Data</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-            </ul>
-          </div>
-        </div>
+            </div>
 
-        <!-- Mobile Sidebar -->
-        <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas">
-          <div class="offcanvas-header">
-            <h5 class="offcanvas-title">Menu</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-          </div>
-          <div class="offcanvas-body">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <a class="nav-link" href="index.php">
-                  <i class="bi bi-house-door"></i> Beranda
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="informasi.php">
-                  <i class="bi bi-info-circle"></i> Informasi
-                </a>
-              </li>
-              
-              <?php if($_SESSION["jabatan"] == "Admin"): ?>
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#masterMenuMobile" role="button">
-                  <i class="bi bi-gear-fill"></i> Master
-                </a>
-                <div class="collapse" id="masterMenuMobile">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="resto.php">Resto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pegawai.php">Pegawai</a></li>
-                    <li class="nav-item"><a class="nav-link" href="vendor.php">Vendor</a></li>
-                    <li class="nav-item"><a class="nav-link" href="meja.php">Meja</a></li>
-                    <li class="nav-item"><a class="nav-link" href="metode_pembayaran.php">Metode Pembayaran</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#produkMenuMobile" role="button">
-                  <i class="bi bi-box-seam"></i> Produk
-                </a>
-                <div class="collapse" id="produkMenuMobile">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="kategori_menu.php">Kategori Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="menu.php">Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="kategori_bahan.php">Kategori Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="bahan.php">Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="resep.php">Resep</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#pembelianMenuMobile" role="button">
-                  <i class="bi bi-cart-plus"></i> Pembelian
-                </a>
-                <div class="collapse" id="pembelianMenuMobile">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="pembelian.php">Pesanan Pembelian</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembayaran_pembelian.php">Pembayaran</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Kasir"): ?>
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#penjualanMenuMobile" role="button">
-                  <i class="bi bi-cash-coin"></i> Penjualan
-                </a>
-                <div class="collapse" id="penjualanMenuMobile">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="shift_kasir.php">Shift Kasir</a></li>
-                    <?php if($_SESSION["jabatan"] == "Admin"): ?>
-                    <li class="nav-item"><a class="nav-link" href="promo.php">Promo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="biaya_lain.php">Biaya Lain</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php">Harga Pokok Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_rilis.php">Harga Rilis</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembatalan.php">Pembatalan</a></li>
-                    <?php endif; ?>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Main Content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Profile</h1>
-          </div>
-
-          <?php if (!empty($message)): ?>
+            <?php if ($message): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-              <?php echo htmlspecialchars($message); ?>
-              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <i class="bi bi-check-circle me-2"></i><?php echo $message; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-          <?php endif; ?>
+            <?php endif; ?>
 
-          <?php if (!empty($error)): ?>
+            <?php if ($error): ?>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-              <?php echo htmlspecialchars($error); ?>
-              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <i class="bi bi-exclamation-triangle me-2"></i><?php echo $error; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-          <?php endif; ?>
+            <?php endif; ?>
 
-          <div class="row">
-            <div class="col-md-12">
-              <div class="card">
-                <div class="card-header">
-                  <h5 class="card-title mb-0">Edit Profile</h5>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card-modern">
+                        <div class="card-header">
+                            <i class="bi bi-pencil-square me-2"></i>Informasi Profil
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" class="form-modern">
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Nama Lengkap <span class="text-danger">*</span></label>
+                                    <div class="col-sm-9">
+                                        <input type="text" name="nama_lengkap" class="form-control" value="<?php echo htmlspecialchars($current_user['nama_lengkap']); ?>" required>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Jabatan</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($current_user['jabatan']); ?>" disabled readonly>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Nomor HP Saat Ini <span class="text-danger">*</span></label>
+                                    <div class="col-sm-9">
+                                        <input type="text" name="nomor_hp" class="form-control" value="<?php echo htmlspecialchars($current_user['nomor_hp']); ?>" disabled readonly>
+                                        <small class="text-muted">Nomor HP digunakan sebagai username</small>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Nomor HP Baru <span class="text-danger">*</span></label>
+                                    <div class="col-sm-9">
+                                        <input type="text" name="nomor_hp_baru" class="form-control" value="<?php echo htmlspecialchars($current_user['nomor_hp']); ?>" required>
+                                        <small class="text-muted">Ubah nomor HP jika diperlukan</small>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Email <span class="text-danger">*</span></label>
+                                    <div class="col-sm-9">
+                                        <input type="email" name="email" class="form-control" value="<?php echo htmlspecialchars($current_user['email']); ?>" required>
+                                    </div>
+                                </div>
+
+                                <hr class="my-4">
+
+                                <h6 class="mb-3"><i class="bi bi-shield-lock me-2"></i>Ubah Password (Opsional)</h6>
+                                <p class="text-muted small">Kosongkan jika tidak ingin mengubah password</p>
+
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Password Baru</label>
+                                    <div class="col-sm-9">
+                                        <input type="password" name="password_baru" id="password_baru" class="form-control" placeholder="Minimal 6 karakter">
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <label class="col-sm-3 col-form-label">Konfirmasi Password</label>
+                                    <div class="col-sm-9">
+                                        <input type="password" name="konfirmasi_password" id="konfirmasi_password" class="form-control" placeholder="Ulangi password baru">
+                                        <div id="password-match-message" class="mt-2"></div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-9 offset-sm-3">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-save me-2"></i>Simpan Perubahan
+                                        </button>
+                                        <a href="index.php" class="btn btn-outline-secondary">
+                                            <i class="bi bi-x-circle me-2"></i>Batal
+                                        </a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card-modern mt-4">
+                        <div class="card-header bg-danger text-white">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Informasi Penting
+                        </div>
+                        <div class="card-body">
+                            <ul class="mb-0">
+                                <li>Setelah mengubah profil, Anda akan diminta login kembali</li>
+                                <li>Password minimal 6 karakter</li>
+                                <li>Jika mengubah nomor HP, password lama akan di-enkripsi ulang</li>
+                                <li>Email harus unik dan belum digunakan pegawai lain</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                  <form method="POST">
-                    <div class="mb-3">
-                      <label for="nama_lengkap" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
-                      <input type="text" class="form-control" id="nama_lengkap" name="nama_lengkap" value="<?php echo htmlspecialchars($current_user['nama_lengkap']); ?>" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                      <label for="nomor_hp" class="form-label">Nomor Handphone <span class="text-danger">*</span></label>
-                      <input type="text" class="form-control" id="nomor_hp" name="nomor_hp" value="<?php echo htmlspecialchars($current_user['nomor_hp']); ?>" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                      <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                      <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($current_user['email']); ?>" required>
-                    </div>
-                    
-                    <hr>
-                    
-                    <div class="mb-3">
-                      <label for="nomor_hp_baru" class="form-label">Nomor Handphone Baru <span class="text-danger">*</span></label>
-                      <input type="text" class="form-control" id="nomor_hp_baru" name="nomor_hp_baru" value="<?php echo htmlspecialchars($current_user['nomor_hp']); ?>" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                      <label for="password_baru" class="form-label">Password Baru</label>
-                      <input type="password" class="form-control" id="password_baru" name="password_baru" placeholder="Kosongkan jika tidak ingin mengubah password">
-                      <div class="form-text">Minimal 6 karakter</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                      <label for="konfirmasi_password" class="form-label">Konfirmasi Password Baru</label>
-                      <input type="password" class="form-control" id="konfirmasi_password" name="konfirmasi_password" placeholder="Ulangi password baru">
-                    </div>
-                    
-                    <div class="d-grid">
-                      <button type="submit" class="btn btn-primary">Update</button>
-                    </div>
-                  </form>
-                </div>
-              </div>
             </div>
-            
-           
-          </div>
-        </main>
-      </div>
-    </div>
+        </div>
+    </main>
 
-    <script src="../js/bootstrap.bundle.min.js"></script>
+    <?php include '_scripts_new.php'; ?>
+    
     <script>
-      // Validate password confirmation
-      document.getElementById('konfirmasi_password').addEventListener('input', function() {
+    // Password match validation
+    document.getElementById('konfirmasi_password').addEventListener('input', function() {
         const password = document.getElementById('password_baru').value;
         const confirm = this.value;
+        const message = document.getElementById('password-match-message');
         
-        if (password !== '' && confirm !== '' && password !== confirm) {
-          this.setCustomValidity('Password tidak sama');
-        } else {
-          this.setCustomValidity('');
+        if (confirm === '') {
+            message.innerHTML = '';
+            return;
         }
-      });
-      
-      document.getElementById('password_baru').addEventListener('input', function() {
+        
+        if (password === confirm) {
+            message.innerHTML = '<small class="text-success"><i class="bi bi-check-circle"></i> Password cocok</small>';
+            this.setCustomValidity('');
+        } else {
+            message.innerHTML = '<small class="text-danger"><i class="bi bi-x-circle"></i> Password tidak cocok</small>';
+            this.setCustomValidity('Password tidak cocok');
+        }
+    });
+    
+    document.getElementById('password_baru').addEventListener('input', function() {
         const confirm = document.getElementById('konfirmasi_password');
         if (confirm.value !== '') {
-          confirm.dispatchEvent(new Event('input'));
+            confirm.dispatchEvent(new Event('input'));
         }
-      });
+    });
     </script>
-  </body>
+</body>
 </html>

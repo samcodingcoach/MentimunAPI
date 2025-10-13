@@ -253,521 +253,217 @@ if (!empty($params)) {
 ?>
 
 <!DOCTYPE html>
-<html lang="id">
+
+<!doctype html>
+<html lang="id" data-bs-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Informasi - Resto007 Admin</title>
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link href="../css/admin.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Informasi - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="../css/newadmin.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Top Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="navbar-brand" href="#">Resto007 Admin</a>
-        <div class="navbar-nav ms-auto">
-          <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-              <?php echo htmlspecialchars($_SESSION["nama_lengkap"]); ?> (<?php echo htmlspecialchars($_SESSION["jabatan"]); ?>)
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="profile.php">Ubah Profil</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="logout.php">Logout</a></li>
-            </ul>
-          </div>
+    <?php include '_header_new.php'; ?>
+    
+    <?php include '_sidebar_new.php'; ?>
+
+    <main class="main-content" id="mainContent">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1"><i class="bi bi-info-circle me-2"></i>Informasi</h2>
+                    <p class="text-muted mb-0">Kelola informasi dan pengumuman untuk semua divisi</p>
+                </div>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+                    <i class="bi bi-plus-lg me-2"></i>Tambah Informasi
+                </button>
+            </div>
+
+            <?php if ($message): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i><?php echo $message; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($error): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i><?php echo $error; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php endif; ?>
+
+            <div class="card-modern">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-table me-2"></i>
+                        <span>Daftar Informasi</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <form class="d-flex" method="GET" action="">
+                            <div class="input-group" style="width: 250px;">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Cari informasi..." value="<?php echo htmlspecialchars($search); ?>">
+                            </div>
+                        </form>
+                        <select class="form-select" style="width: 150px;" onchange="window.location.href='?filter='+this.value+'&search=<?php echo urlencode($search); ?>'">
+                            <option value="">Semua Divisi</option>
+                            <option value="Semua" <?php echo $filter === 'Semua' ? 'selected' : ''; ?>>Semua</option>
+                            <option value="Kasir" <?php echo $filter === 'Kasir' ? 'selected' : ''; ?>>Kasir</option>
+                            <option value="Dapur" <?php echo $filter === 'Dapur' ? 'selected' : ''; ?>>Dapur</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">No</th>
+                                <th>Judul</th>
+                                <th style="width: 200px;">Gambar</th>
+                                <th style="width: 100px;">Divisi</th>
+                                <th style="width: 150px;">Pembuat</th>
+                                <th style="width: 150px;">Tanggal</th>
+                                <th style="width: 120px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php if (!empty($informasi)): ?>
+                            <?php foreach ($informasi as $index => $info): ?>
+                            <tr>
+                                <td class="text-center"><?php echo $offset + $index + 1; ?></td>
+                                <td>
+                                    <strong><?php echo htmlspecialchars($info['judul']); ?></strong>
+                                    <?php if (!empty($info['link'])): ?>
+                                    <br><a href="<?php echo htmlspecialchars($info['link']); ?>" target="_blank" class="text-primary small">
+                                        <i class="bi bi-link-45deg"></i> Link
+                                    </a>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if (!empty($info['gambar']) && file_exists('../images/' . $info['gambar'])): ?>
+                                        <img src="../images/<?php echo htmlspecialchars($info['gambar']); ?>" alt="Gambar" class="img-thumbnail" style="max-width: 150px; max-height: 100px; object-fit: cover;">
+                                    <?php else: ?>
+                                        <span class="text-muted">-</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary"><?php echo htmlspecialchars($info['divisi']); ?></span>
+                                </td>
+                                <td><?php echo htmlspecialchars($info['nama_lengkap']); ?></td>
+                                <td><?php echo date('d/m/Y H:i', strtotime($info['created_time'])); ?></td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="viewInfo(<?php echo htmlspecialchars(json_encode($info)); ?>)" title="Lihat Detail">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning" onclick="editInfo(<?php echo htmlspecialchars(json_encode($info)); ?>)" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete(<?php echo $info['id_info']; ?>, '<?php echo htmlspecialchars(addslashes($info['judul'])); ?>')" title="Hapus">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                    <p class="text-muted mb-0">Tidak ada data informasi</p>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+                <?php if ($total_pages > 1): ?>
+                <div class="card-footer bg-light border-top py-3 px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Menampilkan <?php echo $offset + 1; ?>-<?php echo min($offset + $limit, $total_records); ?> dari <?php echo $total_records; ?> informasi</small>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                                    <a class="page-link" href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&filter=<?php echo urlencode($filter); ?>">Previous</a>
+                                </li>
+                                <?php for ($i = 1; $i <= min($total_pages, 5); $i++): ?>
+                                <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
+                                    <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&filter=<?php echo urlencode($filter); ?>"><?php echo $i; ?></a>
+                                </li>
+                                <?php endfor; ?>
+                                <li class="page-item <?php echo $page >= $total_pages ? 'disabled' : ''; ?>">
+                                    <a class="page-link" href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&filter=<?php echo urlencode($filter); ?>">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
         </div>
-      </div>
-    </nav>
-
-    <div class="container-fluid">
-      <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
-          <div class="position-sticky pt-3">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <a class="nav-link" href="index.php">
-                  <i class="bi bi-house"></i>
-                  <span>Beranda</span>
-                </a>
-              </li>
-              
-              <li class="nav-item">
-                <a class="nav-link active" href="informasi.php">
-                  <i class="bi bi-info-circle"></i>
-                  <span>Informasi</span>
-                </a>
-              </li>
-              
-              <?php if($_SESSION["jabatan"] == "Admin"): ?>
-              <!-- Master Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#masterMenu" role="button">
-                  <i class="bi bi-folder"></i>
-                  <span>Master</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="masterMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pegawai.php"><i class="bi bi-people"></i> Pegawai</a></li>
-                    <li class="nav-item"><a class="nav-link" href="vendor.php"><i class="bi bi-truck"></i> Vendor</a></li>
-                    <li class="nav-item"><a class="nav-link" href="meja.php"><i class="bi bi-table"></i> Meja</a></li>
-                    <li class="nav-item"><a class="nav-link" href="metode_pembayaran.php"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <!-- Produk Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#produkMenu" role="button">
-                  <i class="bi bi-box"></i>
-                  <span>Produk</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="produkMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="kategori_menu.php"><i class="bi bi-tags"></i> Kategori Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="menu.php"><i class="bi bi-list"></i> Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-tags"></i> Kategori Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="bahan.php"><i class="bi bi-egg"></i> Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-book"></i> Resep</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <!-- Pembelian Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#pembelianMenu" role="button">
-                  <i class="bi bi-cart"></i>
-                  <span>Pembelian</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="pembelianMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="pembelian.php"><i class="bi bi-cart-plus"></i> Pesanan Pembelian</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembayaran_pembelian.php"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Kasir"): ?>
-              <!-- Penjualan Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#penjualanMenu" role="button">
-                  <i class="bi bi-cash-coin"></i>
-                  <span>Penjualan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="penjualanMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
-                    <li class="nav-item"><a class="nav-link" href="promo.php"><i class="bi bi-percent"></i> Promo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <!-- Inventory Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#inventoryMenu" role="button">
-                  <i class="bi bi-boxes"></i>
-                  <span>Inventory</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="inventoryMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="inventory.php"><i class="bi bi-box"></i> Inventory</a></li>
-                    <li class="nav-item"><a class="nav-link" href="transaksi_inventory.php"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <!-- Laporan Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#laporanMenu" role="button">
-                  <i class="bi bi-file-earmark-text"></i>
-                  <span>Laporan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="laporanMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="laporan_transaksi.php"><i class="bi bi-receipt"></i> Transaksi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="laporan_pengeluaran.php"><i class="bi bi-graph-up"></i> Pengeluaran vs Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="laporan_kuantitas.php"><i class="bi bi-bar-chart"></i> Kuantitas</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <!-- Pengaturan Menu -->
-              <li class="nav-item">
-                <a class="nav-link" href="pengaturan.php">
-                  <i class="bi bi-gear"></i>
-                  <span>Pengaturan</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Main Content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Informasi</h1>
-          </div>
-
-          <!-- Alert Messages -->
-          <?php if ($message): ?>
-          <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <?php echo htmlspecialchars($message); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
-          <?php endif; ?>
-
-          <?php if ($error): ?>
-          <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <?php echo htmlspecialchars($error); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
-          <?php endif; ?>
-
-          <!-- Data Count Info -->
-          <div class="mb-3">
-            <small class="text-muted">
-              <?php 
-                $start = ($page - 1) * $limit + 1;
-                $end = min($page * $limit, $total_records);
-                if ($total_records > 0) {
-                  echo "Showing $start to $end of $total_records entries";
-                } else {
-                  echo "Showing 0 to 0 of 0 entries";
-                }
-              ?>
-            </small>
-          </div>
-
-          <!-- Search and Filter -->
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <form method="GET" class="d-flex">
-                <input type="text" class="form-control me-2" name="search" placeholder="Cari judul atau isi..." value="<?php echo htmlspecialchars($search); ?>">
-                <button class="btn btn-outline-primary" type="submit">Cari</button>
-                <?php if (!empty($search) || !empty($filter)): ?>
-                <a href="informasi.php" class="btn btn-outline-secondary ms-2">Reset</a>
-                <?php endif; ?>
-              </form>
-            </div>
-            <div class="col-md-3">
-              <form method="GET">
-                <?php if (!empty($search)): ?>
-                <input type="hidden" name="search" value="<?php echo htmlspecialchars($search); ?>">
-                <?php endif; ?>
-                <select class="form-select" name="filter" onchange="this.form.submit()">
-                  <option value="">Semua Divisi</option>
-                  <option value="All" <?php echo $filter === 'All' ? 'selected' : ''; ?>>All</option>
-                  <option value="Admin" <?php echo $filter === 'Admin' ? 'selected' : ''; ?>>Admin</option>
-                  <option value="Kasir" <?php echo $filter === 'Kasir' ? 'selected' : ''; ?>>Kasir</option>
-                  <option value="Pramusaji" <?php echo $filter === 'Pramusaji' ? 'selected' : ''; ?>>Pramusaji</option>
-                  <option value="Dapur" <?php echo $filter === 'Dapur' ? 'selected' : ''; ?>>Dapur</option>
-                </select>
-              </form>
-            </div>
-            <div class="col-md-3 text-end">
-              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
-                <i class="bi bi-plus"></i> Tambah Informasi
-              </button>
-            </div>
-          </div>
-
-          <!-- Informasi Table -->
-          <div class="table-responsive">
-            <table class="table table-striped table-hover">
-              <thead class="table-dark">
-                <tr>
-                  <th>No</th>
-                  <th>Judul</th>
-                  <th>Isi</th>
-                  <th class="d-none">Gambar</th>
-                  <th class="d-none">Link</th>
-                  <th>Divisi</th>
-                  <th>Dibuat Oleh</th>
-                  <th>Waktu</th>
-                  <th class="action-column">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php if ($result && $result->num_rows > 0): ?>
-                  <?php $no = $offset + 1; ?>
-                  <?php while ($row = $result->fetch_assoc()): ?>
-                  <tr>
-                    <td><?php echo $no++; ?></td>
-                    <td><?php echo htmlspecialchars($row['judul']); ?></td>
-                    <td><?php echo htmlspecialchars(substr($row['isi'], 0, 50)) . (strlen($row['isi']) > 50 ? '...' : ''); ?></td>
-                    <td class="d-none"><?php echo htmlspecialchars($row['gambar'] ?? ''); ?></td>
-                    <td class="d-none"><?php echo htmlspecialchars($row['link'] ?? ''); ?></td>
-                    <td>
-                      <span class="badge bg-<?php echo $row['divisi'] === 'All' ? 'primary' : ($row['divisi'] === 'Admin' ? 'danger' : ($row['divisi'] === 'Kasir' ? 'success' : ($row['divisi'] === 'Pramusaji' ? 'warning' : 'info'))); ?>">
-                        <?php echo htmlspecialchars($row['divisi']); ?>
-                      </span>
-                    </td>
-                    <td><?php echo htmlspecialchars($row['nama_lengkap'] ?? 'Unknown'); ?></td>
-                    <td><?php echo date('d/m/Y H:i', strtotime($row['created_time'])); ?></td>
-                    <td>
-                      <button type="button" class="btn btn-sm btn-warning" 
-                                onclick="editInformasi(<?php echo $row['id_info']; ?>, '<?php echo addslashes($row['judul']); ?>', '<?php echo addslashes($row['isi']); ?>', '<?php echo $row['divisi']; ?>', '<?php echo addslashes($row['gambar'] ?? ''); ?>', '<?php echo addslashes($row['link'] ?? ''); ?>')">
-                          <i class="bi bi-pencil"></i> Edit
-                        </button>
-                        <a href="?delete=<?php echo $row['id_info']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
-                            <i class="bi bi-trash"></i> Delete
-                        </a>
-                    </td>
-                  </tr>
-                  <?php endwhile; ?>
-                <?php else: ?>
-                  <tr>
-                    <td colspan="9" class="text-center">Tidak ada data informasi</td>
-                  </tr>
-                <?php endif; ?>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Pagination -->
-          <?php if ($total_pages > 1): ?>
-          <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center">
-              <?php if ($page > 1): ?>
-              <li class="page-item">
-                <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>">
-                  Previous
-                </a>
-              </li>
-              <?php endif; ?>
-              
-              <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-              <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
-                <a class="page-link" href="?page=<?php echo $i; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>">
-                  <?php echo $i; ?>
-                </a>
-              </li>
-              <?php endfor; ?>
-              
-              <?php if ($page < $total_pages): ?>
-              <li class="page-item">
-                <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>">
-                  Next
-                </a>
-              </li>
-              <?php endif; ?>
-            </ul>
-          </nav>
-          <?php endif; ?>
-        </main>
-      </div>
-    </div>
-
-    <!-- Mobile Sidebar Offcanvas -->
-    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title">Menu</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-      </div>
-      <div class="offcanvas-body p-0">
-        <ul class="nav flex-column">
-          <li class="nav-item">
-            <a class="nav-link" href="index.php">
-              <i class="bi bi-house"></i>
-              <span>Beranda</span>
-            </a>
-          </li>
-          
-          <li class="nav-item">
-            <a class="nav-link active" href="informasi.php">
-              <i class="bi bi-info-circle"></i>
-              <span>Informasi</span>
-            </a>
-          </li>
-          
-          <?php if($_SESSION["jabatan"] == "Admin"): ?>
-          <!-- Master Menu Mobile -->
-          <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="collapse" href="#masterMenuMobile" role="button">
-              <i class="bi bi-folder"></i>
-              <span>Master</span>
-              <i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <div class="collapse" id="masterMenuMobile">
-              <ul class="nav flex-column ms-3">
-                <li class="nav-item"><a class="nav-link" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
-                <li class="nav-item"><a class="nav-link" href="pegawai.php"><i class="bi bi-people"></i> Pegawai</a></li>
-                <li class="nav-item"><a class="nav-link" href="vendor.php"><i class="bi bi-truck"></i> Vendor</a></li>
-                <li class="nav-item"><a class="nav-link" href="meja.php"><i class="bi bi-table"></i> Meja</a></li>
-                <li class="nav-item"><a class="nav-link" href="metode_pembayaran.php"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
-              </ul>
-            </div>
-          </li>
-          <?php endif; ?>
-          
-          <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-          <!-- Produk Menu Mobile -->
-          <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="collapse" href="#produkMenuMobile" role="button">
-              <i class="bi bi-box"></i>
-              <span>Produk</span>
-              <i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <div class="collapse" id="produkMenuMobile">
-              <ul class="nav flex-column ms-3">
-                <li class="nav-item"><a class="nav-link" href="kategori_menu.php"><i class="bi bi-tags"></i> Kategori Menu</a></li>
-                <li class="nav-item"><a class="nav-link" href="menu.php"><i class="bi bi-list"></i> Menu</a></li>
-                <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-tags"></i> Kategori Bahan</a></li>
-                <li class="nav-item"><a class="nav-link" href="bahan.php"><i class="bi bi-egg"></i> Bahan</a></li>
-                <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-book"></i> Resep</a></li>
-              </ul>
-            </div>
-          </li>
-          
-          <!-- Pembelian Menu Mobile -->
-          <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="collapse" href="#pembelianMenuMobile" role="button">
-              <i class="bi bi-cart"></i>
-              <span>Pembelian</span>
-              <i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <div class="collapse" id="pembelianMenuMobile">
-              <ul class="nav flex-column ms-3">
-                <li class="nav-item"><a class="nav-link" href="pembelian.php"><i class="bi bi-cart-plus"></i> Pesanan Pembelian</a></li>
-                <li class="nav-item"><a class="nav-link" href="pembayaran_pembelian.php"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
-              </ul>
-            </div>
-          </li>
-          <?php endif; ?>
-          
-          <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Kasir"): ?>
-          <!-- Penjualan Menu Mobile -->
-          <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="collapse" href="#penjualanMenuMobile" role="button">
-              <i class="bi bi-cash-coin"></i>
-              <span>Penjualan</span>
-              <i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <div class="collapse" id="penjualanMenuMobile">
-              <ul class="nav flex-column ms-3">
-                <li class="nav-item"><a class="nav-link" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
-                <li class="nav-item"><a class="nav-link" href="promo.php"><i class="bi bi-percent"></i> Promo</a></li>
-                <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
-                <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
-                <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
-                <li class="nav-item"><a class="nav-link" href="transaksi.php"><i class="bi bi-cart-check"></i> Transaksi</a></li>
-                <li class="nav-item"><a class="nav-link" href="pembayaran.php"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
-              </ul>
-            </div>
-          </li>
-          <?php endif; ?>
-          
-          <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-          <!-- Inventory Menu Mobile -->
-          <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="collapse" href="#inventoryMenuMobile" role="button">
-              <i class="bi bi-boxes"></i>
-              <span>Inventory</span>
-              <i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <div class="collapse" id="inventoryMenuMobile">
-              <ul class="nav flex-column ms-3">
-                <li class="nav-item"><a class="nav-link" href="inventory.php"><i class="bi bi-box"></i> Inventory</a></li>
-                <li class="nav-item"><a class="nav-link" href="transaksi_inventory.php"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
-              </ul>
-            </div>
-          </li>
-          <?php endif; ?>
-          
-          <!-- Laporan Menu Mobile -->
-          <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="collapse" href="#laporanMenuMobile" role="button">
-              <i class="bi bi-file-earmark-text"></i>
-              <span>Laporan</span>
-              <i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <div class="collapse" id="laporanMenuMobile">
-              <ul class="nav flex-column ms-3">
-                <li class="nav-item"><a class="nav-link" href="laporan_transaksi.php"><i class="bi bi-receipt"></i> Transaksi</a></li>
-                <li class="nav-item"><a class="nav-link" href="laporan_pengeluaran.php"><i class="bi bi-graph-up"></i> Pengeluaran vs Penjualan</a></li>
-                <li class="nav-item"><a class="nav-link" href="laporan_kuantitas.php"><i class="bi bi-bar-chart"></i> Kuantitas</a></li>
-              </ul>
-            </div>
-          </li>
-          
-          <!-- Pengaturan Menu Mobile -->
-          <li class="nav-item">
-            <a class="nav-link" href="pengaturan.php">
-              <i class="bi bi-gear"></i>
-              <span>Pengaturan</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
+    </main>
 
     <!-- Add Modal -->
     <div class="modal fade" id="addModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Tambah Informasi</h5>
+                    <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Tambah Informasi</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST" enctype="multipart/form-data">
+                <form method="POST" enctype="multipart/form-data" class="form-modern">
                     <div class="modal-body">
                         <input type="hidden" name="action" value="create">
-                        <div class="mb-3">
-                            <label for="judul" class="form-label">Judul <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="judul" name="judul" required maxlength="50">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Judul <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                <input type="text" name="judul" class="form-control" required placeholder="Masukkan judul informasi">
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="isi" class="form-label">Isi <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="isi" name="isi" rows="5" required></textarea>
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Isi <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                <textarea name="isi" class="form-control" rows="5" required placeholder="Masukkan isi informasi"></textarea>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="divisi" class="form-label">Divisi <span class="text-danger">*</span></label>
-                            <select class="form-select" id="divisi" name="divisi" required>
-                                <option value="">Pilih Divisi</option>
-                                <option value="All">All</option>
-                                <option value="Admin">Admin</option>
-                                <option value="Kasir">Kasir</option>
-                                <option value="Pramusaji">Pramusaji</option>
-                                <option value="Dapur">Dapur</option>
-                            </select>
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Divisi <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                <select name="divisi" class="form-select select2-search" required>
+                                    <option value="">-- Pilih Divisi --</option>
+                                    <option value="Semua">Semua</option>
+                                    <option value="Kasir">Kasir</option>
+                                    <option value="Dapur">Dapur</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="gambar" class="form-label">Gambar</label>
-                            <input type="file" class="form-control" id="gambar" name="gambar" accept="image/*">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Link (Opsional)</label>
+                            <div class="col-sm-9">
+                                <input type="url" name="link" class="form-control" placeholder="https://example.com">
+                                <small class="text-muted">URL eksternal terkait informasi ini</small>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="link" class="form-label">Link</label>
-                            <input type="url" class="form-control" id="link" name="link">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Gambar (Opsional)</label>
+                            <div class="col-sm-9">
+                                <input type="file" name="gambar" class="form-control" accept="image/jpeg,image/jpg,image/png,image/gif">
+                                <small class="text-muted">Format: JPG, JPEG, PNG, GIF. Max 500KB. Min 1280x720px</small>
+                            </div>
                         </div>
-
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-save me-2"></i>Simpan</button>
                     </div>
                 </form>
             </div>
@@ -776,142 +472,157 @@ if (!empty($params)) {
 
     <!-- Edit Modal -->
     <div class="modal fade" id="editModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Informasi</h5>
+                    <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Edit Informasi</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST" enctype="multipart/form-data">
+                <form method="POST" enctype="multipart/form-data" class="form-modern">
                     <div class="modal-body">
                         <input type="hidden" name="action" value="update">
                         <input type="hidden" name="id_info" id="edit_id_info">
-
-                        <!-- Nav tabs -->
-                        <ul class="nav nav-tabs" id="editTabs" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic" type="button" role="tab">Informasi Dasar</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="media-tab" data-bs-toggle="tab" data-bs-target="#media" type="button" role="tab">Gambar & Link</button>
-                            </li>
-                        </ul>
-
-                        <!-- Tab content -->
-                        <div class="tab-content" id="editTabContent">
-                            <div class="tab-pane fade show active" id="basic" role="tabpanel">
-                                <div class="mt-3">
-                                    <div class="mb-3">
-                                        <label for="edit_judul" class="form-label">Judul <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="edit_judul" name="judul" required maxlength="50">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="edit_isi" class="form-label">Isi <span class="text-danger">*</span></label>
-                                        <textarea class="form-control" id="edit_isi" name="isi" rows="4" required></textarea>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="edit_divisi" class="form-label">Divisi <span class="text-danger">*</span></label>
-                                        <select class="form-select" id="edit_divisi" name="divisi" required>
-                                            <option value="">Pilih Divisi</option>
-                                            <option value="All">All</option>
-                                            <option value="Admin">Admin</option>
-                                            <option value="Kasir">Kasir</option>
-                                            <option value="Pramusaji">Pramusaji</option>
-                                            <option value="Dapur">Dapur</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tab-pane fade" id="media" role="tabpanel">
-                                <div class="mt-3">
-                                    <div class="mb-3">
-                                        <label for="edit_gambar" class="form-label">Gambar</label>
-                                        <input type="file" class="form-control" id="edit_gambar" name="gambar" accept="image/*">
-                                        <input type="hidden" name="gambar_lama" id="edit_gambar_lama">
-                                        <div id="edit_current_image" class="mt-2" style="display: none;">
-                                            <small class="text-muted">Gambar saat ini:</small><br>
-                                            <img id="edit_image_preview" src="" alt="Current Image" class="img-thumbnail" style="max-width: 150px; max-height: 100px;">
-                                            <div class="mt-1">
-                                                <small class="text-info">Pilih file baru untuk mengganti gambar.</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="edit_link" class="form-label">Link</label>
-                                        <input type="url" class="form-control" id="edit_link" name="link">
-                                    </div>
-                                </div>
+                        <input type="hidden" name="gambar_lama" id="edit_gambar_lama">
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Judul <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                <input type="text" name="judul" id="edit_judul" class="form-control" required>
                             </div>
                         </div>
-
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Isi <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                <textarea name="isi" id="edit_isi" class="form-control" rows="5" required></textarea>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Divisi <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                <select name="divisi" id="edit_divisi" class="form-select" required>
+                                    <option value="">-- Pilih Divisi --</option>
+                                    <option value="Semua">Semua</option>
+                                    <option value="Kasir">Kasir</option>
+                                    <option value="Dapur">Dapur</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Link (Opsional)</label>
+                            <div class="col-sm-9">
+                                <input type="url" name="link" id="edit_link" class="form-control">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Gambar Saat Ini</label>
+                            <div class="col-sm-9">
+                                <div id="edit_current_image"></div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Gambar Baru (Opsional)</label>
+                            <div class="col-sm-9">
+                                <input type="file" name="gambar" class="form-control" accept="image/jpeg,image/jpg,image/png,image/gif">
+                                <small class="text-muted">Kosongkan jika tidak ingin mengubah gambar</small>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Update</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-save me-2"></i>Update</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Delete Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1">
-        <div class="modal-dialog">
+    <!-- View Modal -->
+    <div class="modal fade" id="viewModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Konfirmasi Hapus</h5>
+                    <h5 class="modal-title"><i class="bi bi-eye me-2"></i>Detail Informasi</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Apakah Anda yakin ingin menghapus informasi <strong id="delete_judul"></strong>?</p>
-                    <p class="text-danger">Tindakan ini tidak dapat dibatalkan!</p>
+                    <div id="view_content"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <form method="POST" style="display: inline;">
-                        <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="id_info" id="delete_id_info">
-                        <button type="submit" class="btn btn-danger">Hapus</button>
-                    </form>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="../js/bootstrap.bundle.min.js"></script>
+    <?php include '_scripts_new.php'; ?>
+    
     <script>
-        function editInformasi(id, judul, isi, divisi, gambar, link) {
-            document.getElementById('edit_id_info').value = id;
-            document.getElementById('edit_judul').value = judul;
-            document.getElementById('edit_isi').value = isi;
-            document.getElementById('edit_divisi').value = divisi;
-            document.getElementById('edit_gambar_lama').value = gambar || '';
-            document.getElementById('edit_link').value = link || '';
+        function editInfo(info) {
+            document.getElementById('edit_id_info').value = info.id_info;
+            document.getElementById('edit_judul').value = info.judul;
+            document.getElementById('edit_isi').value = info.isi;
+            document.getElementById('edit_divisi').value = info.divisi;
+            document.getElementById('edit_link').value = info.link || '';
+            document.getElementById('edit_gambar_lama').value = info.gambar || '';
             
-            // Show/hide current image preview
-            const currentImageDiv = document.getElementById('edit_current_image');
-            const imagePreview = document.getElementById('edit_image_preview');
-            
-            if (gambar && gambar.trim() !== '') {
-                imagePreview.src = '../images/' + gambar;
-                currentImageDiv.style.display = 'block';
+            // Show current image
+            const imgContainer = document.getElementById('edit_current_image');
+            if (info.gambar) {
+                imgContainer.innerHTML = '<img src="../images/' + info.gambar + '" class="img-thumbnail" style="max-width: 200px;">';
             } else {
-                currentImageDiv.style.display = 'none';
+                imgContainer.innerHTML = '<span class="text-muted">Tidak ada gambar</span>';
             }
-            
-            // Reset file input
-            document.getElementById('edit_gambar').value = '';
             
             var editModal = new bootstrap.Modal(document.getElementById('editModal'));
             editModal.show();
         }
         
-        function deleteInformasi(id, judul) {
-            document.getElementById('delete_id_info').value = id;
-            document.getElementById('delete_judul').textContent = judul;
+        function viewInfo(info) {
+            let html = '<div class="row">';
+            html += '<div class="col-md-12 mb-3">';
+            html += '<h4>' + info.judul + '</h4>';
+            html += '<hr>';
+            html += '</div>';
             
-            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            deleteModal.show();
+            if (info.gambar) {
+                html += '<div class="col-md-12 mb-3">';
+                html += '<img src="../images/' + info.gambar + '" class="img-fluid rounded" style="max-width: 100%;">';
+                html += '</div>';
+            }
+            
+            html += '<div class="col-md-12 mb-3">';
+            html += '<h6>Isi:</h6>';
+            html += '<p style="white-space: pre-wrap;">' + info.isi + '</p>';
+            html += '</div>';
+            
+            html += '<div class="col-md-6 mb-2">';
+            html += '<strong>Divisi:</strong> <span class="badge bg-primary">' + info.divisi + '</span>';
+            html += '</div>';
+            
+            html += '<div class="col-md-6 mb-2">';
+            html += '<strong>Pembuat:</strong> ' + info.nama_lengkap;
+            html += '</div>';
+            
+            html += '<div class="col-md-6 mb-2">';
+            html += '<strong>Tanggal:</strong> ' + new Date(info.created_time).toLocaleString('id-ID');
+            html += '</div>';
+            
+            if (info.link) {
+                html += '<div class="col-md-6 mb-2">';
+                html += '<strong>Link:</strong> <a href="' + info.link + '" target="_blank">' + info.link + '</a>';
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            
+            document.getElementById('view_content').innerHTML = html;
+            var viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
+            viewModal.show();
+        }
+        
+        function confirmDelete(id, judul) {
+            if (confirm('Apakah Anda yakin ingin menghapus informasi "' + judul + '"?')) {
+                window.location.href = '?delete=' + id;
+            }
         }
     </script>
 </body>
