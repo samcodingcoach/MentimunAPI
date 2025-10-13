@@ -1,0 +1,595 @@
+:root {
+  --primary-color: #075E54;
+  --text-color: #333333;
+  --danger-color: #FF2D2D;
+  --sidebar-width: 250px;
+  --sidebar-collapsed-width: 70px;
+}
+
+[data-bs-theme="dark"] {
+  --primary-color: #075E54;
+  --text-color: #e0e0e0;
+  --danger-color: #FF2D2D;
+}
+
+body {
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+/* Navbar Styling - Modern Design */
+.navbar-custom {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #064c44 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 0.75rem 1rem;
+}
+
+.navbar-custom .navbar-brand {
+  color: white !important;
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: 0.5px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-custom .btn-toggle {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.navbar-custom .btn-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.navbar-custom .user-dropdown .btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 50px;
+  padding: 0.4rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.navbar-custom .user-dropdown .btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.dark-mode-toggle {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dark-mode-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(15deg);
+}
+
+/* Sidebar Styling */
+.sidebar {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar-width);
+  background-color: var(--bs-body-bg);
+  border-right: 1px solid var(--bs-border-color);
+  overflow-y: auto;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-collapsed-width);
+}
+
+.sidebar.collapsed .menu-text,
+.sidebar.collapsed .menu-arrow {
+  display: none;
+}
+
+.sidebar.collapsed .submenu {
+  display: none !important;
+}
+
+/* Main Content */
+.main-content {
+  margin-left: var(--sidebar-width);
+  margin-top: 60px;
+  padding: 25px;
+  transition: margin-left 0.3s ease;
+  min-height: calc(100vh - 60px);
+  background: var(--bs-body-bg);
+}
+
+.main-content.expanded {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+/* Menu Items */
+.menu-item {
+  padding: 12px 20px;
+  color: var(--text-color);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+}
+
+.menu-item:hover {
+  background-color: var(--bs-secondary-bg);
+  border-left-color: var(--primary-color);
+}
+
+.menu-item.active {
+  background-color: var(--primary-color);
+  color: white !important;
+}
+
+.menu-item i {
+  min-width: 30px;
+  font-size: 18px;
+}
+
+.menu-text {
+  flex: 1;
+  margin-left: 10px;
+}
+
+.menu-arrow {
+  margin-left: auto;
+  transition: transform 0.3s;
+}
+
+.menu-arrow.rotated {
+  transform: rotate(90deg);
+}
+
+.submenu {
+  background-color: var(--bs-tertiary-bg);
+}
+
+.submenu .menu-item {
+  padding-left: 60px;
+  font-size: 13px;
+}
+
+/* === Modern Table Design (Sama seperti card-modern) - MULAI === */
+
+/* DIV pembungkus tabel - mirip card-modern */
+.table-modern {
+  border: none !important;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  background: var(--bs-body-bg);
+}
+
+/* Hapus semua border dari table-responsive */
+.table-modern .table-responsive {
+  border: none !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* TABLE di dalamnya */
+.table-modern .table {
+  margin-bottom: 0;
+  border: none !important;
+  border-collapse: collapse;
+}
+
+.table-modern .table thead {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #064c44 100%);
+  color: white;
+  border: none !important;
+}
+
+.table-modern .table thead th {
+  padding: 16px 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  border: none !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  text-align: left;
+}
+
+.table-modern .table tbody tr {
+  transition: all 0.2s ease-in-out;
+}
+
+.table-modern .table tbody tr:not(:last-child) {
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.table-modern .table tbody tr:hover {
+  background-color: rgba(7, 94, 84, 0.05);
+}
+
+.table-modern .table tbody td {
+  padding: 16px 20px;
+  vertical-align: middle;
+  text-align: left;
+  border: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+}
+
+.table-modern .badge {
+  padding: 6px 12px;
+  font-weight: 500;
+  border-radius: 20px;
+  text-transform: uppercase;
+  font-size: 0.75em;
+  letter-spacing: 0.5px;
+}
+
+.table-modern .table-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.table-modern .table-actions .btn {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.table-modern .table-footer {
+  border-top: 1px solid var(--bs-border-color);
+  background: var(--bs-body-bg);
+  padding: 1rem 1.25rem;
+}
+
+/* FORCE REMOVE SEMUA BORDER - OVERRIDE BOOTSTRAP */
+.table-modern *,
+.table-modern *::before,
+.table-modern *::after {
+  box-sizing: border-box;
+}
+
+.table-modern .table-responsive,
+.table-modern .table-responsive *,
+.table-modern .table,
+.table-modern .table *,
+.table-modern table,
+.table-modern table * {
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Khusus untuk th dan td - hapus SEMUA border */
+.table-modern th,
+.table-modern td,
+.table-modern thead th,
+.table-modern tbody td,
+.table-modern .table th,
+.table-modern .table td {
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-top: 0 !important;
+}
+
+/* === Modern Table Design - SELESAI === */
+
+/* Modern Card Design */
+.card-modern {
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  background: var(--bs-body-bg);
+}
+
+.card-modern:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-modern .card-header {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #064c44 100%);
+  color: white;
+  padding: 16px 20px;
+  border: none;
+  font-weight: 600;
+}
+
+/* Style untuk search box di header */
+.card-modern .card-header .input-group-text {
+  background: white;
+  border: 1px solid #e5e7eb;
+  color: #6b7280;
+}
+
+.card-modern .card-header .form-control {
+  border: 1px solid #e5e7eb;
+  color: #374151;
+}
+
+.card-modern .card-header .form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: none;
+}
+
+/* Button di header */
+.card-modern .card-header .btn-outline-light {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+}
+
+.card-modern .card-header .btn-outline-light:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: white;
+  color: white;
+}
+
+.card-modern .card-body {
+  padding: 20px;
+}
+
+/* Card body dengan table tidak perlu padding samping */
+.card-modern .card-body.p-0 {
+  padding: 0;
+}
+
+.card-modern .card-body.p-0 .table-responsive {
+  margin: 0;
+}
+
+/* Table di dalam card-modern */
+.card-modern .table {
+  margin-bottom: 0;
+}
+
+.card-modern .table thead {
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.card-modern .table thead th {
+  padding: 16px 10px !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: #6b7280;
+  border: none;
+}
+
+/* Alignment untuk kolom tertentu */
+.card-modern .table thead th:nth-child(1),
+.card-modern .table tbody td:nth-child(1) {
+  text-align: center;
+  width: 120px;
+}
+
+.card-modern .table thead th:nth-child(3),
+.card-modern .table tbody td:nth-child(3) {
+  text-align: center;
+  width: 100px;
+}
+
+.card-modern .table thead th:nth-child(5),
+.card-modern .table tbody td:nth-child(5) {
+  text-align: right;
+  width: 120px;
+}
+
+.card-modern .table thead th:nth-child(6),
+.card-modern .table tbody td:nth-child(6) {
+  text-align: center;
+  width: 100px;
+}
+
+.card-modern .table thead th:nth-child(7),
+.card-modern .table tbody td:nth-child(7) {
+  text-align: center;
+  width: 100px;
+}
+
+.card-modern .table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s ease;
+}
+
+.card-modern .table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.card-modern .table tbody td {
+  padding: 18px 10px !important;
+  vertical-align: middle;
+  border: none;
+}
+
+/* FORCE padding untuk semua kolom */
+.card-modern .table th,
+.card-modern .table td {
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+/* Footer di card-modern */
+.card-modern .card-footer {
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+}
+
+.card-modern .card-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+.card-stat {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border-left: 4px solid var(--primary-color);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+[data-bs-theme="dark"] .card-stat {
+  background: var(--bs-body-bg);
+}
+
+.card-stat:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.card-stat .stat-icon {
+  width: 55px;
+  height: 55px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  color: white;
+}
+
+.card-stat h3 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 10px 0 5px 0;
+}
+
+.card-stat small {
+  font-size: 13px;
+}
+
+/* Form Modern Design */
+.form-modern .form-label {
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.form-modern .form-control,
+.form-modern .form-select {
+  border-radius: 8px;
+  border: 2px solid var(--bs-border-color);
+  padding: 10px 15px;
+  transition: all 0.3s ease;
+}
+
+.form-modern .form-control:focus,
+.form-modern .form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(7, 94, 84, 0.15);
+}
+
+/* Select2 Custom Styling */
+.select2-container--bootstrap-5 .select2-selection {
+  border-radius: 8px;
+  border: 2px solid var(--bs-border-color);
+  padding: 4px 10px;
+}
+
+.select2-container--bootstrap-5 .select2-selection:focus {
+  border-color: var(--primary-color);
+}
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #064c44 100%);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(7, 94, 84, 0.4);
+}
+
+.text-danger-custom {
+  color: var(--danger-color) !important;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    left: -100%;
+  }
+
+  .sidebar.show-mobile {
+    left: 0;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+
+  .sidebar-overlay.show {
+    display: block;
+  }
+}
+
+/* Scrollbar Custom */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bs-tertiary-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #064c44;
+}
