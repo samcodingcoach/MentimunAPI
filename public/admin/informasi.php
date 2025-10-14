@@ -250,6 +250,14 @@ if (!empty($params)) {
 } else {
     $result = $conn->query($sql);
 }
+
+// Fetch all results into an array
+$informasi = [];
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $informasi[] = $row;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -325,13 +333,13 @@ if (!empty($params)) {
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th style="width: 50px;">No</th>
+                                <th style="width: 5%;">No</th>
                                 <th>Judul</th>
-                                <th style="width: 200px;">Gambar</th>
-                                <th style="width: 100px;">Divisi</th>
-                                <th style="width: 150px;">Pembuat</th>
-                                <th style="width: 150px;">Tanggal</th>
-                                <th style="width: 120px;">Aksi</th>
+                                <th style="width: 10%;">Gambar</th>
+                                <th style="width: 5%;">Divisi</th>
+                                <th style="width: 15%;">Pembuat</th>
+                                <th style="width: 10%;">Tanggal</th>
+                                <th style="width: 15%;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
