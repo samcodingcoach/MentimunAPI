@@ -286,28 +286,28 @@ $resep_details = $result->fetch_all(MYSQLI_ASSOC);
                     </div>
                     <div class="d-flex gap-2">
                         <form class="d-flex" method="GET" action="">
-                            <div class="input-group" style="width: 250px;">
+                            <div class="input-group" style="width: 250px; border-radius: 0.375rem; overflow: hidden;">
                                 <input type="hidden" name="id_resep" value="<?php echo $id_resep; ?>">
-                                <span class="input-group-text bg-white border-end-0">
+                                <span class="input-group-text bg-white">
                                     <i class="bi bi-search"></i>
                                 </span>
-                                <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Cari bahan, kategori, atau kode..." value="<?php echo htmlspecialchars($search); ?>">
+                                <input type="text" name="search" class="form-control" placeholder="Cari bahan, kategori, atau kode..." value="<?php echo htmlspecialchars($search); ?>">
                             </div>
                         </form>
                     </div>
                 </div>
                 <div class="card-body p-0">
-              <div class="table-responsive">
+              <div class="table-responsive" style="padding-right: 1rem;">
                         <table class="table mb-0">
                             <thead>
                                 <tr>
                                     <th style="width: 5%;">No</th>
                                     <th style="width: auto;">Nama Bahan</th>
-                                    <th style="width: 15%;" class="d-none d-md-table-cell"></i>Harga Satuan</th>
-                                    <th style="width: 10%;" class="d-none d-lg-table-cell"><i></i>Pemakaian</th>
+                                    <th style="width: 15%;" class="d-none d-md-table-cell">Harga Satuan</th>
+                                    <th style="width: 10%;" class="d-none d-lg-table-cell">Pemakaian</th>
                                     <th style="width: 15%;">Nilai Ekspetasi</th>
                                     <?php if (!$is_published): ?>
-                                    <th style="width: 5%;"><i class="bi bi-gear me-1"></i>Aksi</th>
+                                    <th style="width: 5%;">Aksi</th>
                                     <?php endif; ?>
                                 </tr>
                             </thead>
@@ -317,9 +317,7 @@ $resep_details = $result->fetch_all(MYSQLI_ASSOC);
                                         <tr>
                                             <td><?php echo $offset + $index + 1; ?></td>
                                             <td><?php echo htmlspecialchars($detail['nama_bahan']); ?></td>
-                                            <td class="d-none d-md-table-cell">
-                                                <span class="badge bg-info"><?php echo htmlspecialchars($detail['harga_satuan']); ?></span>
-                                            </td>
+                                            <td class="d-none d-md-table-cell"><?php echo htmlspecialchars($detail['harga_satuan']); ?></td>
                                             <td class="d-none d-lg-table-cell"><?php echo htmlspecialchars($detail['satuan_pemakaian']); ?></td>
                                             <td><span class="badge bg-success"><?php echo htmlspecialchars($detail['nilai_ekpetasi']); ?></span></td>
                                             <?php if (!$is_published): ?>
