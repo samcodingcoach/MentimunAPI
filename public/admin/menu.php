@@ -247,7 +247,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 // Pagination and Search parameters
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$limit = 10;
+$limit = 20;
 $offset = ($page - 1) * $limit;
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $filter = isset($_GET['filter']) ? trim($_GET['filter']) : '';
@@ -282,7 +282,7 @@ $base_query = "
         CONCAT('[',km.nama_kategori,'] ', pm.nama_produk) as nama_produk,
         COALESCE(CONCAT('Rp ',FORMAT(hm.nominal,0)), 'Not Set') as harga, 
         DATE_FORMAT(hm.tgl,'%d %M %Y') as tgl, 
-        CONCAT(pg.nama_lengkap,' [',pg.jabatan,']') as pegawai,
+        
         pm.aktif
     FROM produk_menu pm
     INNER JOIN kategori_menu km ON pm.id_kategori = km.id_kategori
@@ -292,7 +292,7 @@ $base_query = "
         GROUP BY id_produk
     ) AS lh ON pm.id_produk = lh.id_produk
     LEFT JOIN harga_menu hm ON pm.id_produk = hm.id_produk AND hm.tgl = lh.max_tgl
-    LEFT JOIN pegawai pg ON hm.id_user = pg.id_user
+    
 ";
 
 // Get total count for pagination
@@ -432,17 +432,17 @@ $categories = $categories_result->fetch_all(MYSQLI_ASSOC);
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
+                        <table class="table table-hover mb-0" >
                             <thead>
                                 <tr>
-                                    <th style="width: 50px;">No</th>
-                                    <th style="width: 120px;">Kode</th>
-                                    <th>Nama Produk</th>
-                                    <th style="width: 150px;">Harga</th>
-                                    <th style="width: 130px;">Tanggal</th>
-                                    <th style="width: 150px;">Pegawai</th>
-                                    <th style="width: 100px;">Status</th>
-                                    <th style="width: 180px;">Aksi</th>
+                                    <th style= "text-align: center; width: 5%;">No</th>
+                                    <th style="text-align: center; width: 10%;">Kode</th>
+                                    <th style="text-align: left; width: auto;">Nama Produk</th>
+                                    <th style="width: 15%; text-align: right;">Harga</th>
+                                    <th style="width: 15%; text-align: center;">Tanggal</th>
+                                    
+                                    <th style="width: 10%; text-align: center;">Status</th>
+                                    <th style="width: 15%; text-align: center;">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -453,23 +453,23 @@ $categories = $categories_result->fetch_all(MYSQLI_ASSOC);
                                 ?>
                                 <tr>
                                     <td class="text-center"><?php echo $no++; ?></td>
-                                    <td>
+                                    <td class="text-center">
                                         <a href="#" class="text-decoration-none fw-semibold" onclick="showProductImage('<?php echo htmlspecialchars($product['kode_produk']); ?>', '<?php echo htmlspecialchars($product['nama_produk']); ?>'); return false;" data-bs-toggle="modal" data-bs-target="#imageModal">
                                             <?php echo htmlspecialchars($product['kode_produk']); ?>
                                         </a>
                                     </td>
-                                    <td><?php echo htmlspecialchars($product['nama_produk']); ?></td>
-                                    <td><strong class="text-success"><?php echo htmlspecialchars($product['harga']); ?></strong></td>
-                                    <td><?php echo htmlspecialchars($product['tgl'] ?? '-'); ?></td>
-                                    <td><small><?php echo htmlspecialchars($product['pegawai'] ?? '-'); ?></small></td>
-                                    <td>
+                                    <td style="text-align: left;"><?php echo htmlspecialchars($product['nama_produk']); ?></td>
+                                    <td class="text-end"><strong class="text-success"><?php echo htmlspecialchars($product['harga']); ?></strong></td>
+                                    <td class="text-center"><?php echo htmlspecialchars($product['tgl'] ?? '-'); ?></td>
+                                    
+                                    <td class="text-center">
                                         <?php if ($product['aktif'] == '1'): ?>
                                             <span class="badge bg-success">Aktif</span>
                                         <?php else: ?>
                                             <span class="badge bg-secondary">Nonaktif</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <div class="table-actions">
                                             <button class="btn btn-sm btn-outline-warning" onclick="editProduct(<?php echo $product['id_produk']; ?>)" title="Edit">
                                                 <i class="bi bi-pencil"></i>
@@ -483,7 +483,7 @@ $categories = $categories_result->fetch_all(MYSQLI_ASSOC);
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="8" class="text-center py-4">
+                                    <td colspan="7" class="text-center py-4">
                                         <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
                                         <p class="text-muted mb-0">Tidak ada data produk menu</p>
                                     </td>
@@ -493,7 +493,6 @@ $categories = $categories_result->fetch_all(MYSQLI_ASSOC);
                         </table>
                     </div>
                 </div>
-                <?php if ($total_pages > 1): ?>
                 <div class="card-footer bg-light border-top py-3 px-4">
                     <div class="d-flex justify-content-between align-items-center">
                         <small class="text-muted">Menampilkan <?php echo $offset + 1; ?>-<?php echo min($offset + $limit, $total_records); ?> dari <?php echo $total_records; ?> menu</small>
@@ -514,8 +513,8 @@ $categories = $categories_result->fetch_all(MYSQLI_ASSOC);
                         </nav>
                     </div>
                 </div>
-                <?php endif; ?>
-            </div>
+        </div>
+    </main>
         </div>
     </main>
     <!-- Add Modal -->
