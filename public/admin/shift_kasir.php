@@ -105,475 +105,189 @@ try {
 }
 ?>
 
+<!DOCTYPE html>
+
 <!doctype html>
-<html lang="en">
-  <head>
+<html lang="id" data-bs-theme="light">
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Shift Kasir - Admin Dashboard</title>
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="../css/admin.css" rel="stylesheet">
-  </head>
-  <body>
-    <!-- Top Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="navbar-brand" href="#">Resto007 Admin</a>
-        <div class="navbar-nav ms-auto">
-          <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-              <?php echo htmlspecialchars($_SESSION["nama_lengkap"]); ?> (<?php echo htmlspecialchars($_SESSION["jabatan"]); ?>)
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="profile.php">Ubah Profil</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="logout.php">Logout</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <title>Shift Kasir - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="../css/newadmin.css" rel="stylesheet">
+</head>
+<body>
+    <?php include '_header_new.php'; ?>
+    
+    <?php include '_sidebar_new.php'; ?>
 
-    <div class="container-fluid">
-      <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
-          <div class="position-sticky pt-3">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <a class="nav-link" href="index.php">
-                  <i class="bi bi-house"></i>
-                  <span>Beranda</span>
-                </a>
-              </li>
-              
-              <li class="nav-item">
-                <a class="nav-link" href="informasi.php">
-                  <i class="bi bi-info-circle"></i>
-                  <span>Informasi</span>
-                </a>
-              </li>
-              
-              <?php if($_SESSION["jabatan"] == "Admin"): ?>
-              <!-- Master Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#masterMenu" role="button">
-                  <i class="bi bi-folder"></i>
-                  <span>Master</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="masterMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pegawai.php"><i class="bi bi-people"></i> Pegawai</a></li>
-                    <li class="nav-item"><a class="nav-link" href="vendor.php"><i class="bi bi-truck"></i> Vendor</a></li>
-                    <li class="nav-item"><a class="nav-link" href="meja.php"><i class="bi bi-table"></i> Meja</a></li>
-                    <li class="nav-item"><a class="nav-link" href="metode_pembayaran.php"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
-                  </ul>
+    <main class="main-content" id="mainContent">
+          <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1"><i class="bi bi-clock-history me-2"></i>Shift Kasir</h2>
+                    <p class="text-muted mb-0">Kelola shift kasir dan pantau transaksi harian</p>
                 </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <!-- Produk Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#produkMenu" role="button">
-                  <i class="bi bi-box"></i>
-                  <span>Produk</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="produkMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="kategori_menu.php"><i class="bi bi-tags"></i> Kategori Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="menu.php"><i class="bi bi-list"></i> Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-tags"></i> Kategori Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="bahan.php"><i class="bi bi-egg"></i> Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-book"></i> Resep</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <!-- Pembelian Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#pembelianMenu" role="button">
-                  <i class="bi bi-cart"></i>
-                  <span>Pembelian</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="pembelianMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="pembelian.php"><i class="bi bi-cart-plus"></i> Pesanan Pembelian</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembayaran_pembelian.php"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Kasir"): ?>
-              <!-- Penjualan Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#penjualanMenu" role="button">
-                  <i class="bi bi-cash-stack"></i>
-                  <span>Penjualan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse show" id="penjualanMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link active" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
-                    <li class="nav-item"><a class="nav-link" href="promo.php"><i class="bi bi-percent"></i> Promo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <!-- Inventory Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#inventoryMenu" role="button">
-                  <i class="bi bi-boxes"></i>
-                  <span>Inventory</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="inventoryMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="inventory.php"><i class="bi bi-box-seam"></i> Inventory</a></li>
-                    <li class="nav-item"><a class="nav-link" href="transaksi_inventory.php"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#laporanMenu" role="button">
-                  <i class="bi bi-graph-up"></i>
-                  <span>Laporan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="laporanMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="laporan_transaksi.php"><i class="bi bi-list-ul"></i> Transaksi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="laporan_pengeluaran.php"><i class="bi bi-bar-chart"></i> Pengeluaran vs Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="laporan_kuantitas.php"><i class="bi bi-pie-chart"></i> Kuantitas</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <li class="nav-item">
-                <a class="nav-link" href="pengaturan.php">
-                  <i class="bi bi-gear"></i>
-                  <span>Pengaturan</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Mobile Sidebar -->
-        <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas">
-          <div class="offcanvas-header">
-            <h5 class="offcanvas-title">Menu</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-          </div>
-          <div class="offcanvas-body">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <a class="nav-link" href="index.php">
-                  <i class="bi bi-house"></i>
-                  <span>Beranda</span>
-                </a>
-              </li>
-              
-              <li class="nav-item">
-                <a class="nav-link" href="informasi.php">
-                  <i class="bi bi-info-circle"></i>
-                  <span>Informasi</span>
-                </a>
-              </li>
-              
-              <?php if($_SESSION["jabatan"] == "Admin"): ?>
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#masterMenuMobile" role="button">
-                  <i class="bi bi-folder"></i>
-                  <span>Master</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="masterMenuMobile">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pegawai.php"><i class="bi bi-people"></i> Pegawai</a></li>
-                    <li class="nav-item"><a class="nav-link" href="vendor.php"><i class="bi bi-truck"></i> Vendor</a></li>
-                    <li class="nav-item"><a class="nav-link" href="meja.php"><i class="bi bi-table"></i> Meja</a></li>
-                    <li class="nav-item"><a class="nav-link" href="metode_pembayaran.php"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#produkMenuMobile" role="button">
-                  <i class="bi bi-box"></i>
-                  <span>Produk</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="produkMenuMobile">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="kategori_menu.php"><i class="bi bi-tags"></i> Kategori Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="menu.php"><i class="bi bi-list"></i> Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-tags"></i> Kategori Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="bahan.php"><i class="bi bi-egg"></i> Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-book"></i> Resep</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#pembelianMenuMobile" role="button">
-                  <i class="bi bi-cart"></i>
-                  <span>Pembelian</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="pembelianMenuMobile">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="pembelian.php"><i class="bi bi-cart-plus"></i> Pesanan Pembelian</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembayaran_pembelian.php"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Kasir"): ?>
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#penjualanMenuMobile" role="button">
-                  <i class="bi bi-cash-stack"></i>
-                  <span>Penjualan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse show" id="penjualanMenuMobile">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link active" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
-                    <li class="nav-item"><a class="nav-link" href="promo.php"><i class="bi bi-percent"></i> Promo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#inventoryMenuMobile" role="button">
-                  <i class="bi bi-boxes"></i>
-                  <span>Inventory</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="inventoryMenuMobile">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="inventory.php"><i class="bi bi-box-seam"></i> Inventory</a></li>
-                    <li class="nav-item"><a class="nav-link" href="transaksi_inventory.php"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#laporanMenuMobile" role="button">
-                  <i class="bi bi-graph-up"></i>
-                  <span>Laporan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="laporanMenuMobile">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="laporan_transaksi.php"><i class="bi bi-list-ul"></i> Transaksi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="laporan_pengeluaran.php"><i class="bi bi-bar-chart"></i> Pengeluaran vs Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="laporan_kuantitas.php"><i class="bi bi-pie-chart"></i> Kuantitas</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <li class="nav-item">
-                <a class="nav-link" href="pengaturan.php">
-                  <i class="bi bi-gear"></i>
-                  <span>Pengaturan</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Main content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Shift Kasir</h1>
-            <div class="btn-toolbar mb-2 mb-md-0">
-              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shiftModal">
-                <i class="bi bi-plus-circle me-2"></i>Tambah Shift
-              </button>
-            </div>
-          </div>
-
-                <!-- Alert Messages -->
-                <?php if (!empty($message)): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <?php echo htmlspecialchars($message); ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <?php endif; ?>
-
-                <?php if (!empty($error)): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <?php echo htmlspecialchars($error); ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <?php endif; ?>
-
-          <!-- Search and Filter -->
-          <div class="row mb-3">
-            <div class="col-md-4">
-              <form method="GET" class="d-flex">
-                <input type="date" class="form-control me-2" name="tanggal" value="<?php echo $selected_date; ?>">
-                <button type="submit" class="btn btn-outline-primary">
-                  <i class="bi bi-search"></i>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shiftModal">
+                    <i class="bi bi-plus-lg me-2"></i>Tambah Shift
                 </button>
-              
-              </form>
             </div>
-           
-          </div>
 
-          <!-- Shift Data Table -->
-          
-          <div class="table-responsive shadow-sm">
-            <table class="table table-hover align-middle">
-              <thead class="table-dark">
-                <tr>
-                  <th class="text-center">No</th>
-                  <th>Nama Kasir</th>
-                  <th class="text-center">Status</th>
-                  <th class="text-end">Tunai Awal</th>
-                  <th class="text-end">Grand Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php if (empty($shift_data)): ?>
-                  <tr>
-                    <td colspan="5" class="text-center text-muted py-5">
-                      <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
-                      <span class="fs-5">Tidak ada data shift untuk tanggal <?php echo date('d F Y', strtotime($selected_date)); ?></span>
-                    </td>
-                  </tr>
-                <?php else: ?>
-                  <?php foreach ($shift_data as $index => $shift): ?>
-                    <tr onclick="showDetail(<?php echo $shift['id_open']; ?>, '<?php echo addslashes($shift['kasir']); ?>', '<?php echo $shift['cash']; ?>', '<?php echo $shift['qris']; ?>', '<?php echo $shift['transfer']; ?>')" data-bs-toggle="modal" data-bs-target="#detailModal" style="cursor: pointer;">
-                      <td class="text-center fw-bold"><?php echo $index + 1; ?></td>
-                      <td class="fw-semibold"><?php echo htmlspecialchars($shift['kasir']); ?></td>
-                      <td class="text-center">
-                        <?php if ($shift['status'] == '1'): ?>
-                          <span class="badge bg-success fs-6 px-3 py-2">
-                            <i class="bi bi-check-circle me-1"></i>Open
-                          </span>
-                        <?php else: ?>
-                          <span class="badge bg-secondary fs-6 px-3 py-2">
-                            <i class="bi bi-lock me-1"></i>Closed
-                          </span>
-                        <?php endif; ?>
-                      </td>
-                      <td class="text-end fw-semibold text-primary">Rp <?php echo $shift['cash_awal']; ?></td>
-                      <td class="text-end fw-bold text-success fs-5">Rp <?php echo $shift['grand_total']; ?></td>
-                    </tr>
-                  <?php endforeach; ?>
-                <?php endif; ?>
-              </tbody>
-            </table>
-          </div>
-          
-          <!-- Grand Total Summary -->
-          <?php if (!empty($shift_data)): ?>
-            <?php 
-              $total_grand = 0;
-              foreach ($shift_data as $shift) {
-                $total_grand += (int)str_replace(',', '', $shift['grand_total']);
-              }
-            ?>
-            <div class="mt-3 p-3 bg-light rounded border">
-              <div class="row align-items-center">
-                <div class="col-md-8">
-                  <span class="text-muted">Total Grand Total (<?php echo count($shift_data); ?> shift)</span>
-                </div>
-                <div class="col-md-4 text-end">
-                  <span class="fw-bold fs-4 text-success">Rp <?php echo number_format($total_grand, 0, ',', '.'); ?></span>
-                </div>
-              </div>
+            <?php if (isset($_SESSION['success']) && !empty($_SESSION['success'])): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i><?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-          <?php endif; ?>
+            <?php endif; ?>
+
+            <?php if (isset($_SESSION['error']) && !empty($_SESSION['error'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i><?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php endif; ?>
+
+            <div class="card-modern">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-calendar-date me-2"></i>
+                        <span>Filter Tanggal</span>
+                    </div>
+                    <form method="GET" class="d-flex gap-2">
+                        <input type="date" class="form-control" name="tanggal" value="<?php echo $selected_date; ?>" style="width: 200px;">
+                        <button type="submit" class="btn btn-outline-light">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%;">No</th>
+                                    <th style="width: auto;">Nama Kasir</th>
+                                    <th style="width: 15%;">Status</th>
+                                    <th style="width: 15%;" class="text-end">Tunai Awal</th>
+                                    <th style="width: 15%;" class="text-end">Grand Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (empty($shift_data)): ?>
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                            <p class="text-muted mb-0">Tidak ada data shift untuk tanggal <?php echo date('d F Y', strtotime($selected_date)); ?></p>
+                                        </td>
+                                    </tr>
+                                <?php else: ?>
+                                    <?php foreach ($shift_data as $index => $shift): ?>
+                                        <tr onclick="showDetail(<?php echo $shift['id_open']; ?>, '<?php echo addslashes($shift['kasir']); ?>', '<?php echo $shift['cash']; ?>', '<?php echo $shift['qris']; ?>', '<?php echo $shift['transfer']; ?>')" data-bs-toggle="modal" data-bs-target="#detailModal" style="cursor: pointer;">
+                                            <td><?php echo $index + 1; ?></td>
+                                            <td style="text-align: left;">
+                                                <span class="fw-medium"><?php echo htmlspecialchars($shift['kasir']); ?></span>
+                                            </td>
+                                            <td>
+                                                <?php if ($shift['status'] == '1'): ?>
+                                                    <span class="badge bg-success">Open</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-secondary">Closed</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="text-primary fw-medium">Rp <?php echo $shift['cash_awal']; ?></span>
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="text-success fw-bold">Rp <?php echo $shift['grand_total']; ?></span>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <?php if (!empty($shift_data)): ?>
+                <div class="card-footer bg-light border-top py-3 px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <?php 
+                            $total_cash_awal = 0;
+                            $total_grand = 0;
+                            foreach ($shift_data as $shift) {
+                                $total_cash_awal += (int)str_replace(',', '', $shift['cash_awal']);
+                                $total_grand += (int)str_replace(',', '', $shift['grand_total']);
+                            }
+                        ?>
+                        <small class="text-muted">Total <?php echo count($shift_data); ?> shift</small>
+                        <div class="d-flex gap-4">
+                            <div>
+                                <small class="text-muted d-block">Total Tunai Awal</small>
+                                <strong class="text-primary">Rp <?php echo number_format($total_cash_awal, 0, ',', '.'); ?></strong>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Total Grand Total</small>
+                                <strong class="text-success">Rp <?php echo number_format($total_grand, 0, ',', '.'); ?></strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
         </main>
       </div>
     </div>
 
     <!-- Detail Modal -->
     <div class="modal fade" id="detailModal" tabindex="-1">
-        <div class="modal-dialog modal-md">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header border-0 pb-2">
-                    <h5 class="modal-title fw-bold text-dark d-flex align-items-center">
-                        <i class="bi bi-info-circle-fill text-primary me-2"></i>
-                        Detail Shift Kasir
-                    </h5>
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-info-circle me-2"></i>Detail Shift Kasir</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body px-4 py-3">
+                <div class="modal-body">
                     <!-- Kasir Info -->
-                    <div class="mb-4 p-3 bg-primary bg-opacity-10 rounded-3">
+                    <div class="mb-4 p-3 bg-light rounded">
                         <div class="d-flex align-items-center">
-                            <div class="bg-primary bg-opacity-20 rounded-circle p-2 me-3">
-                                <i class="bi bi-person-fill text-primary fs-5"></i>
-                            </div>
+                            <i class="bi bi-person-circle text-primary fs-3 me-3"></i>
                             <div>
-                                <small class="text-muted d-block mb-1">Nama Kasir</small>
-                                <span class="fw-bold text-dark" id="detail-kasir"></span>
+                                <small class="text-muted">Nama Kasir</small>
+                                <div class="fw-bold" id="detail-kasir"></div>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Payment Details -->
                     <div class="row g-3">
-                        <div class="col-4">
-                            <div class="text-center p-3 bg-success bg-opacity-10 rounded-3 border border-success border-opacity-25">
-                                <i class="bi bi-cash-stack text-success fs-3 mb-2 d-block"></i>
-                                <small class="text-muted d-block mb-1 fw-medium">Tunai</small>
-                                <div class="fw-bold text-success fs-6" id="detail-tunai"></div>
+                        <div class="col-md-4">
+                            <div class="text-center p-4 border rounded">
+                                <i class="bi bi-cash-stack text-success fs-2 mb-2"></i>
+                                <div class="text-muted small mb-2">Tunai</div>
+                                <div class="fw-bold text-success" id="detail-tunai"></div>
                             </div>
                         </div>
-                        <div class="col-4">
-                            <div class="text-center p-3 bg-info bg-opacity-10 rounded-3 border border-info border-opacity-25">
-                                <i class="bi bi-qr-code text-info fs-3 mb-2 d-block"></i>
-                                <small class="text-muted d-block mb-1 fw-medium">QRIS</small>
-                                <div class="fw-bold text-info fs-6" id="detail-qris"></div>
+                        <div class="col-md-4">
+                            <div class="text-center p-4 border rounded">
+                                <i class="bi bi-qr-code text-info fs-2 mb-2"></i>
+                                <div class="text-muted small mb-2">QRIS</div>
+                                <div class="fw-bold text-info" id="detail-qris"></div>
                             </div>
                         </div>
-                        <div class="col-4">
-                            <div class="text-center p-3 bg-warning bg-opacity-10 rounded-3 border border-warning border-opacity-25">
-                                <i class="bi bi-credit-card text-warning fs-3 mb-2 d-block"></i>
-                                <small class="text-muted d-block mb-1 fw-medium">Transfer</small>
-                                <div class="fw-bold text-warning fs-6" id="detail-transfer"></div>
+                        <div class="col-md-4">
+                            <div class="text-center p-4 border rounded">
+                                <i class="bi bi-credit-card text-warning fs-2 mb-2"></i>
+                                <div class="text-muted small mb-2">Transfer</div>
+                                <div class="fw-bold text-warning" id="detail-transfer"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 pt-2 pb-3">
-                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle me-1"></i>
-                        Tutup
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>Tutup
                     </button>
                 </div>
             </div>
@@ -582,56 +296,57 @@ try {
 
     <!-- Add Shift Modal -->
     <div class="modal fade" id="shiftModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header">
                     <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Tambah Shift Kasir</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST">
+                <form method="POST" class="form-modern">
                     <div class="modal-body">
                         <input type="hidden" name="action" value="create">
-                        <div class="mb-3">
-                             <label for="id_pegawai" class="form-label">Kasir <span class="text-danger">*</span></label>
-                             <div class="searchable-select" style="position: relative;">
-                                 <input type="text" class="form-control" id="kasir_display" placeholder="Pilih kasir..." readonly onclick="toggleKasirDropdown()" style="padding-right: 2.5rem;">
-                                 <input type="hidden" name="id_pegawai" id="id_pegawai" required>
-                                 <div class="dropdown-menu" id="kasir_dropdown" style="display: none; position: absolute; width: 100%; max-height: 200px; overflow-y: auto; border: 1px solid #ced4da; border-radius: 0.375rem; background: white; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); z-index: 1060; top: 100%;">
-                                     <input type="text" class="search-input form-control" id="kasir_search" placeholder="Cari kasir..." onkeyup="filterKasir()" style="margin: 0.5rem; width: calc(100% - 1rem);">
-                                     <?php foreach ($kasir_list as $kasir): ?>
-                                     <div class="dropdown-item" data-value="<?php echo $kasir['id_user']; ?>" data-text="<?php echo htmlspecialchars($kasir['nama_lengkap']); ?>" onclick="selectKasir(this)" style="padding: 0.5rem 1rem; cursor: pointer; border-bottom: 1px solid #f8f9fa;">
-                                         <?php echo htmlspecialchars($kasir['nama_lengkap']); ?>
-                                     </div>
-                                     <?php endforeach; ?>
-                                 </div>
-                             </div>
-                         </div>
-                         <div class="mb-3">
-                             <label for="cash_awal" class="form-label">Modal Awal (Rp) <span class="text-danger">*</span></label>
-                             <input type="number" class="form-control" id="cash_awal" name="cash_awal" min="0" step="1000" required>
-                         </div>
-                         <div class="mb-3">
-                             <label for="tanggal" class="form-label">Tanggal <span class="text-danger">*</span></label>
-                             <input type="date" class="form-control" id="tanggal" name="tanggal" value="<?php echo date('Y-m-d'); ?>" required>
-                         </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Kasir <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                <select name="id_pegawai" class="form-select" required>
+                                    <option value="">-- Pilih Kasir --</option>
+                                    <?php foreach ($kasir_list as $kasir): ?>
+                                    <option value="<?php echo $kasir['id_user']; ?>">
+                                        <?php echo htmlspecialchars($kasir['nama_lengkap']); ?> (<?php echo htmlspecialchars($kasir['jabatan']); ?>)
+                                    </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Modal Awal (Rp) <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                <input type="number" class="form-control" name="cash_awal" min="0" step="1000" required placeholder="0">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Tanggal <span class="text-danger">*</span></label>
+                            <div class="col-sm-9">
+                                <input type="date" class="form-control" name="tanggal" value="<?php echo date('Y-m-d'); ?>" required>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="bi bi-x-circle me-2"></i>Batal
+                            <i class="bi bi-x-lg me-1"></i>Batal
                         </button>
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle me-2"></i>Simpan
+                            <i class="bi bi-check-lg me-1"></i>Simpan
                         </button>
                     </div>
                 </form>
             </div>
         </div>
+    </main>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="../js/bootstrap.bundle.min.js"></script>
+    <?php include '_scripts_new.php'; ?>
     
-    <!-- JavaScript Functions -->
     <script>
         function showDetail(id, kasir, tunai, qris, transfer) {
             document.getElementById('detail-kasir').textContent = kasir;
@@ -640,80 +355,39 @@ try {
             document.getElementById('detail-transfer').textContent = 'Rp ' + transfer;
         }
         
-        // Searchable dropdown functionality for kasir
-        function toggleKasirDropdown() {
-            const dropdown = document.getElementById('kasir_dropdown');
-            const isVisible = dropdown.style.display === 'block';
-            dropdown.style.display = isVisible ? 'none' : 'block';
-            
-            if (!isVisible) {
-                document.getElementById('kasir_search').value = '';
-                filterKasir();
-                document.getElementById('kasir_search').focus();
-            }
-        }
-        
-        function selectKasir(element) {
-            const value = element.getAttribute('data-value');
-            const text = element.getAttribute('data-text');
-            
-            document.getElementById('id_pegawai').value = value;
-            document.getElementById('kasir_display').value = text;
-            document.getElementById('kasir_dropdown').style.display = 'none';
-        }
-        
-        function filterKasir() {
-            const searchValue = document.getElementById('kasir_search').value.toLowerCase();
-            const items = document.querySelectorAll('#kasir_dropdown .dropdown-item');
-            
-            items.forEach(item => {
-                const text = item.getAttribute('data-text').toLowerCase();
-                if (text.includes(searchValue)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        }
-        
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('kasir_dropdown');
-            const displayInput = document.getElementById('kasir_display');
-            const searchInput = document.getElementById('kasir_search');
-            
-            if (dropdown && !dropdown.contains(event.target) && event.target !== displayInput && event.target !== searchInput) {
-                dropdown.style.display = 'none';
-            }
-        });
-        
         // Auto-submit form when date changes
-        document.getElementById('tanggal').addEventListener('change', function() {
-            this.form.submit();
-        });
-        
-        // Set date picker limits (yesterday to 2 days ahead)
         document.addEventListener('DOMContentLoaded', function() {
-            const dateInput = document.getElementById('tanggal');
-            const today = new Date();
+            const dateInputs = document.querySelectorAll('input[name="tanggal"]');
+            dateInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    if (this.form) {
+                        this.form.submit();
+                    }
+                });
+            });
             
-            // Yesterday
-            const yesterday = new Date(today);
-            yesterday.setDate(today.getDate() - 1);
-            
-            // 2 days ahead
-            const twoDaysAhead = new Date(today);
-            twoDaysAhead.setDate(today.getDate() + 2);
-            
-            // Format dates to YYYY-MM-DD
-            const formatDate = (date) => {
-                return date.getFullYear() + '-' + 
-                       String(date.getMonth() + 1).padStart(2, '0') + '-' + 
-                       String(date.getDate()).padStart(2, '0');
-            };
-            
-            dateInput.min = formatDate(yesterday);
-            dateInput.max = formatDate(twoDaysAhead);
+            // Set date picker limits (yesterday to 2 days ahead)
+            dateInputs.forEach(input => {
+                const today = new Date();
+                
+                // Yesterday
+                const yesterday = new Date(today);
+                yesterday.setDate(today.getDate() - 1);
+                
+                // 2 days ahead
+                const twoDaysAhead = new Date(today);
+                twoDaysAhead.setDate(today.getDate() + 2);
+                
+                // Format dates to YYYY-MM-DD
+                const formatDate = (date) => {
+                    return date.getFullYear() + '-' + 
+                           String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                           String(date.getDate()).padStart(2, '0');
+                };
+                
+                input.min = formatDate(yesterday);
+                input.max = formatDate(twoDaysAhead);
+            });
         });
     </script>
 </body>
