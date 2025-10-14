@@ -155,7 +155,7 @@ while ($row = $result->fetch_assoc()) {
 }
 
 // Pagination
-$limit = 10;
+$limit = 20;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
@@ -355,12 +355,12 @@ if (!empty($params)) {
                     </div>
                 </div>
 
-                <?php if ($total_pages > 1): ?>
                 <div class="card-footer bg-light border-top py-3 px-4">
                     <div class="d-flex justify-content-between align-items-center">
                         <small class="text-muted">Menampilkan <?php echo $offset + 1; ?>-<?php echo min($offset + $limit, $total_rows); ?> dari <?php echo $total_rows; ?> data</small>
                         <nav>
                             <ul class="pagination pagination-sm mb-0">
+                                <?php if ($total_pages > 1): ?>
                                 <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
                                     <a class="page-link" href="?page=<?php echo ($page - 1); ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>">
                                         <i class="bi bi-chevron-left"></i>
@@ -378,11 +378,15 @@ if (!empty($params)) {
                                         <i class="bi bi-chevron-right"></i>
                                     </a>
                                 </li>
+                                <?php else: ?>
+                                <li class="page-item active">
+                                    <span class="page-link">1</span>
+                                </li>
+                                <?php endif; ?>
                             </ul>
                         </nav>
                     </div>
                 </div>
-                <?php endif; ?>
             </div>
         </div>
     </main>
