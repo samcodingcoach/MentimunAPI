@@ -262,10 +262,10 @@ if (isset($_GET['edit'])) {
                         </table>
                     </div>
                 </div>
-                <?php if ($total_pages > 1): ?>
                 <div class="card-footer bg-light border-top py-3 px-4">
                     <div class="d-flex justify-content-between align-items-center">
                         <small class="text-muted">Menampilkan <?php echo $offset + 1; ?>-<?php echo min($offset + $limit, $total_records); ?> dari <?php echo $total_records; ?> resep</small>
+                        <?php if ($total_pages > 1): ?>
                         <nav>
                             <ul class="pagination pagination-sm mb-0">
                                 <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
@@ -281,9 +281,9 @@ if (isset($_GET['edit'])) {
                                 </li>
                             </ul>
                         </nav>
+                        <?php endif; ?>
                     </div>
                 </div>
-                <?php endif; ?>
             </div>
         </div>
     </main>
