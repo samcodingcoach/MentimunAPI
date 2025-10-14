@@ -16,10 +16,10 @@ $meja_active = ($current_page == 'meja.php') ? 'active' : '';
 $metode_pembayaran_active = ($current_page == 'metode_pembayaran.php') ? 'active' : '';
 
 // Produk Menu
-$produk_menu_pages = ['kategori_menu.php', 'menu.php', 'kategori_bahan.php', 'bahan.php', 'resep.php'];
+$produk_menu_pages = ['kategori_menu.php', 'menu.php', 'kategori_bahan.php', 'bahan.php', 'resep.php', 'harga.php'];
 $produk_menu_show = in_array($current_page, $produk_menu_pages) ? 'show' : '';
 $kategori_menu_active = ($current_page == 'kategori_menu.php') ? 'active' : '';
-$menu_active = ($current_page == 'menu.php') ? 'active' : '';
+$menu_active = ($current_page == 'menu.php' || $current_page == 'harga.php') ? 'active' : '';
 $kategori_bahan_active = ($current_page == 'kategori_bahan.php') ? 'active' : '';
 $bahan_active = ($current_page == 'bahan.php') ? 'active' : '';
 $resep_active = ($current_page == 'resep.php') ? 'active' : '';
