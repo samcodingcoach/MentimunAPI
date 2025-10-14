@@ -277,176 +277,69 @@ $resep_details = $result->fetch_all(MYSQLI_ASSOC);
                 </div>
             </div>
 
-          <!-- Info Cards -->
-          <div class="row mb-4">
-            <!-- Total Details Card -->
-            <div class="col-xl-3 col-md-6 mb-4">
-              <div class="card border-left-primary shadow h-100 py-2" style="border-left: 4px solid #4e73df !important;">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="color: #4e73df !important; font-size: 0.8rem; font-weight: 600;">
-                        Total Detail
-                      </div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800" style="color: #5a5c69 !important;">
-                        <?php echo $total_records; ?>
-                      </div>
-                    </div>
-                    <div class="col-auto">
-                      <i class="bi bi-list-ul" style="font-size: 2rem; color: #4e73df;"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Status Card -->
-            <div class="col-xl-3 col-md-6 mb-4">
-              <div class="card border-left-<?php echo $is_published ? 'success' : 'warning'; ?> shadow h-100 py-2" style="border-left: 4px solid <?php echo $is_published ? '#1cc88a' : '#f6c23e'; ?> !important;">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-<?php echo $is_published ? 'success' : 'warning'; ?> text-uppercase mb-1" style="color: <?php echo $is_published ? '#1cc88a' : '#f6c23e'; ?> !important; font-size: 0.8rem; font-weight: 600;">
-                        Status
-                      </div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800" style="color: #5a5c69 !important;">
-                        <?php echo $is_published ? 'Published' : 'Draft'; ?>
-                      </div>
-                    </div>
-                    <div class="col-auto">
-                      <i class="bi bi-<?php echo $is_published ? 'check-circle-fill' : 'clock-fill'; ?>" style="font-size: 2rem; color: <?php echo $is_published ? '#1cc88a' : '#f6c23e'; ?>;"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Current Page Card -->
-            <div class="col-xl-3 col-md-6 mb-4">
-              <div class="card border-left-info shadow h-100 py-2" style="border-left: 4px solid #36b9cc !important;">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="color: #36b9cc !important; font-size: 0.8rem; font-weight: 600;">
-                        Halaman
-                      </div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800" style="color: #5a5c69 !important;">
-                        <?php echo $page; ?> / <?php echo $total_pages; ?>
-                      </div>
-                    </div>
-                    <div class="col-auto">
-                      <i class="bi bi-file-text" style="font-size: 2rem; color: #36b9cc;"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Kode Resep Card -->
-            <div class="col-xl-3 col-md-6 mb-4">
-              <div class="card border-left-secondary shadow h-100 py-2" style="border-left: 4px solid #858796 !important;">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1" style="color: #858796 !important; font-size: 0.8rem; font-weight: 600;">
-                        Kode Resep
-                      </div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800" style="color: #5a5c69 !important;">
-                        <?php echo htmlspecialchars($resep_info['kode_resep']); ?>
-                      </div>
-                    </div>
-                    <div class="col-auto">
-                      <i class="bi bi-upc-scan" style="font-size: 2rem; color: #858796;"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Search -->
-          <div class="row mb-4">
-            <div class="col-md-4">
-              <form method="GET" class="d-flex">
-                <input type="hidden" name="id_resep" value="<?php echo $id_resep; ?>">
-                <input type="text" class="form-control me-2" name="search" placeholder="Cari bahan, kategori, atau kode..." value="<?php echo htmlspecialchars($search); ?>">
-                <button class="btn btn-outline-secondary" type="submit">
-                  <i class="bi bi-search"></i>
-                </button>
-              </form>
-            </div>
-            <div class="col-md-8 text-end">
-              <small class="text-muted">
-                Showing <?php echo $offset + 1; ?> to <?php echo min($offset + $limit, $total_records); ?> of <?php echo $total_records; ?> entries
-              </small>
-            </div>
-          </div>
-
           <!-- Data Table -->
-          <div class="card shadow" style="border-radius: 15px; border: none;">
-            <div class="card-body p-0">
-              <div class="table-responsive">
-                <table class="table table-hover mb-0" style="border-radius: 15px; overflow: hidden;">
-                  <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                    <tr>
-                      <th class="border-0" style="padding: 1rem 1.5rem;">No</th>
-                      <th class="border-0" style="padding: 1rem 1.5rem;">Nama Bahan</th>
-                      <th class="border-0 d-none d-md-table-cell" style="padding: 1rem 1.5rem;">Harga Satuan</th>
-                      <th class="border-0 d-none d-lg-table-cell" style="padding: 1rem 1.5rem;">Pemakaian</th>
-                      <th class="border-0" style="padding: 1rem 1.5rem;">Nilai Ekspetasi</th>
-                      <?php if (!$is_published): ?>
-                      <th class="border-0 text-center" style="padding: 1rem 1.5rem;">Aksi</th>
-                      <?php endif; ?>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php if (!empty($resep_details)): ?>
-                      <?php foreach ($resep_details as $index => $detail): ?>
-                        <tr style="transition: all 0.3s ease; cursor: pointer;">
-                          <td class="align-middle" style="padding: 1rem 1.5rem;"><?php echo $offset + $index + 1; ?></td>
-                          <td class="align-middle" style="padding: 1rem 1.5rem;">
-                            <div>
-                              <strong><?php echo htmlspecialchars($detail['nama_bahan']); ?></strong>
+            <div class="card-modern">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-journal-text me-2"></i>
+                        <span>Detail Bahan Resep</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <form class="d-flex" method="GET" action="">
+                            <div class="input-group" style="width: 250px;">
+                                <input type="hidden" name="id_resep" value="<?php echo $id_resep; ?>">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Cari bahan, kategori, atau kode..." value="<?php echo htmlspecialchars($search); ?>">
                             </div>
-                          </td>
-                          <td class="align-middle d-none d-md-table-cell" style="padding: 1rem 1.5rem;">
-                            <span class="badge" style="background: linear-gradient(135deg, #36b9cc 0%, #258391 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem;">
-                              <i class="bi bi-tag-fill me-1"></i>
-                              <?php echo htmlspecialchars($detail['harga_satuan']); ?>
-                            </span>
-                          </td>
-                          <td class="align-middle d-none d-lg-table-cell" style="padding: 1rem 1.5rem;">
-                            <span class="text-muted">
-                              <i class="bi bi-speedometer2 me-1"></i>
-                              <?php echo htmlspecialchars($detail['satuan_pemakaian']); ?>
-                            </span>
-                          </td>
-                          <td class="align-middle" style="padding: 1rem 1.5rem;">
-                            <span class="badge" style="background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%); color: white; padding: 0.5rem 1rem; font-size: 0.85rem;">
-                              <i class="bi bi-currency-exchange me-1"></i>
-                              <?php echo htmlspecialchars($detail['nilai_ekpetasi']); ?>
-                            </span>
-                          </td>
-                          <?php if (!$is_published): ?>
-                          <td class="align-middle text-center" style="padding: 1rem 1.5rem;">
-                            <button type="button" class="btn btn-danger btn-sm" style="border-radius: 20px; padding: 0.25rem 0.75rem; background: linear-gradient(135deg, #e74a3b 0%, #c0392b 100%); border: none;" onclick="deleteDetail(<?php echo $detail['id_resep_detail']; ?>)">
-                              <i class="bi bi-trash-fill"></i>
-                            </button>
-                          </td>
-                          <?php endif; ?>
-                        </tr>
-                      <?php endforeach; ?>
-                    <?php else: ?>
-                      <tr>
-                        <td colspan="<?php echo $is_published ? '5' : '6'; ?>" class="text-center" style="padding: 3rem;">
-                          <div style="opacity: 0.5;">
-                            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
-                            <p class="mt-2 mb-0">Tidak ada data detail resep</p>
-                          </div>
-                        </td>
-                      </tr>
-                    <?php endif; ?>
-                  </tbody>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+              <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">No</th>
+                                    <th style="width: auto;">Nama Bahan</th>
+                                    <th style="width: 15%;" class="d-none d-md-table-cell"></i>Harga Satuan</th>
+                                    <th style="width: 10%;" class="d-none d-lg-table-cell"><i></i>Pemakaian</th>
+                                    <th style="width: 15%;">Nilai Ekspetasi</th>
+                                    <?php if (!$is_published): ?>
+                                    <th style="width: 5%;"><i class="bi bi-gear me-1"></i>Aksi</th>
+                                    <?php endif; ?>
+                                </tr>
+                            </thead>
+                  <tbody>
+                                <?php if (!empty($resep_details)): ?>
+                                    <?php foreach ($resep_details as $index => $detail): ?>
+                                        <tr>
+                                            <td><?php echo $offset + $index + 1; ?></td>
+                                            <td><?php echo htmlspecialchars($detail['nama_bahan']); ?></td>
+                                            <td class="d-none d-md-table-cell">
+                                                <span class="badge bg-info"><?php echo htmlspecialchars($detail['harga_satuan']); ?></span>
+                                            </td>
+                                            <td class="d-none d-lg-table-cell"><?php echo htmlspecialchars($detail['satuan_pemakaian']); ?></td>
+                                            <td><span class="badge bg-success"><?php echo htmlspecialchars($detail['nilai_ekpetasi']); ?></span></td>
+                                            <?php if (!$is_published): ?>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteDetail(<?php echo $detail['id_resep_detail']; ?>)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                            <?php endif; ?>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="<?php echo $is_published ? '5' : '6'; ?>" class="text-center py-4">
+                                            <i class="bi bi-journal-text fs-1 text-muted d-block mb-2"></i>
+                                            <p class="text-muted mb-0">Tidak ada data detail resep</p>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
                 </table>
                     </div>
                 </div>
