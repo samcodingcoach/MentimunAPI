@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 session_start();
 require_once __DIR__ . '/../../config/koneksi.php';
 require_once __DIR__ . '/../../config/encryption.php';
@@ -303,7 +305,7 @@ if (!empty($params)) {
                     </form>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
+                    <div class="table-responsive" style="padding-right: 1rem;">
 
                     <table class="table table-hover mb-0" style="table-layout: fixed;">
                         <thead>
@@ -495,12 +497,11 @@ if (!empty($params)) {
         </div>
     </div>
 
-   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
         function editBahan(id, nama, kode, kategori) {
-            // Set form to edit mode
             document.getElementById('modalAction').value = 'update';
             document.getElementById('modalIdBahan').value = id;
             document.getElementById('modalIdKategori').value = kategori;
@@ -509,259 +510,72 @@ if (!empty($params)) {
             document.getElementById('modalTitle').textContent = 'Edit Bahan';
             document.getElementById('modalSubmitBtn').innerHTML = '<i class="bi bi-save me-2"></i>Perbarui';
             
-            // Trigger change event for select2
             $('#modalIdKategori').trigger('change');
             
-            // Show modal
-            var modalElement = document.getElementById('bahanModal');
-            var modal = new bootstrap.Modal(modalElement);
+            var modal = new bootstrap.Modal(document.getElementById('bahanModal'));
             modal.show();
         }
         
         function biayaBahan(id, nama) {
-            // Set values for the biaya modal
             document.getElementById('id_bahan_biaya').value = id;
             document.getElementById('nama_bahan_biaya').value = nama;
-            
-            // Clear and reset inputs
             document.getElementById('harga').value = '';
             document.getElementById('harga_hidden').value = '';
             document.getElementById('satuan').value = '';
             
-            // Trigger change event for select2
             $('#satuan').trigger('change');
             
-            // Show modal
-            var modalElement = document.getElementById('biayaModal');
-            var modal = new bootstrap.Modal(modalElement);
+            var modal = new bootstrap.Modal(document.getElementById('biayaModal'));
             modal.show();
         }
         
-        // Reset form when opening add modal
         document.addEventListener('DOMContentLoaded', function() {
-            const addModal = document.getElementById('bahanModal');
-            addModal.addEventListener('show.bs.modal', function() {
-                // Reset to add mode
+            // Modal reset event
+            document.getElementById('bahanModal').addEventListener('hidden.bs.modal', function () {
+                const modalForm = document.querySelector('#bahanModal form');
+                modalForm.reset();
                 document.getElementById('modalAction').value = 'create';
                 document.getElementById('modalIdBahan').value = '';
-                document.getElementById('modalIdKategori').value = '';
-                document.getElementById('modalNamaBahan').value = '';
-                document.getElementById('modalKodeBahan').value = '';
                 document.getElementById('modalTitle').textContent = 'Tambah Bahan';
                 document.getElementById('modalSubmitBtn').innerHTML = '<i class="bi bi-save me-2"></i>Simpan';
-                
-                // Trigger change event for select2
-                $('#modalIdKategori').trigger('change');
+                $('#modalIdKategori').val(null).trigger('change');
             });
-        });
-        
-        <?php if ($edit_data): ?>
-        // Show modal for edit mode
-        document.addEventListener('DOMContentLoaded', function() {
+            
+            <?php if ($edit_data): ?>
             editBahan(<?php echo $edit_data['id_bahan']; ?>, '<?php echo htmlspecialchars($edit_data['nama_bahan']); ?>', '<?php echo htmlspecialchars($edit_data['kode_bahan']); ?>', <?php echo $edit_data['id_kategori']; ?>);
-        });
-        <?php endif; ?>
-        
-        // Handle form submission success
-        document.addEventListener('DOMContentLoaded', function() {
-            <?php if ($message): ?>
-                // Close modals after successful operation
-                setTimeout(function() {
-                    const bahanModal = bootstrap.Modal.getInstance(document.getElementById('bahanModal'));
-                    const biayaModal = bootstrap.Modal.getInstance(document.getElementById('biayaModal'));
-                    if (bahanModal) bahanModal.hide();
-                    if (biayaModal) biayaModal.hide();
-                    
-                    // Remove edit parameter from URL if present
-                    if (window.location.search.includes('edit=')) {
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                    }
-                }, 100);
             <?php endif; ?>
-        });
-        
-        // Format number with thousand separators
-        function formatNumber(num) {
-            // Remove any non-numeric characters except decimal point and minus sign
-            num = num.toString().replace(/[^0-9]/g, '');
-            // Add thousand separators
-            return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        }
-        
-        // Add event listener for harga input
-        document.addEventListener('DOMContentLoaded', function() {
-            const hargaInput = document.getElementById('harga');
-            if (hargaInput) {
-                hargaInput.addEventListener('input', function(e) {
-                    let value = e.target.value;
-                    // Remove any non-numeric characters except decimal point and minus sign
-                    value = value.replace(/[^\d]/g, '');
-                    // Format the number
-                    let formattedValue = formatNumber(value);
-                    // Update the display
-                    e.target.value = formattedValue;
-                    // Update the hidden input with the numeric value
-                    document.getElementById('harga_hidden').value = value;
-                });
-            }
             
-            // Form submission validation for biaya modal
-            const biayaForm = document.querySelector('#biayaModal form');
-            if (biayaForm) {
-                biayaForm.addEventListener('submit', function(e) {
-                    // Update hidden field if it's empty but the display field has a value
-                    const hargaDisplay = document.getElementById('harga').value;
-                    const hargaHidden = document.getElementById('harga_hidden');
-                    if (hargaHidden.value === '' && hargaDisplay !== '') {
-                        // Remove formatting and set the numeric value
-                        const numericValue = hargaDisplay.replace(/[^\d]/g, '');
-                        hargaHidden.value = numericValue;
-                    }
-                });
-            }
-            
-            // Event listeners for edit and biaya buttons
+            // Edit button click
             document.addEventListener('click', function(e) {
-                // Edit button clicked
                 if (e.target.closest('.btn-edit')) {
+                    e.preventDefault();
                     const btn = e.target.closest('.btn-edit');
                     const id = btn.getAttribute('data-id');
                     const nama = btn.getAttribute('data-nama');
                     const kode = btn.getAttribute('data-kode');
                     const kategori = btn.getAttribute('data-kategori');
                     
+                    console.log('Edit button clicked:', {id, nama, kode, kategori});
                     editBahan(parseInt(id), nama, kode, parseInt(kategori));
                 }
                 
-                // Biaya button clicked
                 if (e.target.closest('.btn-biaya')) {
                     const btn = e.target.closest('.btn-biaya');
                     const id = btn.getAttribute('data-id');
                     const nama = btn.getAttribute('data-nama');
-                    
                     biayaBahan(parseInt(id), nama);
                 }
+            });
+        });
+
+        $(document).ready(function () {
+            $('.select2-search').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: '-- Pilih --',
+                allowClear: true
             });
         });
     </script>
-   
-   <?php include '_scripts_new.php'; ?>
-</body>
-</html>
-         </form>
-       </div>
-     </div>
-   </div>
-
-   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-   <script>
-     <?php if ($edit_data): ?>
-       // Show modal for edit mode
-       document.addEventListener('DOMContentLoaded', function() {
-         var modal = new bootstrap.Modal(document.getElementById('bahanModal'));
-         modal.show();
-       });
-     <?php endif; ?>
-     
-     <?php if ($edit_data): ?>
-        // Show modal for edit mode
-        document.addEventListener('DOMContentLoaded', function() {
-            editBahan(<?php echo $edit_data['id_bahan']; ?>, '<?php echo htmlspecialchars($edit_data['nama_bahan']); ?>', '<?php echo htmlspecialchars($edit_data['kode_bahan']); ?>', <?php echo $edit_data['id_kategori']; ?>);
-        });
-        <?php endif; ?>
-        
-        // Handle form submission success
-        document.addEventListener('DOMContentLoaded', function() {
-            <?php if ($message): ?>
-                // Close modals after successful operation
-                setTimeout(function() {
-                    const bahanModal = bootstrap.Modal.getInstance(document.getElementById('bahanModal'));
-                    const biayaModal = bootstrap.Modal.getInstance(document.getElementById('biayaModal'));
-                    if (bahanModal) bahanModal.hide();
-                    if (biayaModal) biayaModal.hide();
-                    
-                    // Remove edit parameter from URL if present
-                    if (window.location.search.includes('edit=')) {
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                    }
-                }, 100);
-            <?php endif; ?>
-        });
-        
-        // Format number with thousand separators
-        function formatNumber(num) {
-            // Remove any non-numeric characters except decimal point and minus sign
-            num = num.toString().replace(/[^0-9]/g, '');
-            // Add thousand separators
-            return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        }
-        
-        // Add event listener for harga input
-        document.addEventListener('DOMContentLoaded', function() {
-            const hargaInput = document.getElementById('harga');
-            if (hargaInput) {
-                hargaInput.addEventListener('input', function(e) {
-                    let value = e.target.value;
-                    // Remove any non-numeric characters except decimal point and minus sign
-                    value = value.replace(/[^\d]/g, '');
-                    // Format the number
-                    let formattedValue = formatNumber(value);
-                    // Update the display
-                    e.target.value = formattedValue;
-                    // Update the hidden input with the numeric value
-                    document.getElementById('harga_hidden').value = value;
-                });
-            }
-            
-            // Form submission validation for biaya modal
-            const biayaForm = document.querySelector('#biayaModal form');
-            if (biayaForm) {
-                biayaForm.addEventListener('submit', function(e) {
-                    // Update hidden field if it's empty but the display field has a value
-                    const hargaDisplay = document.getElementById('harga').value;
-                    const hargaHidden = document.getElementById('harga_hidden');
-                    if (hargaHidden.value === '' && hargaDisplay !== '') {
-                        // Remove formatting and set the numeric value
-                        const numericValue = hargaDisplay.replace(/[^\d]/g, '');
-                        hargaHidden.value = numericValue;
-                    }
-                });
-            }
-            
-            // Event listeners for edit and biaya buttons
-            document.addEventListener('click', function(e) {
-                // Edit button clicked
-                if (e.target.closest('.btn-edit')) {
-                    const btn = e.target.closest('.btn-edit');
-                    const id = btn.getAttribute('data-id');
-                    const nama = btn.getAttribute('data-nama');
-                    const kode = btn.getAttribute('data-kode');
-                    const kategori = btn.getAttribute('data-kategori');
-                    
-                    editBahan(parseInt(id), nama, kode, parseInt(kategori));
-                }
-                
-                // Biaya button clicked
-                if (e.target.closest('.btn-biaya')) {
-                    const btn = e.target.closest('.btn-biaya');
-                    const id = btn.getAttribute('data-id');
-                    const nama = btn.getAttribute('data-nama');
-                    
-                    biayaBahan(parseInt(id), nama);
-                }
-            });
-        });
-
-    // Initialize Select2 for searchable dropdowns
-    $(document).ready(function () {
-        $('.select2-search').select2({
-            theme: 'bootstrap-5',
-            width: '100%',
-            placeholder: '-- Pilih --',
-            allowClear: true
-        });
-    });
-
-   <!-- <?php include '_scripts_new.php'; ?> -->
 </body>
 </html>
