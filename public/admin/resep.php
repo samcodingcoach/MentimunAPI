@@ -154,314 +154,139 @@ if (isset($_GET['edit'])) {
 ?>
 
 <!doctype html>
-<html lang="en">
-  <head>
+<html lang="id" data-bs-theme="light">
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Resep - Admin Dashboard</title>
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="../css/admin.css" rel="stylesheet">
-    <style>
-    .searchable-select {
-        position: relative;
-    }
-    .searchable-select .dropdown-menu {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        z-index: 1000;
-    }
-    .searchable-select .dropdown-item:hover {
-        background-color: #f8f9fa;
-    }
-    </style>
-  </head>
-  <body>
-    <!-- Top Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="navbar-brand" href="#">Resto007 Admin</a>
-        <div class="navbar-nav ms-auto">
-          <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-              <?php echo htmlspecialchars($_SESSION["nama_lengkap"]); ?> (<?php echo htmlspecialchars($_SESSION["jabatan"]); ?>)
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="profile.php">Ubah Profil</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="logout.php">Logout</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <title>Resep - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="../css/newadmin.css" rel="stylesheet">
+</head>
+<body>
+    <?php include '_header_new.php'; ?>
+    <?php include '_sidebar_new.php'; ?>
 
-    <div class="container-fluid">
-      <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
-          <div class="position-sticky pt-3">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <a class="nav-link" href="index.php">
-                  <i class="bi bi-house"></i>
-                  <span>Beranda</span>
-                </a>
-              </li>
-              
-              <li class="nav-item">
-                <a class="nav-link" href="informasi.php">
-                  <i class="bi bi-info-circle"></i>
-                  <span>Informasi</span>
-                </a>
-              </li>
-              
-              <?php if($_SESSION["jabatan"] == "Admin"): ?>
-              <!-- Master Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#masterMenu" role="button">
-                  <i class="bi bi-folder"></i>
-                  <span>Master</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="masterMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pegawai.php"><i class="bi bi-people"></i> Pegawai</a></li>
-                    <li class="nav-item"><a class="nav-link" href="vendor.php"><i class="bi bi-truck"></i> Vendor</a></li>
-                    <li class="nav-item"><a class="nav-link" href="meja.php"><i class="bi bi-table"></i> Meja</a></li>
-                    <li class="nav-item"><a class="nav-link" href="metode_pembayaran.php"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
-                  </ul>
+    <main class="main-content" id="mainContent">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1"><i class="bi bi-journal-text me-2"></i>Manajemen Resep</h2>
+                    <p class="text-muted mb-0">Kelola resep produk dan komposisi bahan</p>
                 </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <!-- Produk Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#produkMenu" role="button">
-                  <i class="bi bi-box"></i>
-                  <span>Produk</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse show" id="produkMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="kategori_menu.php"><i class="bi bi-tags"></i> Kategori Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="menu.php"><i class="bi bi-list"></i> Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-tags"></i> Kategori Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="bahan.php"><i class="bi bi-egg"></i> Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="resep.php"><i class="bi bi-book"></i> Resep</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <!-- Pembelian Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#pembelianMenu" role="button">
-                  <i class="bi bi-cart"></i>
-                  <span>Pembelian</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="pembelianMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="pembelian.php"><i class="bi bi-cart-plus"></i> Pesanan Pembelian</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembayaran_pembelian.php"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Kasir"): ?>
-              <!-- Penjualan Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#penjualanMenu" role="button">
-                  <i class="bi bi-cash-stack"></i>
-                  <span>Penjualan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="penjualanMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
-                    <li class="nav-item"><a class="nav-link" href="promo.php"><i class="bi bi-percent"></i> Promo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <!-- Inventory Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#inventoryMenu" role="button">
-                  <i class="bi bi-boxes"></i>
-                  <span>Inventory</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="inventoryMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="inventory.php"><i class="bi bi-box-seam"></i> Inventory</a></li>
-                    <li class="nav-item"><a class="nav-link" href="transaksi_inventory.php"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#laporanMenu" role="button">
-                  <i class="bi bi-graph-up"></i>
-                  <span>Laporan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="laporanMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="laporan_transaksi.php"><i class="bi bi-list-ul"></i> Transaksi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="laporan_pengeluaran.php"><i class="bi bi-bar-chart"></i> Pengeluaran vs Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="laporan_kuantitas.php"><i class="bi bi-pie-chart"></i> Kuantitas</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <li class="nav-item">
-                <a class="nav-link" href="pengaturan.php">
-                  <i class="bi bi-gear"></i>
-                  <span>Pengaturan</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Main Content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Manajemen Resep</h1>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#resepModal">
-              <i class="bi bi-plus-circle"></i> Tambah Resep
-            </button>
-          </div>
-
-          <!-- Alert Messages -->
-          <?php if ($message): ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-              <?php echo htmlspecialchars($message); ?>
-              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-          <?php endif; ?>
-
-          <?php if ($error): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-              <?php echo htmlspecialchars($error); ?>
-              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-          <?php endif; ?>
-
-          <!-- Search -->
-          <div class="row mb-3">
-            <div class="col-md-4">
-              <form method="GET" class="d-flex">
-                <input type="text" class="form-control me-2" name="search" placeholder="Cari kode resep, produk, kategori, atau pembuat..." value="<?php echo htmlspecialchars($search); ?>">
-                <button class="btn btn-outline-secondary" type="submit">
-                  <i class="bi bi-search"></i>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#resepModal">
+                    <i class="bi bi-plus-lg me-2"></i>Tambah Resep
                 </button>
-              </form>
             </div>
-            <div class="col-md-8 text-end">
-              <small class="text-muted">
-                Showing <?php echo $offset + 1; ?> to <?php echo min($offset + $limit, $total_records); ?> of <?php echo $total_records; ?> entries
-              </small>
+
+            <?php if ($message): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i><?php echo $message; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-          </div>
+            <?php endif; ?>
 
-          <!-- Data Table -->
-          <div class="table-responsive">
-            <table class="table table-striped table-hover">
-              <thead class="table-dark">
-                <tr>
-                  <th>No</th>
-                  <th>Kode Resep</th>
-                  <th>Produk</th>
-                  <th class="d-none d-md-table-cell">Pembuat</th>
-                  <th class="d-none d-lg-table-cell">Tanggal</th>
-                  <th class="d-none d-lg-table-cell">Qty Bahan</th>
-                  <th class="d-none d-lg-table-cell">Nilai</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php if (!empty($reseps)): ?>
-                  <?php foreach ($reseps as $index => $resep): ?>
-                    <tr>
-                      <td><?php echo $offset + $index + 1; ?></td>
-                      <td><?php echo htmlspecialchars($resep['kode_resep']); ?></td>
-                      <td><?php echo htmlspecialchars($resep['nama_produk']); ?></td>
-                      <td class="d-none d-md-table-cell"><?php echo htmlspecialchars($resep['pembuat_resep']); ?></td>
-                      <td class="d-none d-lg-table-cell"><?php echo htmlspecialchars($resep['tanggal_release']); ?></td>
-                      <td class="d-none d-lg-table-cell"><?php echo $resep['qty_bahan']; ?></td>
-                      <td class="d-none d-lg-table-cell"><?php echo htmlspecialchars($resep['nilai']); ?></td>
-                      <td>
-                        <a href="resep_detail.php?id=<?php echo $resep['id_resep']; ?>" class="btn btn-sm btn-info">
-                          <i class="bi bi-eye"></i> Detail
-                        </a>
-                      </td>
-                    </tr>
-                  <?php endforeach; ?>
-                <?php else: ?>
-                  <tr>
-                    <td colspan="8" class="text-center">Tidak ada data resep</td>
-                  </tr>
+            <?php if ($error): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-x-circle me-2"></i><?php echo $error; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php endif; ?>
+
+            <!-- Data Table -->
+            <div class="card-modern">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-journal-text me-2"></i>
+                        <span>Daftar Resep</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <form class="d-flex" method="GET" action="">
+                            <div class="input-group" style="width: 250px;">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Cari kode resep, produk, kategori, atau pembuat..." value="<?php echo htmlspecialchars($search); ?>">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%;">No</th>
+                                    <th style="width: 10%;">Kode Resep</th>
+                                    <th style="width: auto;">Produk</th>
+                                   
+                                    <th style="width: 15%;" class="d-none d-lg-table-cell">Tanggal</th>
+                                    <th style="width: 5%;" class="d-none d-lg-table-cell text-center">Qty</th>
+                                    <th style="width: 10%;" class="d-none d-lg-table-cell text-end">Nilai</th>
+                                    <th style="width: 10%;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($reseps)): ?>
+                                    <?php foreach ($reseps as $index => $resep): ?>
+                                        <tr>
+                                            <td><?php echo $offset + $index + 1; ?></td>
+                                            <td><span class="badge bg-secondary"><?php echo htmlspecialchars($resep['kode_resep']); ?></span></td>
+                                            <td style="text-align: left;"><?php echo htmlspecialchars($resep['nama_produk']); ?></td>
+                                           
+                                            <td class="d-none d-lg-table-cell"><?php echo htmlspecialchars($resep['tanggal_release']); ?></td>
+                                            <td class="d-none d-lg-table-cell text-center">
+                                                <span class="badge bg-info"><?php echo $resep['qty_bahan']; ?></span>
+                                            </td>
+                                            <td class="d-none d-lg-table-cell text-end">
+                                                <strong><?php echo htmlspecialchars($resep['nilai']); ?></strong>
+                                            </td>
+                                            <td>
+                                                <a href="resep_detail.php?id=<?php echo $resep['id_resep']; ?>" class="btn btn-sm btn-outline-info">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="8" class="text-center py-4">
+                                            <i class="bi bi-journal-text fs-1 text-muted d-block mb-2"></i>
+                                            <p class="text-muted mb-0">Tidak ada data resep</p>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <?php if ($total_pages > 1): ?>
+                <div class="card-footer bg-light border-top py-3 px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Menampilkan <?php echo $offset + 1; ?>-<?php echo min($offset + $limit, $total_records); ?> dari <?php echo $total_records; ?> resep</small>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                                    <a class="page-link" href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>">Previous</a>
+                                </li>
+                                <?php for ($i = 1; $i <= min($total_pages, 5); $i++): ?>
+                                <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
+                                    <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>"><?php echo $i; ?></a>
+                                </li>
+                                <?php endfor; ?>
+                                <li class="page-item <?php echo $page >= $total_pages ? 'disabled' : ''; ?>">
+                                    <a class="page-link" href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
                 <?php endif; ?>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Pagination -->
-          <?php if ($total_pages > 1): ?>
-            <nav aria-label="Page navigation">
-              <ul class="pagination justify-content-center">
-                <!-- Previous Page -->
-                <?php if ($page > 1): ?>
-                  <li class="page-item">
-                    <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>">
-                      <i class="bi bi-chevron-left"></i>
-                    </a>
-                  </li>
-                <?php endif; ?>
-
-                <!-- Page Numbers -->
-                <?php
-                $start_page = max(1, $page - 2);
-                $end_page = min($total_pages, $page + 2);
-                
-                for ($i = $start_page; $i <= $end_page; $i++):
-                ?>
-                  <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
-                    <a class="page-link" href="?page=<?php echo $i; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>">
-                      <?php echo $i; ?>
-                    </a>
-                  </li>
-                <?php endfor; ?>
-
-                <!-- Next Page -->
-                <?php if ($page < $total_pages): ?>
-                  <li class="page-item">
-                    <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>">
-                      <i class="bi bi-chevron-right"></i>
-                    </a>
-                  </li>
-                <?php endif; ?>
-              </ul>
-            </nav>
-          <?php endif; ?>
-        </main>
-      </div>
-    </div>
+            </div>
+        </div>
+    </main>
 
     <!-- Modal -->
     <div class="modal fade" id="resepModal" tabindex="-1" aria-labelledby="resepModalLabel" aria-hidden="true">
@@ -481,32 +306,28 @@ if (isset($_GET['edit'])) {
                     
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="kode_resep" class="form-label">Kode Resep *</label>
+                            <label for="kode_resep" class="form-label">Kode Resep <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="kode_resep" name="kode_resep" 
                                    value="<?php echo $edit_resep ? htmlspecialchars($edit_resep['kode_resep']) : ''; ?>" 
                                    maxlength="50" required>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="id_produk" class="form-label">Produk *</label>
-                            <div class="searchable-select">
-                                <input type="text" class="form-control" id="produk_display" placeholder="Pilih produk..." readonly onclick="toggleDropdown()" style="padding-right: 2.5rem;">
-                                <input type="hidden" name="id_produk" id="id_produk" required>
-                                <div class="dropdown-menu" id="produk_dropdown" style="display: none; width: 100%; max-height: 200px; overflow-y: auto; border: 1px solid #ced4da; border-radius: 0.375rem; background: white; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);">
-                                    <input type="text" class="search-input form-control" id="produk_search" placeholder="Cari produk..." onkeyup="filterProduk()" style="margin: 0.5rem; width: calc(100% - 1rem);">
-                                    <?php foreach ($products as $product): ?>
-                                    <div class="dropdown-item" data-value="<?php echo $product['id_produk']; ?>" data-text="<?php echo htmlspecialchars($product['display_name']); ?>" onclick="selectProduk(this)" style="padding: 0.5rem 1rem; cursor: pointer; border-bottom: 1px solid #f8f9fa;">
+                            <label for="id_produk" class="form-label">Produk <span class="text-danger">*</span></label>
+                            <select class="form-select select2-search" name="id_produk" id="id_produk" required>
+                                <option value="">-- Pilih Produk --</option>
+                                <?php foreach ($products as $product): ?>
+                                    <option value="<?php echo $product['id_produk']; ?>" <?php echo ($edit_resep && $edit_resep['id_produk'] == $product['id_produk']) ? 'selected' : ''; ?>>
                                         <?php echo htmlspecialchars($product['display_name']); ?>
-                                    </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary">
-                            <?php echo $edit_resep ? 'Update' : 'Simpan'; ?>
+                            <i class="bi bi-save me-2"></i><?php echo $edit_resep ? 'Update' : 'Simpan'; ?>
                         </button>
                     </div>
                 </form>
@@ -514,55 +335,7 @@ if (isset($_GET['edit'])) {
         </div>
     </div>
 
-    <script src="../js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-    // Searchable dropdown functionality
-    function toggleDropdown() {
-        const dropdown = document.getElementById('produk_dropdown');
-        const isVisible = dropdown.style.display === 'block';
-        dropdown.style.display = isVisible ? 'none' : 'block';
-        
-        if (!isVisible) {
-            document.getElementById('produk_search').value = '';
-            filterProduk();
-            document.getElementById('produk_search').focus();
-        }
-    }
-    
-    function selectProduk(element) {
-        const value = element.getAttribute('data-value');
-        const text = element.getAttribute('data-text');
-        
-        document.getElementById('id_produk').value = value;
-        document.getElementById('produk_display').value = text;
-        document.getElementById('produk_dropdown').style.display = 'none';
-    }
-    
-    function filterProduk() {
-        const searchValue = document.getElementById('produk_search').value.toLowerCase();
-        const items = document.querySelectorAll('#produk_dropdown .dropdown-item');
-        
-        items.forEach(item => {
-            const text = item.textContent.toLowerCase();
-            if (text.includes(searchValue)) {
-                item.style.display = 'block';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    }
-    
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-        const dropdown = document.getElementById('produk_dropdown');
-        const display = document.getElementById('produk_display');
-        
-        if (!dropdown.contains(event.target) && event.target !== display) {
-            dropdown.style.display = 'none';
-        }
-    });
-    </script>
+    <?php include '_scripts_new.php'; ?>
     
     <!-- Auto show modal if editing -->
     <?php if ($edit_resep): ?>
@@ -570,17 +343,6 @@ if (isset($_GET['edit'])) {
         document.addEventListener('DOMContentLoaded', function() {
             var resepModal = new bootstrap.Modal(document.getElementById('resepModal'));
             resepModal.show();
-            
-            // Set selected product for editing
-            <?php if ($edit_resep): ?>
-            const editProdukId = '<?php echo $edit_resep['id_produk']; ?>';
-            const produkItems = document.querySelectorAll('#produk_dropdown .dropdown-item');
-            produkItems.forEach(item => {
-                if (item.getAttribute('data-value') === editProdukId) {
-                    selectProduk(item);
-                }
-            });
-            <?php endif; ?>
         });
     </script>
     <?php endif; ?>
@@ -602,5 +364,5 @@ if (isset($_GET['edit'])) {
         });
     </script>
     <?php endif; ?>
-  </body>
+</body>
 </html>
