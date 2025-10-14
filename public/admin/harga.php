@@ -152,470 +152,133 @@ while ($resep_row = $resep_result->fetch_assoc()) {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="id">
+<!doctype html>
+<html lang="id" data-bs-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set Harga - Resto007</title>
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="../css/admin.css" rel="stylesheet">
-    <style>
-        .sidebar {
-            min-height: 100vh;
-            background-color: #f8f9fa;
-        }
-        .sidebar .nav-link {
-            color: #333;
-            padding: 0.75rem 1rem;
-            border-radius: 0.375rem;
-            margin-bottom: 0.25rem;
-        }
-        .sidebar .nav-link:hover {
-            background-color: #e9ecef;
-            color: #0d6efd;
-        }
-        .sidebar .nav-link.active {
-            background-color: #0d6efd;
-            color: white;
-        }
-        .sidebar .nav-link i {
-            margin-right: 0.5rem;
-            width: 1rem;
-        }
-        .main-content {
-            padding: 2rem;
-        }
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: -250px;
-                width: 250px;
-                height: 100vh;
-                z-index: 1000;
-                transition: left 0.3s ease;
-                background-color: #f8f9fa;
-                border-right: 1px solid #dee2e6;
-            }
-            .sidebar.show {
-                left: 0;
-            }
-            .main-content {
-                margin-left: 0;
-                padding: 1rem;
-            }
-        }
-    </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Set Harga Menu - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="../css/newadmin.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Top Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <?php include '_header_new.php'; ?>
+    <?php include '_sidebar_new.php'; ?>
+
+    <main class="main-content" id="mainContent">
         <div class="container-fluid">
-            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <a class="navbar-brand" href="#">Resto007 Admin</a>
-            <div class="navbar-nav ms-auto">
-                <div class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-                        <?php echo htmlspecialchars($_SESSION["nama_lengkap"]); ?> (<?php echo htmlspecialchars($_SESSION["jabatan"]); ?>)
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="profile.php">Ubah Profil</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="logout.php">Logout</a></li>
-                    </ul>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1"><i class="bi bi-tag me-2"></i>Set Harga Menu</h2>
+                    <p class="text-muted mb-0"><?php echo htmlspecialchars($product_info['nama_produk']); ?> (<?php echo htmlspecialchars($product_info['kode_produk']); ?>)</p>
                 </div>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
-                <div class="position-sticky pt-3">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.php">
-                                <i class="bi bi-house"></i>
-                                <span>Beranda</span>
-                            </a>
-                        </li>
-                        
-                        <li class="nav-item">
-                            <a class="nav-link" href="informasi.php">
-                                <i class="bi bi-info-circle"></i>
-                                <span>Informasi</span>
-                            </a>
-                        </li>
-                        
-                        <?php if($_SESSION["jabatan"] == "Admin"): ?>
-                        <!-- Master Menu -->
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="collapse" href="#masterMenu" role="button">
-                                <i class="bi bi-folder"></i>
-                                <span>Master</span>
-                                <i class="bi bi-chevron-down ms-auto"></i>
-                            </a>
-                            <div class="collapse" id="masterMenu">
-                                <ul class="nav flex-column ms-3">
-                                    <li class="nav-item"><a class="nav-link" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="pegawai.php"><i class="bi bi-people"></i> Pegawai</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="vendor.php"><i class="bi bi-truck"></i> Vendor</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="meja.php"><i class="bi bi-table"></i> Meja</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="metode_pembayaran.php"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
-                                </ul>
-                            </div>
-                        </li>
-                        <?php endif; ?>
-                        
-                        <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-                        <!-- Produk Menu -->
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="collapse" href="#produkMenu" role="button">
-                                <i class="bi bi-box"></i>
-                                <span>Produk</span>
-                                <i class="bi bi-chevron-down ms-auto"></i>
-                            </a>
-                            <div class="collapse show" id="produkMenu">
-                                <ul class="nav flex-column ms-3">
-                                    <li class="nav-item"><a class="nav-link" href="kategori_menu.php"><i class="bi bi-tags"></i> Kategori Menu</a></li>
-                                    <li class="nav-item"><a class="nav-link active" href="menu.php"><i class="bi bi-list"></i> Menu</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-tags"></i> Kategori Bahan</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="bahan.php"><i class="bi bi-egg"></i> Bahan</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-book"></i> Resep</a></li>
-                                </ul>
-                            </div>
-                        </li>
-                        
-                        <!-- Pembelian Menu -->
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="collapse" href="#pembelianMenu" role="button">
-                                <i class="bi bi-cart"></i>
-                                <span>Pembelian</span>
-                                <i class="bi bi-chevron-down ms-auto"></i>
-                            </a>
-                            <div class="collapse" id="pembelianMenu">
-                                <ul class="nav flex-column ms-3">
-                                    <li class="nav-item"><a class="nav-link" href="pembelian.php"><i class="bi bi-cart-plus"></i> Pesanan Pembelian</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="pembayaran_pembelian.php"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
-                                </ul>
-                            </div>
-                        </li>
-                        <?php endif; ?>
-                        
-                        <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Kasir"): ?>
-                        <!-- Penjualan Menu -->
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="collapse" href="#penjualanMenu" role="button">
-                                <i class="bi bi-cash-stack"></i>
-                                <span>Penjualan</span>
-                                <i class="bi bi-chevron-down ms-auto"></i>
-                            </a>
-                            <div class="collapse" id="penjualanMenu">
-                                <ul class="nav flex-column ms-3">
-                                    <li class="nav-item"><a class="nav-link" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="promo.php"><i class="bi bi-percent"></i> Promo</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
-                                </ul>
-                            </div>
-                        </li>
-                        <?php endif; ?>
-                        
-                        <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-                        <!-- Inventory Menu -->
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="collapse" href="#inventoryMenu" role="button">
-                                <i class="bi bi-boxes"></i>
-                                <span>Inventory</span>
-                                <i class="bi bi-chevron-down ms-auto"></i>
-                            </a>
-                            <div class="collapse" id="inventoryMenu">
-                                <ul class="nav flex-column ms-3">
-                                    <li class="nav-item"><a class="nav-link" href="inventory.php"><i class="bi bi-box-seam"></i> Inventory</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="transaksi_inventory.php"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
-                                </ul>
-                            </div>
-                        </li>
-                        <?php endif; ?>
-                        
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="collapse" href="#laporanMenu" role="button">
-                                <i class="bi bi-graph-up"></i>
-                                <span>Laporan</span>
-                                <i class="bi bi-chevron-down ms-auto"></i>
-                            </a>
-                            <div class="collapse" id="laporanMenu">
-                                <ul class="nav flex-column ms-3">
-                                    <li class="nav-item"><a class="nav-link" href="laporan_transaksi.php"><i class="bi bi-list-ul"></i> Transaksi</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="laporan_pengeluaran.php"><i class="bi bi-bar-chart"></i> Pengeluaran vs Penjualan</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="laporan_kuantitas.php"><i class="bi bi-pie-chart"></i> Kuantitas</a></li>
-                                </ul>
-                            </div>
-                        </li>
-                        
-                        <!-- Pengaturan Menu -->
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="collapse" href="#pengaturanMenu" role="button">
-                                <i class="bi bi-gear"></i>
-                                <span>Pengaturan</span>
-                                <i class="bi bi-chevron-down ms-auto"></i>
-                            </a>
-                            <div class="collapse" id="pengaturanMenu">
-                                <ul class="nav flex-column ms-3">
-                                    <li class="nav-item"><a class="nav-link" href="ubah_password.php"><i class="bi bi-key"></i> Ubah Password</a></li>
-                                </ul>
-                            </div>
-                        </li>
-                        
-                        <li class="nav-item">
-                            <a class="nav-link" href="logout.php">
-                                <i class="bi bi-box-arrow-right"></i>
-                                <span>Logout</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <a href="menu.php" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i> Kembali ke Menu
+                </a>
             </div>
 
-            <!-- Main Content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">Set Harga Menu: <?php echo htmlspecialchars($product_info['nama_produk']); ?> (<?php echo htmlspecialchars($product_info['kode_produk']); ?>)</h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="menu.php" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left"></i> Kembali ke Menu
-                        </a>
-                    </div>
-                </div>
+            <?php if ($message): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i><?php echo $message; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php endif; ?>
 
-              
-               
+            <?php if ($error): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-x-circle me-2"></i><?php echo $error; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php endif; ?>
 
-                <!-- Alert Messages -->
-                <?php if (!empty($message)): ?>
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <?php echo htmlspecialchars($message); ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                <?php endif; ?>
-
-                <?php if (!empty($error)): ?>
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <?php echo htmlspecialchars($error); ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                <?php endif; ?>
-
-                <!-- Harga Table -->
-                <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Tanggal</th>
-                                        <th>Harga Pokok</th>
-                                        <th>Biaya Produksi</th>
-                                        <th>Margin</th>
-                                        <th>Nominal</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (empty($harga_data)): ?>
-                                    <tr>
-                                        <td colspan="7" class="text-center">Tidak ada data harga</td>
-                                    </tr>
-                                    <?php else: ?>
-                                    <?php 
-                                    $no = ($page - 1) * $limit + 1;
-                                    foreach ($harga_data as $harga): 
-                                    ?>
-                                    <tr>
-                                        <td><?php echo $no++; ?></td>
-                                        <td><?php echo htmlspecialchars($harga['tgl']); ?></td>
-                                        
-                                        <td>Rp <?php echo number_format($harga['harga_pokok_resep'], 0, ',', '.'); ?></td>
-                                        <td>Rp <?php echo number_format($harga['biaya_produksi'], 0, ',', '.'); ?></td>
-                                        <td>Rp <?php echo number_format($harga['margin'], 0, ',', '.'); ?></td>
-                                        <td>Rp <?php echo number_format($harga['nominal'], 0, ',', '.'); ?></td>
-                                        <td>
-                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#hargaModal" 
-                                                    onclick="editHarga(<?php echo $harga['id_harga']; ?>, <?php echo $harga['harga_pokok_resep']; ?>, <?php echo $harga['biaya_produksi']; ?>, <?php echo $harga['margin']; ?>, <?php echo $harga['nominal']; ?>)">
-                                                <i class="bi bi-pencil"></i> Harga
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Pagination -->
-                        <?php if ($total_pages > 1): ?>
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination justify-content-center">
-                                <?php if ($page > 1): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?id_produk=<?php echo $id_produk; ?>&page=<?php echo $page - 1; ?>">
-                                        <i class="bi bi-chevron-left"></i>
-                                    </a>
-                                </li>
+            <!-- Harga Table -->
+            <div class="card-modern">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th width="50">No</th>
+                                    <th>Tanggal</th>
+                                    <th style="width: 15%;" class="text-end">Harga Pokok</th>
+                                    <th style="width: 14%;" class="text-end">Biaya Produksi</th>
+                                    <th style="width: 15%;" class="text-end">Margin</th>
+                                    <th style="width: 15%;"  class="text-end">Nominal</th>
+                                    <th width="100">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (empty($harga_data)): ?>
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <i class="bi bi-inbox fs-1 text-muted d-block mb-2"></i>
+                                        <small class="text-muted">Tidak ada data harga</small>
+                                    </td>
+                                </tr>
+                                <?php else: ?>
+                                <?php 
+                                $no = ($page - 1) * $limit + 1;
+                                foreach ($harga_data as $harga): 
+                                ?>
+                                <tr>
+                                    <td><?php echo $no++; ?></td>
+                                    <td><?php echo htmlspecialchars($harga['tgl']); ?></td>
+                                    <td class="text-end">Rp <?php echo number_format($harga['harga_pokok_resep'], 0, ',', '.'); ?></td>
+                                    <td class="text-end">Rp <?php echo number_format($harga['biaya_produksi'], 0, ',', '.'); ?></td>
+                                    <td class="text-end">Rp <?php echo number_format($harga['margin'], 0, ',', '.'); ?></td>
+                                    <td class="text-end">
+                                        <strong>Rp <?php echo number_format($harga['nominal'], 0, ',', '.'); ?></strong>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#hargaModal" 
+                                                onclick="editHarga(<?php echo $harga['id_harga']; ?>, <?php echo $harga['harga_pokok_resep']; ?>, <?php echo $harga['biaya_produksi']; ?>, <?php echo $harga['margin']; ?>, <?php echo $harga['nominal']; ?>)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
                                 <?php endif; ?>
-                                
-                                <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-                                <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
-                                    <a class="page-link" href="?id_produk=<?php echo $id_produk; ?>&page=<?php echo $i; ?>">
-                                        <?php echo $i; ?>
-                                    </a>
-                                </li>
-                                <?php endfor; ?>
-                                
-                                <?php if ($page < $total_pages): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="?id_produk=<?php echo $id_produk; ?>&page=<?php echo $page + 1; ?>">
-                                        <i class="bi bi-chevron-right"></i>
-                                    </a>
-                                </li>
-                                <?php endif; ?>
-                            </ul>
-                        </nav>
-                        <?php endif; ?>
-                    
-               
-            </main>
-        </div>
-    </div>
-
-    <!-- Sidebar Offcanvas for Mobile -->
-    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title">Menu</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-        </div>
-        <div class="offcanvas-body">
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link" href="index.php">
-                        <i class="bi bi-house"></i>
-                        <span>Beranda</span>
-                    </a>
-                </li>
-                
-                <li class="nav-item">
-                    <a class="nav-link" href="informasi.php">
-                        <i class="bi bi-info-circle"></i>
-                        <span>Informasi</span>
-                    </a>
-                </li>
-                
-                <?php if($_SESSION["jabatan"] == "Admin"): ?>
-                <!-- Master Menu -->
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="collapse" href="#masterMenuMobile" role="button">
-                        <i class="bi bi-folder"></i>
-                        <span>Master</span>
-                        <i class="bi bi-chevron-down ms-auto"></i>
-                    </a>
-                    <div class="collapse" id="masterMenuMobile">
-                        <ul class="nav flex-column ms-3">
-                            <li class="nav-item"><a class="nav-link" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
-                            <li class="nav-item"><a class="nav-link" href="pegawai.php"><i class="bi bi-people"></i> Pegawai</a></li>
-                            <li class="nav-item"><a class="nav-link" href="vendor.php"><i class="bi bi-truck"></i> Vendor</a></li>
-                            <li class="nav-item"><a class="nav-link" href="meja.php"><i class="bi bi-table"></i> Meja</a></li>
-                            <li class="nav-item"><a class="nav-link" href="metode_pembayaran.php"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
-                        </ul>
+                            </tbody>
+                        </table>
                     </div>
-                </li>
+                </div>
+                <?php if ($total_pages > 1): ?>
+                <div class="card-footer">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            <?php if ($page > 1): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="?id_produk=<?php echo $id_produk; ?>&page=<?php echo $page - 1; ?>">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+                            <?php endif; ?>
+                            
+                            <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
+                            <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
+                                <a class="page-link" href="?id_produk=<?php echo $id_produk; ?>&page=<?php echo $i; ?>">
+                                    <?php echo $i; ?>
+                                </a>
+                            </li>
+                            <?php endfor; ?>
+                            
+                            <?php if ($page < $total_pages): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="?id_produk=<?php echo $id_produk; ?>&page=<?php echo $page + 1; ?>">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
+                </div>
                 <?php endif; ?>
-                
-                <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-                <!-- Produk Menu -->
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="collapse" href="#produkMenuMobile" role="button">
-                        <i class="bi bi-box"></i>
-                        <span>Produk</span>
-                        <i class="bi bi-chevron-down ms-auto"></i>
-                    </a>
-                    <div class="collapse show" id="produkMenuMobile">
-                        <ul class="nav flex-column ms-3">
-                            <li class="nav-item"><a class="nav-link" href="kategori_menu.php"><i class="bi bi-tags"></i> Kategori Menu</a></li>
-                            <li class="nav-item"><a class="nav-link active" href="menu.php"><i class="bi bi-list"></i> Menu</a></li>
-                            <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-tags"></i> Kategori Bahan</a></li>
-                            <li class="nav-item"><a class="nav-link" href="bahan.php"><i class="bi bi-egg"></i> Bahan</a></li>
-                            <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-book"></i> Resep</a></li>
-                        </ul>
-                    </div>
-                </li>
-                <?php endif; ?>
-                
-                <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Kasir"): ?>
-                <!-- Penjualan Menu -->
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="collapse" href="#penjualanMenuMobile" role="button">
-                        <i class="bi bi-cash-stack"></i>
-                        <span>Penjualan</span>
-                        <i class="bi bi-chevron-down ms-auto"></i>
-                    </a>
-                    <div class="collapse" id="penjualanMenuMobile">
-                        <ul class="nav flex-column ms-3">
-                            <li class="nav-item"><a class="nav-link" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
-                            <li class="nav-item"><a class="nav-link" href="promo.php"><i class="bi bi-percent"></i> Promo</a></li>
-                            <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                            <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
-                            <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
-                            <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
-                        </ul>
-                    </div>
-                </li>
-                
-                <!-- Laporan Menu -->
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="collapse" href="#laporanMenuMobile" role="button">
-                        <i class="bi bi-file-earmark-text"></i>
-                        <span>Laporan</span>
-                        <i class="bi bi-chevron-down ms-auto"></i>
-                    </a>
-                    <div class="collapse" id="laporanMenuMobile">
-                        <ul class="nav flex-column ms-3">
-                            <li class="nav-item"><a class="nav-link" href="laporan_transaksi.php"><i class="bi bi-receipt"></i> Transaksi</a></li>
-                            <li class="nav-item"><a class="nav-link" href="laporan_pengeluaran.php"><i class="bi bi-graph-down"></i> Pengeluaran vs Penjualan</a></li>
-                            <li class="nav-item"><a class="nav-link" href="laporan_kuantitas.php"><i class="bi bi-bar-chart"></i> Kuantitas</a></li>
-                        </ul>
-                    </div>
-                </li>
-                <?php endif; ?>
-                
-                <!-- Pengaturan Menu -->
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="collapse" href="#pengaturanMenuMobile" role="button">
-                        <i class="bi bi-gear"></i>
-                        <span>Pengaturan</span>
-                        <i class="bi bi-chevron-down ms-auto"></i>
-                    </a>
-                    <div class="collapse" id="pengaturanMenuMobile">
-                        <ul class="nav flex-column ms-3">
-                            <li class="nav-item"><a class="nav-link" href="ubah_password.php"><i class="bi bi-key"></i> Ubah Password</a></li>
-                        </ul>
-                    </div>
-                </li>
-                
-                <li class="nav-item">
-                    <a class="nav-link" href="logout.php">
-                        <i class="bi bi-box-arrow-right"></i>
-                        <span>Logout</span>
-                    </a>
-                </li>
-            </ul>
+            </div>
         </div>
-    </div>
+    </main>
 
     <!-- Modal Harga -->
     <div class="modal fade" id="hargaModal" tabindex="-1" aria-labelledby="hargaModalLabel" aria-hidden="true">
@@ -680,14 +343,17 @@ while ($resep_row = $resep_result->fetch_assoc()) {
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan Harga</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Simpan Harga
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <script src="../js/bootstrap.bundle.min.js"></script>
+    <?php include '_scripts_new.php'; ?>
+    
     <script>
         function addHarga() {
             document.getElementById('hargaModalLabel').textContent = 'Tambah Harga Menu';
@@ -698,6 +364,12 @@ while ($resep_row = $resep_result->fetch_assoc()) {
             document.getElementById('margin_value').value = '';
             document.getElementById('margin').value = '';
             document.getElementById('nominal').value = '';
+            
+            // Set harga pokok resep from available resep
+            <?php if (!empty($resep_data)): ?>
+            document.getElementById('harga_pokok_resep').value = <?php echo $resep_data[0]['harga_pokok_resep']; ?>;
+            document.getElementById('id_resep').value = <?php echo $resep_data[0]['id_resep']; ?>;
+            <?php endif; ?>
         }
         
         function editHarga(id_harga, harga_pokok, biaya_produksi, margin, nominal) {
@@ -709,8 +381,6 @@ while ($resep_row = $resep_result->fetch_assoc()) {
             document.getElementById('margin').value = margin;
             document.getElementById('nominal').value = nominal;
         }
-        
-
         
         function calculateMargin() {
             const hargaPokok = parseFloat(document.getElementById('harga_pokok_resep').value) || 0;
