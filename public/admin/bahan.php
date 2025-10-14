@@ -326,10 +326,16 @@ if (!empty($params)) {
                                 <td><?php echo htmlspecialchars($row['nama_kategori'] ?? '-') ?></td>
                                 <td>
                                     <div class="table-actions">
-                                        <button class="btn btn-sm btn-outline-warning" onclick="editBahan(<?php echo $row['id_bahan']; ?>, '<?php echo htmlspecialchars($row['nama_bahan']); ?>', '<?php echo htmlspecialchars($row['kode_bahan']); ?>', <?php echo $row['id_kategori']; ?>)">
+                                        <button type="button" class="btn btn-sm btn-outline-warning btn-edit" 
+                                                data-id="<?php echo $row['id_bahan']; ?>" 
+                                                data-nama="<?php echo addslashes(htmlspecialchars($row['nama_bahan'])); ?>" 
+                                                data-kode="<?php echo addslashes(htmlspecialchars($row['kode_bahan'])); ?>" 
+                                                data-kategori="<?php echo $row['id_kategori']; ?>">
                                             <i class="bi bi-pencil"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-outline-info" onclick="biayaBahan(<?php echo $row['id_bahan']; ?>, '<?php echo htmlspecialchars($row['nama_bahan']); ?>')">
+                                        <button type="button" class="btn btn-sm btn-outline-info btn-biaya" 
+                                                data-id="<?php echo $row['id_bahan']; ?>" 
+                                                data-nama="<?php echo addslashes(htmlspecialchars($row['nama_bahan'])); ?>">
                                             <i class="bi bi-cash-coin"></i>
                                         </button>
                                     </div>
@@ -485,7 +491,10 @@ if (!empty($params)) {
         </div>
     </div>
 
-   <script>
+   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
         function editBahan(id, nama, kode, kategori) {
             // Set form to edit mode
             document.getElementById('modalAction').value = 'update';
@@ -500,7 +509,8 @@ if (!empty($params)) {
             $('#modalIdKategori').trigger('change');
             
             // Show modal
-            var modal = new bootstrap.Modal(document.getElementById('bahanModal'));
+            var modalElement = document.getElementById('bahanModal');
+            var modal = new bootstrap.Modal(modalElement);
             modal.show();
         }
         
@@ -518,7 +528,8 @@ if (!empty($params)) {
             $('#satuan').trigger('change');
             
             // Show modal
-            var modal = new bootstrap.Modal(document.getElementById('biayaModal'));
+            var modalElement = document.getElementById('biayaModal');
+            var modal = new bootstrap.Modal(modalElement);
             modal.show();
         }
         
@@ -604,6 +615,29 @@ if (!empty($params)) {
                     }
                 });
             }
+            
+            // Event listeners for edit and biaya buttons
+            document.addEventListener('click', function(e) {
+                // Edit button clicked
+                if (e.target.closest('.btn-edit')) {
+                    const btn = e.target.closest('.btn-edit');
+                    const id = btn.getAttribute('data-id');
+                    const nama = btn.getAttribute('data-nama');
+                    const kode = btn.getAttribute('data-kode');
+                    const kategori = btn.getAttribute('data-kategori');
+                    
+                    editBahan(parseInt(id), nama, kode, parseInt(kategori));
+                }
+                
+                // Biaya button clicked
+                if (e.target.closest('.btn-biaya')) {
+                    const btn = e.target.closest('.btn-biaya');
+                    const id = btn.getAttribute('data-id');
+                    const nama = btn.getAttribute('data-nama');
+                    
+                    biayaBahan(parseInt(id), nama);
+                }
+            });
         });
     </script>
    
@@ -625,282 +659,105 @@ if (!empty($params)) {
        });
      <?php endif; ?>
      
-     // Initialize searchable dropdown
-     document.addEventListener('DOMContentLoaded', function() {
-       const displayInput = document.getElementById('kategori_display');
-       const hiddenInput = document.getElementById('id_kategori');
-       const dropdown = document.getElementById('kategori_dropdown');
-       const searchInput = document.getElementById('kategori_search');
-       const optionsContainer = document.getElementById('kategori_options');
-       const allOptions = optionsContainer.querySelectorAll('.dropdown-item');
-       
-       // Show dropdown when clicking display input
-       displayInput.addEventListener('click', function() {
-         dropdown.style.display = 'block';
-         searchInput.focus();
-       });
-       
-       // Hide dropdown when clicking outside
-       document.addEventListener('click', function(e) {
-         if (!e.target.closest('.searchable-select')) {
-           dropdown.style.display = 'none';
-         }
-       });
-       
-       // Search functionality
-       searchInput.addEventListener('input', function() {
-         const searchTerm = this.value.toLowerCase();
-         allOptions.forEach(option => {
-           const text = option.textContent.toLowerCase();
-           if (text.includes(searchTerm)) {
-             option.style.display = 'block';
-           } else {
-             option.style.display = 'none';
-           }
-         });
-       });
-       
-       // Select option
-       allOptions.forEach(option => {
-         option.addEventListener('click', function() {
-           const value = this.getAttribute('data-value');
-           const text = this.getAttribute('data-text');
-           
-           hiddenInput.value = value;
-           displayInput.value = text;
-           dropdown.style.display = 'none';
-           searchInput.value = '';
-           
-           // Show all options again
-           allOptions.forEach(opt => opt.style.display = 'block');
-         });
-       });
-       
-       // Clear search when dropdown is shown
-       displayInput.addEventListener('focus', function() {
-         searchInput.value = '';
-         allOptions.forEach(opt => opt.style.display = 'block');
-       });
-     });
-     
-     // Handle form submission success
-     document.addEventListener('DOMContentLoaded', function() {
-       <?php if ($message): ?>
-         // Close modal after successful operation
-         setTimeout(function() {
-           var modal = bootstrap.Modal.getInstance(document.getElementById('bahanModal'));
-           if (modal) {
-             modal.hide();
-           }
-           // Remove edit parameter from URL after successful update
-           if (window.location.search.includes('edit=')) {
-             window.history.replaceState({}, document.title, window.location.pathname);
-           }
-         }, 100);
-       <?php endif; ?>
-       
-       // Handle "Tambah Bahan" button click
-       document.querySelector('[data-bs-target="#bahanModal"]').addEventListener('click', function() {
-         // Reset form for add mode
-         var form = document.querySelector('#bahanModal form');
-         var actionInput = form.querySelector('input[name="action"]');
-         var idInput = form.querySelector('input[name="id_bahan"]');
-         var kategoriSelect = form.querySelector('select[name="id_kategori"]');
-         var namaInput = form.querySelector('input[name="nama_bahan"]');
-         var kodeInput = form.querySelector('input[name="kode_bahan"]');
-         var modalTitle = document.querySelector('#bahanModal .modal-title');
-         var submitBtn = document.querySelector('#bahanModal button[type="submit"]');
-         
-         // Reset to add mode
-         actionInput.value = 'create';
-         if (idInput) idInput.remove();
-         document.getElementById('id_kategori').value = '';
-         document.getElementById('kategori_display').value = '';
-         namaInput.value = '';
-         kodeInput.value = '';
-         modalTitle.textContent = 'Tambah Bahan';
-         submitBtn.textContent = 'Simpan';
-         
-         // Remove edit parameter from URL
-         if (window.location.search.includes('edit=')) {
-           window.history.replaceState({}, document.title, window.location.pathname);
-         }
-       });
-     });
-     
-     function editBahan(id, nama, kode, kategori) {
-       // Set form to edit mode
-       var form = document.querySelector('#bahanModal form');
-       var actionInput = form.querySelector('input[name="action"]');
-       var idInput = form.querySelector('input[name="id_bahan"]');
-       var kategoriSelect = form.querySelector('select[name="id_kategori"]');
-       var namaInput = form.querySelector('input[name="nama_bahan"]');
-       var kodeInput = form.querySelector('input[name="kode_bahan"]');
-       var modalTitle = document.querySelector('#bahanModal .modal-title');
-       var submitBtn = document.querySelector('#bahanModal button[type="submit"]');
-       
-       // Set edit mode
-       actionInput.value = 'update';
-       
-       // Add or update id input
-       if (!idInput) {
-         idInput = document.createElement('input');
-         idInput.type = 'hidden';
-         idInput.name = 'id_bahan';
-         form.appendChild(idInput);
-       }
-       idInput.value = id;
-       
-       // Set form values
-       document.getElementById('id_kategori').value = kategori;
-       // Find the category name for display
-       const categoryOption = document.querySelector(`[data-value="${kategori}"]`);
-       if (categoryOption) {
-         document.getElementById('kategori_display').value = categoryOption.getAttribute('data-text');
-       }
-       namaInput.value = nama;
-       kodeInput.value = kode;
-       modalTitle.textContent = 'Edit Bahan';
-       submitBtn.textContent = 'Perbarui';
-       
-       // Show modal
-       var modal = new bootstrap.Modal(document.getElementById('bahanModal'));
-       modal.show();
-     }
-     
-     function biayaBahan(id, nama) {
-       // Set values for the biaya modal
-       document.getElementById('id_bahan_biaya').value = id;
-       document.getElementById('nama_bahan_biaya').value = nama;
-       
-       // Clear and reset inputs
-       document.getElementById('harga').value = '';
-       document.getElementById('harga_hidden').value = '';
-       document.getElementById('satuan_display').value = '';
-       document.getElementById('satuan_hidden').value = '';
-       
-       // Show modal
-       var modal = new bootstrap.Modal(document.getElementById('biayaModal'));
-       modal.show();
-     }
-     
-     // Handle form submission success
-     document.addEventListener('DOMContentLoaded', function() {
-       <?php if ($message): ?>
-         // Close biaya modal after successful operation if it's open
-         setTimeout(function() {
-           var biayaModal = bootstrap.Modal.getInstance(document.getElementById('biayaModal'));
-           if (biayaModal) {
-             biayaModal.hide();
-           }
-         }, 100);
-       <?php endif; ?>
-     });
-     
-     // Format number with thousand separators
-     function formatNumber(num) {
-       // Remove any non-numeric characters except decimal point and minus sign
-       num = num.toString().replace(/[^0-9]/g, '');
-       // Add thousand separators
-       return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-     }
-     
-     // Add event listener for harga input
-     document.getElementById('harga').addEventListener('input', function(e) {
-       let value = e.target.value;
-       // Remove any non-numeric characters except decimal point and minus sign
-       value = value.replace(/[^\d]/g, '');
-       // Format the number
-       let formattedValue = formatNumber(value);
-       // Update the display
-       e.target.value = formattedValue;
-       // Update the hidden input with the numeric value
-       document.getElementById('harga_hidden').value = value;
-     });
-     
-     // Initialize satuan searchable dropdown
-     document.addEventListener('DOMContentLoaded', function() {
-       const satuanDisplay = document.getElementById('satuan_display');
-       const satuanHidden = document.getElementById('satuan_hidden');
-       const satuanDropdown = document.getElementById('satuan_dropdown');
-       const satuanSearch = document.getElementById('satuan_search');
-       const satuanOptionsContainer = document.getElementById('satuan_options');
-       const satuanAllOptions = satuanOptionsContainer.querySelectorAll('.dropdown-item');
-       
-       // Show dropdown when clicking display input
-       satuanDisplay.addEventListener('click', function() {
-         satuanDropdown.style.display = 'block';
-         satuanSearch.focus();
-       });
-       
-       // Hide dropdown when clicking outside
-       document.addEventListener('click', function(e) {
-         if (!e.target.closest('.searchable-select')) {
-           satuanDropdown.style.display = 'none';
-         }
-       });
-       
-       // Search functionality for satuan
-       satuanSearch.addEventListener('input', function() {
-         const searchTerm = this.value.toLowerCase();
-         satuanAllOptions.forEach(option => {
-           const text = option.textContent.toLowerCase();
-           if (text.includes(searchTerm)) {
-             option.style.display = 'block';
-           } else {
-             option.style.display = 'none';
-           }
-         });
-       });
-       
-       // Select option from dropdown
-       satuanAllOptions.forEach(option => {
-         option.addEventListener('click', function() {
-           const value = this.getAttribute('data-value');
-           
-           satuanHidden.value = value;
-           satuanDisplay.value = value;
-           satuanDropdown.style.display = 'none';
-           satuanSearch.value = '';
-           
-           // Show all options again
-           satuanAllOptions.forEach(opt => opt.style.display = 'block');
-         });
-       });
-       
-       // Allow manual entry - when user types and then clicks away, use the typed value
-       satuanDisplay.addEventListener('blur', function() {
-         if (this.value.trim() !== '' && !satuanHidden.value) {
-           satuanHidden.value = this.value.trim();
-         }
-       });
-       
-       // Also update the hidden field when typing
-       satuanDisplay.addEventListener('input', function() {
-         // Check if the typed value matches any predefined options
-         const typedValue = this.value.toLowerCase();
-         let matched = false;
-         
-         satuanAllOptions.forEach(option => {
-           const optionText = option.textContent.toLowerCase();
-           if (optionText === typedValue) {
-             satuanHidden.value = option.getAttribute('data-value');
-             matched = true;
-           }
-         });
-         
-         // If no match found, use the typed value
-         if (!matched) {
-           satuanHidden.value = this.value.trim();
-         }
-       });
-       
-       // Clear search when dropdown is shown
-       satuanDisplay.addEventListener('focus', function() {
-         satuanSearch.value = '';
-         satuanAllOptions.forEach(opt => opt.style.display = 'block');
-       });
-     });
-   </script>
- </body>
+     <?php if ($edit_data): ?>
+        // Show modal for edit mode
+        document.addEventListener('DOMContentLoaded', function() {
+            editBahan(<?php echo $edit_data['id_bahan']; ?>, '<?php echo htmlspecialchars($edit_data['nama_bahan']); ?>', '<?php echo htmlspecialchars($edit_data['kode_bahan']); ?>', <?php echo $edit_data['id_kategori']; ?>);
+        });
+        <?php endif; ?>
+        
+        // Handle form submission success
+        document.addEventListener('DOMContentLoaded', function() {
+            <?php if ($message): ?>
+                // Close modals after successful operation
+                setTimeout(function() {
+                    const bahanModal = bootstrap.Modal.getInstance(document.getElementById('bahanModal'));
+                    const biayaModal = bootstrap.Modal.getInstance(document.getElementById('biayaModal'));
+                    if (bahanModal) bahanModal.hide();
+                    if (biayaModal) biayaModal.hide();
+                    
+                    // Remove edit parameter from URL if present
+                    if (window.location.search.includes('edit=')) {
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+                }, 100);
+            <?php endif; ?>
+        });
+        
+        // Format number with thousand separators
+        function formatNumber(num) {
+            // Remove any non-numeric characters except decimal point and minus sign
+            num = num.toString().replace(/[^0-9]/g, '');
+            // Add thousand separators
+            return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+        
+        // Add event listener for harga input
+        document.addEventListener('DOMContentLoaded', function() {
+            const hargaInput = document.getElementById('harga');
+            if (hargaInput) {
+                hargaInput.addEventListener('input', function(e) {
+                    let value = e.target.value;
+                    // Remove any non-numeric characters except decimal point and minus sign
+                    value = value.replace(/[^\d]/g, '');
+                    // Format the number
+                    let formattedValue = formatNumber(value);
+                    // Update the display
+                    e.target.value = formattedValue;
+                    // Update the hidden input with the numeric value
+                    document.getElementById('harga_hidden').value = value;
+                });
+            }
+            
+            // Form submission validation for biaya modal
+            const biayaForm = document.querySelector('#biayaModal form');
+            if (biayaForm) {
+                biayaForm.addEventListener('submit', function(e) {
+                    // Update hidden field if it's empty but the display field has a value
+                    const hargaDisplay = document.getElementById('harga').value;
+                    const hargaHidden = document.getElementById('harga_hidden');
+                    if (hargaHidden.value === '' && hargaDisplay !== '') {
+                        // Remove formatting and set the numeric value
+                        const numericValue = hargaDisplay.replace(/[^\d]/g, '');
+                        hargaHidden.value = numericValue;
+                    }
+                });
+            }
+            
+            // Event listeners for edit and biaya buttons
+            document.addEventListener('click', function(e) {
+                // Edit button clicked
+                if (e.target.closest('.btn-edit')) {
+                    const btn = e.target.closest('.btn-edit');
+                    const id = btn.getAttribute('data-id');
+                    const nama = btn.getAttribute('data-nama');
+                    const kode = btn.getAttribute('data-kode');
+                    const kategori = btn.getAttribute('data-kategori');
+                    
+                    editBahan(parseInt(id), nama, kode, parseInt(kategori));
+                }
+                
+                // Biaya button clicked
+                if (e.target.closest('.btn-biaya')) {
+                    const btn = e.target.closest('.btn-biaya');
+                    const id = btn.getAttribute('data-id');
+                    const nama = btn.getAttribute('data-nama');
+                    
+                    biayaBahan(parseInt(id), nama);
+                }
+            });
+        });
+
+    // Initialize Select2 for searchable dropdowns
+    $(document).ready(function () {
+        $('.select2-search').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: '-- Pilih --',
+            allowClear: true
+        });
+    });
+
+   <!-- <?php include '_scripts_new.php'; ?> -->
+</body>
 </html>
