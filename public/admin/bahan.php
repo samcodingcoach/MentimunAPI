@@ -197,799 +197,418 @@ if (!empty($params)) {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="id">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bahan - Resto007 Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="../css/admin.css" rel="stylesheet">
+<!doctype html>
+<html lang="id" data-bs-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bahan - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="../css/newadmin.css" rel="stylesheet">
     <style>
-      .sidebar {
-        min-height: 100vh;
-        background-color: #f8f9fa;
-      }
-      .nav-link {
-        color: #333;
-        padding: 0.75rem 1rem;
-        border-radius: 0.375rem;
-        margin-bottom: 0.25rem;
-      }
-      .nav-link:hover {
-        background-color: #e9ecef;
-        color: #0d6efd;
-      }
-      .nav-link.active {
-        background-color: #0d6efd;
-        color: white;
-      }
-      .nav-link i {
-        margin-right: 0.5rem;
-      }
-      .table th {
-        background-color: #f8f9fa;
-        font-weight: 600;
-      }
-      .btn-sm {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
-      }
-      .alert {
-        border-radius: 0.5rem;
-      }
-      .modal-header {
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #dee2e6;
-      }
-      .form-label {
-        font-weight: 500;
-      }
-      .pagination {
-        margin-top: 1rem;
-      }
-      .search-box {
-        max-width: 300px;
-      }
-      .searchable-select {
-        position: relative;
-      }
-      .searchable-select .form-control {
-        cursor: pointer;
-      }
-      .searchable-select .dropdown-menu {
-        width: 100%;
-        max-height: 200px;
-        overflow-y: auto;
-      }
-      .searchable-select .search-input {
-        border: none;
-        outline: none;
-        width: 100%;
-        padding: 0.375rem 0.75rem;
-        border-bottom: 1px solid #dee2e6;
-      }
-      .searchable-select .dropdown-item {
-        cursor: pointer;
-      }
-      .searchable-select .dropdown-item:hover {
-        background-color: #f8f9fa;
-      }
-      .searchable-select .dropdown-item.active {
-        background-color: #0d6efd;
-        color: white;
-      }
-      .col-fit {
-        width: 1px;
-        white-space: nowrap;
-      }
-      .searchable-select {
-        position: relative;
-      }
-      .searchable-select .form-control {
-        cursor: pointer;
-      }
-      .searchable-select .dropdown-menu {
-        width: 100%;
-        max-height: 200px;
-        overflow-y: auto;
-      }
-      .searchable-select .search-input {
-        border: none;
-        outline: none;
-        width: 100%;
-        padding: 0.375rem 0.75rem;
-        border-bottom: 1px solid #dee2e6;
-      }
-      .searchable-select .dropdown-item {
-        cursor: pointer;
-      }
-      .searchable-select .dropdown-item:hover {
-        background-color: #f8f9fa;
-      }
-      .searchable-select .dropdown-item.active {
-        background-color: #0d6efd;
-        color: white;
-      }
+        /* Custom table wrapper padding for bahan page */
+        .card-modern .table-responsive {
+            padding: 0 15px !important;
+        }
+        
+        /* Custom table column widths for bahan page */
+        .card-modern .table th:nth-child(1),
+        .card-modern .table td:nth-child(1) { /* No - min width */
+            width: 50px !important;
+            max-width: 50px !important;
+            white-space: nowrap !important;
+            text-align: center !important;
+        }
+        
+        .card-modern .table th:nth-child(2),
+        .card-modern .table td:nth-child(2) { /* Kode Bahan - fit to content */
+            width: 100px !important;
+            max-width: 100px !important;
+            white-space: nowrap !important;
+        }
+        
+        .card-modern .table th:nth-child(3),
+        .card-modern .table td:nth-child(3) { /* Nama Bahan - flexible */
+            width: auto !important;
+            min-width: 200px !important;
+        }
+        
+        .card-modern .table th:nth-child(4),
+        .card-modern .table td:nth-child(4) { /* Kategori - fit to content */
+            width: 120px !important;
+            max-width: 120px !important;
+            white-space: nowrap !important;
+        }
+        
+        .card-modern .table th:nth-child(5),
+        .card-modern .table td:nth-child(5) { /* Aksi - fit to content */
+            width: 130px !important;
+            max-width: 130px !important;
+            white-space: nowrap !important;
+        }
     </style>
-  </head>
+</head>
+<body>
+    <?php include '_header_new.php'; ?>
+    
+    <?php include '_sidebar_new.php'; ?>
 
-  <body>
-    <!-- Top Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="navbar-brand" href="#">Resto007 Admin</a>
-        <div class="navbar-nav ms-auto">
-          <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-              <?php echo htmlspecialchars($_SESSION["nama_lengkap"]); ?> (<?php echo htmlspecialchars($_SESSION["jabatan"]); ?>)
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="profile.php">Ubah Profil</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="logout.php">Logout</a></li>
-            </ul>
-          </div>
+    <main class="main-content" id="mainContent">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">Bahan</h2>
+                    <p class="text-muted mb-0">Kelola bahan baku restoran</p>
+                </div>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bahanModal">
+                    <i class="bi bi-plus-lg me-2"></i>Tambah Bahan
+                </button>
+            </div>
+
+            <?php if ($message): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i><?php echo htmlspecialchars($message); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($error): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i><?php echo htmlspecialchars($error); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php endif; ?>
+
+            <div class="card-modern">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-table me-2"></i>
+                        <span>Daftar Bahan</span>
+                    </div>
+                    <form method="GET" class="d-flex">
+                        <div class="input-group" style="width: 250px;">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Cari nama bahan..." value="<?php echo htmlspecialchars($search); ?>">
+                            <?php if (!empty($search)): ?>
+                            <a href="bahan.php" class="btn btn-outline-danger" type="button">
+                                <i class="bi bi-x"></i>
+                            </a>
+                            <?php endif; ?>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+
+                    <table class="table table-hover mb-0" style="table-layout: fixed;">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Kode Bahan</th>
+                                <th>Nama Bahan</th>
+                                <th>Kategori</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php if ($result->num_rows > 0): ?>
+                            <?php $no = $offset + 1; ?>
+                            <?php while ($row = $result->fetch_assoc()): ?>
+                            <tr>
+                                <td><?php echo $no++; ?></td>
+                                <td><?php echo htmlspecialchars($row['kode_bahan']); ?></td>
+                                <td><strong><?php echo htmlspecialchars($row['nama_bahan']); ?></strong></td>
+                                <td><?php echo htmlspecialchars($row['nama_kategori'] ?? '-') ?></td>
+                                <td>
+                                    <div class="table-actions">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="editBahan(<?php echo $row['id_bahan']; ?>, '<?php echo htmlspecialchars($row['nama_bahan']); ?>', '<?php echo htmlspecialchars($row['kode_bahan']); ?>', <?php echo $row['id_kategori']; ?>)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="biayaBahan(<?php echo $row['id_bahan']; ?>, '<?php echo htmlspecialchars($row['nama_bahan']); ?>')">
+                                            <i class="bi bi-cash-coin"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                    <p class="text-muted mb-0">Tidak ada data bahan</p>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+
+                <?php if ($total_pages > 1): ?>
+                <div class="card-footer bg-light border-top py-3 px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Menampilkan <?php echo $offset + 1; ?>-<?php echo min($offset + $limit, $total_rows); ?> dari <?php echo $total_rows; ?> data</small>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                                    <a class="page-link" href="?page=<?php echo ($page - 1); ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
+                                    <li class="page-item <?php echo ($i == $page) ? 'active' : ''; ?>">
+                                        <a class="page-link" href="?page=<?php echo $i; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>">
+                                            <?php echo $i; ?>
+                                        </a>
+                                    </li>
+                                <?php endfor; ?>
+                                <li class="page-item <?php echo $page >= $total_pages ? 'disabled' : ''; ?>">
+                                    <a class="page-link" href="?page=<?php echo ($page + 1); ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
         </div>
-      </div>
-    </nav>
+    </main>
 
-    <div class="container-fluid">
-      <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
-          <div class="position-sticky pt-3">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <a class="nav-link" href="index.php">
-                  <i class="bi bi-house"></i>
-                  <span>Beranda</span>
-                </a>
-              </li>
-              
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <i class="bi bi-info-circle"></i>
-                  <span>Informasi</span>
-                </a>
-              </li>
-              
-              <?php if($_SESSION["jabatan"] == "Admin"): ?>
-              <!-- Master Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#masterMenu" role="button">
-                  <i class="bi bi-folder"></i>
-                  <span>Master</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="masterMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pegawai.php"><i class="bi bi-people"></i> Pegawai</a></li>
-                    <li class="nav-item"><a class="nav-link" href="vendor.php"><i class="bi bi-truck"></i> Vendor</a></li>
-                    <li class="nav-item"><a class="nav-link" href="meja.php"><i class="bi bi-table"></i> Meja</a></li>
-                    <li class="nav-item"><a class="nav-link" href="metode_pembayaran.php"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
+    <!-- Add/Edit Modal -->
+    <div class="modal fade" id="bahanModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i><span id="modalTitle">Tambah Bahan</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" class="form-modern">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="create" id="modalAction">
+                        <input type="hidden" name="id_bahan" id="modalIdBahan">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Kategori Bahan <span class="text-danger">*</span></label>
+                            <select class="form-select select2-search" name="id_kategori" id="modalIdKategori" required>
+                                <option value="">-- Pilih Kategori --</option>
+                                <?php foreach ($categories as $category): ?>
+                                    <option value="<?php echo $category['id_kategori']; ?>"><?php echo htmlspecialchars($category['nama_kategori']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nama Bahan <span class="text-danger">*</span></label>
+                            <input type="text" name="nama_bahan" id="modalNamaBahan" class="form-control" required placeholder="Masukkan nama bahan">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Kode Bahan <span class="text-danger">*</span></label>
+                            <input type="text" name="kode_bahan" id="modalKodeBahan" class="form-control" maxlength="6" required placeholder="Maksimal 6 karakter">
+                            <div class="form-text">Maksimal 6 karakter</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="modalSubmitBtn"><i class="bi bi-save me-2"></i>Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biaya Modal -->
+    <div class="modal fade" id="biayaModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-cash-coin me-2"></i>Biaya Bahan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" class="form-modern">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="update_biaya">
+                        <input type="hidden" name="id_bahan_biaya" id="id_bahan_biaya" value="">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nama Bahan</label>
+                            <input type="text" class="form-control" id="nama_bahan_biaya" readonly>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Harga <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="harga" name="harga_formatted" placeholder="0" required>
+                            <input type="hidden" id="harga_hidden" name="harga">
+                            <div class="form-text">Contoh: 100.000 / 20.000 / 2000</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Satuan <span class="text-danger">*</span></label>
+                            <select class="form-select select2-search" name="satuan" id="satuan" required>
+                                <option value="">-- Pilih Satuan --</option>
+                                <option value="buah">buah</option>
+                                <option value="pcs">pcs</option>
+                                <option value="kg">kg</option>
+                                <option value="g">g</option>
+                                <option value="mg">mg</option>
+                                <option value="l">l</option>
+                                <option value="ml">ml</option>
+                                <option value="ons">ons</option>
+                                <option value="pon">pon</option>
+                                <option value="lt">lt</option>
+                                <option value="gr">gr</option>
+                                <option value="bh">bh</option>
+                                <option value="bhg">bhg</option>
+                                <option value="btr">btr</option>
+                                <option value="btg">btg</option>
+                                <option value="bks">bks</option>
+                                <option value="ltr">ltr</option>
+                                <option value="bwk">bwk</option>
+                                <option value="dus">dus</option>
+                                <option value="pack">pack</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-save me-2"></i>Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+   <script>
+        function editBahan(id, nama, kode, kategori) {
+            // Set form to edit mode
+            document.getElementById('modalAction').value = 'update';
+            document.getElementById('modalIdBahan').value = id;
+            document.getElementById('modalIdKategori').value = kategori;
+            document.getElementById('modalNamaBahan').value = nama;
+            document.getElementById('modalKodeBahan').value = kode;
+            document.getElementById('modalTitle').textContent = 'Edit Bahan';
+            document.getElementById('modalSubmitBtn').innerHTML = '<i class="bi bi-save me-2"></i>Perbarui';
+            
+            // Trigger change event for select2
+            $('#modalIdKategori').trigger('change');
+            
+            // Show modal
+            var modal = new bootstrap.Modal(document.getElementById('bahanModal'));
+            modal.show();
+        }
+        
+        function biayaBahan(id, nama) {
+            // Set values for the biaya modal
+            document.getElementById('id_bahan_biaya').value = id;
+            document.getElementById('nama_bahan_biaya').value = nama;
+            
+            // Clear and reset inputs
+            document.getElementById('harga').value = '';
+            document.getElementById('harga_hidden').value = '';
+            document.getElementById('satuan').value = '';
+            
+            // Trigger change event for select2
+            $('#satuan').trigger('change');
+            
+            // Show modal
+            var modal = new bootstrap.Modal(document.getElementById('biayaModal'));
+            modal.show();
+        }
+        
+        // Reset form when opening add modal
+        document.addEventListener('DOMContentLoaded', function() {
+            const addModal = document.getElementById('bahanModal');
+            addModal.addEventListener('show.bs.modal', function() {
+                // Reset to add mode
+                document.getElementById('modalAction').value = 'create';
+                document.getElementById('modalIdBahan').value = '';
+                document.getElementById('modalIdKategori').value = '';
+                document.getElementById('modalNamaBahan').value = '';
+                document.getElementById('modalKodeBahan').value = '';
+                document.getElementById('modalTitle').textContent = 'Tambah Bahan';
+                document.getElementById('modalSubmitBtn').innerHTML = '<i class="bi bi-save me-2"></i>Simpan';
+                
+                // Trigger change event for select2
+                $('#modalIdKategori').trigger('change');
+            });
+        });
+        
+        <?php if ($edit_data): ?>
+        // Show modal for edit mode
+        document.addEventListener('DOMContentLoaded', function() {
+            editBahan(<?php echo $edit_data['id_bahan']; ?>, '<?php echo htmlspecialchars($edit_data['nama_bahan']); ?>', '<?php echo htmlspecialchars($edit_data['kode_bahan']); ?>', <?php echo $edit_data['id_kategori']; ?>);
+        });
+        <?php endif; ?>
+        
+        // Handle form submission success
+        document.addEventListener('DOMContentLoaded', function() {
+            <?php if ($message): ?>
+                // Close modals after successful operation
+                setTimeout(function() {
+                    const bahanModal = bootstrap.Modal.getInstance(document.getElementById('bahanModal'));
+                    const biayaModal = bootstrap.Modal.getInstance(document.getElementById('biayaModal'));
+                    if (bahanModal) bahanModal.hide();
+                    if (biayaModal) biayaModal.hide();
                     
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <!-- Produk Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#produkMenu" role="button">
-                  <i class="bi bi-box"></i>
-                  <span>Produk</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse show" id="produkMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="kategori_menu.php"><i class="bi bi-tags"></i> Kategori Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="menu.php"><i class="bi bi-list"></i> Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-tags"></i> Kategori Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="bahan.php"><i class="bi bi-egg"></i> Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-book"></i> Resep</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <!-- Pembelian Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#pembelianMenu" role="button">
-                  <i class="bi bi-cart"></i>
-                  <span>Pembelian</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="pembelianMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-cart-plus"></i> Pesanan Pembelian</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Kasir"): ?>
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#penjualanMenu" role="button">
-                  <i class="bi bi-cash-stack"></i>
-                  <span>Penjualan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="penjualanMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
-                    <li class="nav-item"><a class="nav-link" href="promo.php"><i class="bi bi-percent"></i> Promo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#inventoryMenu" role="button">
-                  <i class="bi bi-boxes"></i>
-                  <span>Inventory</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="inventoryMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-box-seam"></i> Inventory</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#laporanMenu" role="button">
-                  <i class="bi bi-graph-up"></i>
-                  <span>Laporan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="laporanMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-list-ul"></i> Transaksi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-bar-chart"></i> Pengeluaran vs Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-pie-chart"></i> Kuantitas</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <i class="bi bi-gear"></i>
-                  <span>Pengaturan</span>
-                </a>
-              </li>
-           </ul>
-         </div>
-       </div>
-
-       <!-- Mobile Sidebar -->
-       <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
-         <div class="offcanvas-header">
-           <h5 class="offcanvas-title" id="sidebarOffcanvasLabel">Menu</h5>
-           <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-         </div>
-         <div class="offcanvas-body">
-           <ul class="nav flex-column">
-             <li class="nav-item">
-               <a class="nav-link" href="index.php">
-                 <i class="bi bi-house"></i>
-                 <span>Beranda</span>
-               </a>
-             </li>
-             
-             <li class="nav-item">
-               <a class="nav-link" href="#">
-                 <i class="bi bi-info-circle"></i>
-                 <span>Informasi</span>
-               </a>
-             </li>
-             
-             <?php if($_SESSION["jabatan"] == "Admin"): ?>
-             <li class="nav-item">
-               <a class="nav-link" data-bs-toggle="collapse" href="#masterMenuMobile" role="button">
-                 <i class="bi bi-folder"></i>
-                 <span>Master</span>
-                 <i class="bi bi-chevron-down ms-auto"></i>
-               </a>
-               <div class="collapse" id="masterMenuMobile">
-                 <ul class="nav flex-column ms-3">
-                   <li class="nav-item"><a class="nav-link" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
-                   <li class="nav-item"><a class="nav-link" href="pegawai.php"><i class="bi bi-people"></i> Pegawai</a></li>
-                   <li class="nav-item"><a class="nav-link" href="vendor.php"><i class="bi bi-truck"></i> Vendor</a></li>
-                   <li class="nav-item"><a class="nav-link" href="meja.php"><i class="bi bi-table"></i> Meja</a></li>
-                   <li class="nav-item"><a class="nav-link" href="metode_pembayaran.php"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
-                   <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-cash"></i> Bayar</a></li>
-                 </ul>
-               </div>
-             </li>
-             <?php endif; ?>
-             
-             <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-             <li class="nav-item">
-               <a class="nav-link" data-bs-toggle="collapse" href="#produkMenuMobile" role="button">
-                 <i class="bi bi-box"></i>
-                 <span>Produk</span>
-                 <i class="bi bi-chevron-down ms-auto"></i>
-               </a>
-               <div class="collapse show" id="produkMenuMobile">
-                 <ul class="nav flex-column ms-3">
-                   <li class="nav-item"><a class="nav-link" href="kategori_menu.php"><i class="bi bi-tags"></i> Kategori Menu</a></li>
-                   <li class="nav-item"><a class="nav-link" href="menu.php"><i class="bi bi-list"></i> Menu</a></li>
-                   <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-tags"></i> Kategori Bahan</a></li>
-                   <li class="nav-item"><a class="nav-link active" href="bahan.php"><i class="bi bi-egg"></i> Bahan</a></li>
-                   <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-book"></i> Resep</a></li>
-                 </ul>
-               </div>
-             </li>
-             
-             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#pembelianMenuMobile" role="button">
-                  <i class="bi bi-cart"></i>
-                  <span>Pembelian</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="pembelianMenuMobile">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-cart-plus"></i> Pesanan Pembelian</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-credit-card"></i> Pembayaran</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Kasir"): ?>
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#penjualanMenuMobile" role="button">
-                  <i class="bi bi-cash-stack"></i>
-                  <span>Penjualan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="penjualanMenuMobile">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
-                    <li class="nav-item"><a class="nav-link" href="promo.php"><i class="bi bi-percent"></i> Promo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#inventoryMenuMobile" role="button">
-                  <i class="bi bi-boxes"></i>
-                  <span>Inventory</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="inventoryMenuMobile">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-box-seam"></i> Inventory</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#laporanMenuMobile" role="button">
-                  <i class="bi bi-graph-up"></i>
-                  <span>Laporan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="laporanMenuMobile">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-list-ul"></i> Transaksi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-bar-chart"></i> Pengeluaran vs Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-pie-chart"></i> Kuantitas</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <li class="nav-item">
-                <a class="nav-link" href="#">
-                  <i class="bi bi-gear"></i>
-                  <span>Pengaturan</span>
-                </a>
-              </li>
-           </ul>
-         </div>
-       </div>
-
-       <!-- Main Content -->
-       <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-           <h1 class="h2">Bahan</h1>
-           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bahanModal">
-             <i class="bi bi-plus-circle"></i> Tambah Bahan
-           </button>
-         </div>
-
-         <?php if ($message): ?>
-           <div class="alert alert-success alert-dismissible fade show" role="alert">
-             <?php echo htmlspecialchars($message); ?>
-             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-           </div>
-         <?php endif; ?>
-
-         <?php if ($error): ?>
-           <div class="alert alert-danger alert-dismissible fade show" role="alert">
-             <?php echo htmlspecialchars($error); ?>
-             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-           </div>
-         <?php endif; ?>
-
-         <!-- Search and Filter -->
-         <div class="row mb-3">
-           <div class="col-md-6">
-             <form method="GET" class="d-flex">
-               <input type="text" class="form-control search-box" name="search" placeholder="Cari nama bahan, kode, atau kategori..." value="<?php echo htmlspecialchars($search); ?>">
-               <button class="btn btn-outline-secondary ms-2" type="submit">
-                 <i class="bi bi-search"></i>
-               </button>
-               <?php if (!empty($search)): ?>
-                 <a href="bahan.php" class="btn btn-outline-danger ms-2">
-                   <i class="bi bi-x"></i>
-                 </a>
-               <?php endif; ?>
-             </form>
-           </div>
-         </div>
-
-         <!-- Data Table -->
-         <div class="table-responsive">
-           <table class="table table-striped table-hover">
-             <thead>
-               <tr>
-                 <th class="col-fit">No</th>
-                 <th class="col-fit">Kode Bahan</th>
-                 <th>Nama Bahan</th>
-                 <th class="col-fit">Kategori</th>
-                 <th class="col-fit">Aksi</th>
-               </tr>
-             </thead>
-             <tbody>
-               <?php if ($result->num_rows > 0): ?>
-                 <?php $no = $offset + 1; ?>
-                 <?php while ($row = $result->fetch_assoc()): ?>
-                   <tr>
-                     <td class="col-fit"><?php echo $no++; ?></td>
-                     <td class="col-fit"><?php echo htmlspecialchars($row['kode_bahan']); ?></td>
-                     <td><?php echo htmlspecialchars($row['nama_bahan']); ?></td>
-                     <td class="col-fit"><?php echo htmlspecialchars($row['nama_kategori'] ?? 'Tidak ada kategori'); ?></td>
-                     <td class="col-fit">
-                       <button type="button" class="btn btn-warning btn-sm" onclick="editBahan(<?php echo $row['id_bahan']; ?>, '<?php echo htmlspecialchars($row['nama_bahan']); ?>', '<?php echo htmlspecialchars($row['kode_bahan']); ?>', <?php echo $row['id_kategori']; ?>)">
-                         <i class="bi bi-pencil"></i> Edit
-                       </button>
-                       <button type="button" class="btn btn-info btn-sm ms-1" onclick="biayaBahan(<?php echo $row['id_bahan']; ?>, '<?php echo htmlspecialchars($row['nama_bahan']); ?>')">
-                         <i class="bi bi-cash-coin"></i> Biaya
-                       </button>
-                     </td>
-                   </tr>
-                 <?php endwhile; ?>
-               <?php else: ?>
-                 <tr>
-                   <td colspan="5" class="text-center">Tidak ada data bahan</td>
-                 </tr>
-               <?php endif; ?>
-             </tbody>
-           </table>
-         </div>
-
-         <!-- Pagination -->
-         <?php if ($total_pages > 1): ?>
-           <nav aria-label="Page navigation">
-             <ul class="pagination justify-content-center">
-               <?php if ($page > 1): ?>
-                 <li class="page-item">
-                   <a class="page-link" href="?page=<?php echo ($page - 1); ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>">
-                     <i class="bi bi-chevron-left"></i>
-                   </a>
-                 </li>
-               <?php endif; ?>
-
-               <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-                 <li class="page-item <?php echo ($i == $page) ? 'active' : ''; ?>">
-                   <a class="page-link" href="?page=<?php echo $i; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>">
-                     <?php echo $i; ?>
-                   </a>
-                 </li>
-               <?php endfor; ?>
-
-               <?php if ($page < $total_pages): ?>
-                 <li class="page-item">
-                   <a class="page-link" href="?page=<?php echo ($page + 1); ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>">
-                     <i class="bi bi-chevron-right"></i>
-                   </a>
-                 </li>
-               <?php endif; ?>
-             </ul>
-           </nav>
-
-           <div class="text-center text-muted">
-             Showing <?php echo $offset + 1; ?> to <?php echo min($offset + $limit, $total_rows); ?> of <?php echo $total_rows; ?> entries
-           </div>
-         <?php endif; ?>
-       </main>
-     </div>
-   </div>
-
-   <!-- Add/Edit Modal -->
-   <div class="modal fade" id="bahanModal" tabindex="-1" aria-labelledby="bahanModalLabel" aria-hidden="true">
-     <div class="modal-dialog">
-       <div class="modal-content">
-         <div class="modal-header">
-           <h5 class="modal-title" id="bahanModalLabel"><?php echo $edit_data ? 'Edit Bahan' : 'Tambah Bahan'; ?></h5>
-           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-         </div>
-         <form method="POST">
-           <div class="modal-body">
-             <input type="hidden" name="action" value="<?php echo $edit_data ? 'update' : 'create'; ?>">
-             <?php if ($edit_data): ?>
-               <input type="hidden" name="id_bahan" value="<?php echo $edit_data['id_bahan']; ?>">
-             <?php endif; ?>
-             
-             <div class="mb-3">
-               <label for="id_kategori" class="form-label">Kategori Bahan <span class="text-danger">*</span></label>
-               <div class="searchable-select">
-                 <input type="text" class="form-control" id="kategori_display" placeholder="Pilih atau ketik untuk mencari kategori..." readonly>
-                 <input type="hidden" id="id_kategori" name="id_kategori" required>
-                 <div class="dropdown-menu" id="kategori_dropdown">
-                   <input type="text" class="search-input" id="kategori_search" placeholder="Cari kategori...">
-                   <div id="kategori_options">
-                     <?php foreach ($categories as $category): ?>
-                       <div class="dropdown-item" data-value="<?php echo $category['id_kategori']; ?>" data-text="<?php echo htmlspecialchars($category['nama_kategori']); ?>">
-                         <?php echo htmlspecialchars($category['nama_kategori']); ?>
-                       </div>
-                     <?php endforeach; ?>
-                   </div>
-                 </div>
-               </div>
-             </div>
-             
-             <div class="mb-3">
-               <label for="nama_bahan" class="form-label">Nama Bahan <span class="text-danger">*</span></label>
-               <input type="text" class="form-control" id="nama_bahan" name="nama_bahan" value="<?php echo $edit_data ? htmlspecialchars($edit_data['nama_bahan']) : ''; ?>" required>
-             </div>
-             
-             <div class="mb-3">
-               <label for="kode_bahan" class="form-label">Kode Bahan <span class="text-danger">*</span></label>
-               <input type="text" class="form-control" id="kode_bahan" name="kode_bahan" value="<?php echo $edit_data ? htmlspecialchars($edit_data['kode_bahan']) : ''; ?>" maxlength="6" required>
-               <div class="form-text">Maksimal 6 karakter</div>
-             </div>
-           </div>
-           <div class="modal-footer">
-             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-             <button type="submit" class="btn btn-primary"><?php echo $edit_data ? 'Perbarui' : 'Simpan'; ?></button>
-           </div>
-         </form>
-       </div>
-     </div>
-   </div>
-
-   <!-- Biaya Modal -->
-   <div class="modal fade" id="biayaModal" tabindex="-1" aria-labelledby="biayaModalLabel" aria-hidden="true">
-     <div class="modal-dialog">
-       <div class="modal-content">
-         <div class="modal-header">
-           <h5 class="modal-title" id="biayaModalLabel">Biaya Bahan</h5>
-           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-         </div>
-         <form method="POST">
-           <div class="modal-body">
-             <input type="hidden" name="action" value="update_biaya">
-             <input type="hidden" name="id_bahan_biaya" id="id_bahan_biaya" value="">
-             
-             <div class="mb-3">
-               <label for="nama_bahan_biaya" class="form-label">Nama Bahan</label>
-               <input type="text" class="form-control" id="nama_bahan_biaya" readonly>
-             </div>
-             
-             <div class="mb-3">
-               <label for="harga" class="form-label">Harga <span class="text-danger">*</span></label>
-               <input type="text" class="form-control" id="harga" name="harga_formatted" placeholder="0" required>
-               <input type="hidden" id="harga_hidden" name="harga">
-               <div class="form-text">Contoh: 100.000 / 20.000 / 2000</div>
-             </div>
-             
-             <div class="mb-3">
-               <label for="satuan" class="form-label">Satuan <span class="text-danger">*</span></label>
-               <div class="searchable-select">
-                 <input type="text" class="form-control" id="satuan_display" placeholder="Pilih atau ketik satuan..." required>
-                 <input type="hidden" id="satuan_hidden" name="satuan" required>
-                 <div class="dropdown-menu" id="satuan_dropdown">
-                   <input type="text" class="search-input" id="satuan_search" placeholder="Cari atau masukkan satuan...">
-                   <div id="satuan_options">
-                     <div class="dropdown-item" data-value="buah">buah</div>
-                     <div class="dropdown-item" data-value="pcs">pcs</div>
-                     <div class="dropdown-item" data-value="kg">kg</div>
-                     <div class="dropdown-item" data-value="g">g</div>
-                     <div class="dropdown-item" data-value="mg">mg</div>
-                     <div class="dropdown-item" data-value="l">l</div>
-                     <div class="dropdown-item" data-value="ml">ml</div>
-                     <div class="dropdown-item" data-value="ons">ons</div>
-                     <div class="dropdown-item" data-value="pon">pon</div>
-                     <div class="dropdown-item" data-value="lt">lt</div>
-                     <div class="dropdown-item" data-value="gr">gr</div>
-                     <div class="dropdown-item" data-value="bh">bh</div>
-                     <div class="dropdown-item" data-value="bhg">bhg</div>
-                     <div class="dropdown-item" data-value="btr">btr</div>
-                     <div class="dropdown-item" data-value="btg">btg</div>
-                     <div class="dropdown-item" data-value="bks">bks</div>
-                     <div class="dropdown-item" data-value="ltr">ltr</div>
-                     <div class="dropdown-item" data-value="bwk">bwk</div>
-                     <div class="dropdown-item" data-value="dus">dus</div>
-                     <div class="dropdown-item" data-value="pack">pack</div>
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </div>
-           <div class="modal-footer">
-             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-             <button type="submit" class="btn btn-primary">Update</button>
-           </div>
-         </form>
-       </div>
-     </div>
-   </div>
-
-   <script>
-     // Handle form submission success
-     document.addEventListener('DOMContentLoaded', function() {
-       <?php if ($message): ?>
-         // Close biaya modal after successful operation if it's open
-         setTimeout(function() {
-           var biayaModal = bootstrap.Modal.getInstance(document.getElementById('biayaModal'));
-           if (biayaModal) {
-             biayaModal.hide();
-           }
-         }, 100);
-       <?php endif; ?>
-     });
-     
-     // Format number with thousand separators
-     function formatNumber(num) {
-       // Remove any non-numeric characters except decimal point and minus sign
-       num = num.toString().replace(/[^0-9]/g, '');
-       // Add thousand separators
-       return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-     }
-     
-     // Add event listener for harga input
-     document.getElementById('harga').addEventListener('input', function(e) {
-       let value = e.target.value;
-       // Remove any non-numeric characters except decimal point and minus sign
-       value = value.replace(/[^\d]/g, '');
-       // Format the number
-       let formattedValue = formatNumber(value);
-       // Update the display
-       e.target.value = formattedValue;
-       // Update the hidden input with the numeric value
-       document.getElementById('harga_hidden').value = value;
-     });
-     
-     // Initialize satuan searchable dropdown
-     document.addEventListener('DOMContentLoaded', function() {
-       const satuanDisplay = document.getElementById('satuan_display');
-       const satuanHidden = document.getElementById('satuan_hidden');
-       const satuanDropdown = document.getElementById('satuan_dropdown');
-       const satuanSearch = document.getElementById('satuan_search');
-       const satuanOptionsContainer = document.getElementById('satuan_options');
-       const satuanAllOptions = satuanOptionsContainer.querySelectorAll('.dropdown-item');
-       
-       // Show dropdown when clicking display input
-       satuanDisplay.addEventListener('click', function() {
-         satuanDropdown.style.display = 'block';
-         satuanSearch.focus();
-       });
-       
-       // Hide dropdown when clicking outside
-       document.addEventListener('click', function(e) {
-         if (!e.target.closest('.searchable-select')) {
-           satuanDropdown.style.display = 'none';
-         }
-       });
-       
-       // Search functionality for satuan
-       satuanSearch.addEventListener('input', function() {
-         const searchTerm = this.value.toLowerCase();
-         satuanAllOptions.forEach(option => {
-           const text = option.textContent.toLowerCase();
-           if (text.includes(searchTerm)) {
-             option.style.display = 'block';
-           } else {
-             option.style.display = 'none';
-           }
-         });
-       });
-       
-       // Select option from dropdown
-       satuanAllOptions.forEach(option => {
-         option.addEventListener('click', function() {
-           const value = this.getAttribute('data-value');
-           
-           satuanHidden.value = value;
-           satuanDisplay.value = value;
-           satuanDropdown.style.display = 'none';
-           satuanSearch.value = '';
-           
-           // Show all options again
-           satuanAllOptions.forEach(opt => opt.style.display = 'block');
-         });
-       });
-       
-       // Allow manual entry - when user types and then clicks away, use the typed value
-       satuanDisplay.addEventListener('blur', function() {
-         if (this.value.trim() !== '' && !satuanHidden.value) {
-           satuanHidden.value = this.value.trim();
-         }
-       });
-       
-       // Also update the hidden field when typing
-       satuanDisplay.addEventListener('input', function() {
-         // Check if the typed value matches any predefined options
-         const typedValue = this.value.toLowerCase();
-         let matched = false;
-         
-         satuanAllOptions.forEach(option => {
-           const optionText = option.textContent.toLowerCase();
-           if (optionText === typedValue) {
-             satuanHidden.value = option.getAttribute('data-value');
-             matched = true;
-           }
-         });
-         
-         // If no match found, use the typed value
-         if (!matched) {
-           satuanHidden.value = this.value.trim();
-         }
-       });
-       
-       // Clear search when dropdown is shown
-       satuanDisplay.addEventListener('focus', function() {
-         satuanSearch.value = '';
-         satuanAllOptions.forEach(opt => opt.style.display = 'block');
-       });
-     });
-   </script>
+                    // Remove edit parameter from URL if present
+                    if (window.location.search.includes('edit=')) {
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+                }, 100);
+            <?php endif; ?>
+        });
+        
+        // Format number with thousand separators
+        function formatNumber(num) {
+            // Remove any non-numeric characters except decimal point and minus sign
+            num = num.toString().replace(/[^0-9]/g, '');
+            // Add thousand separators
+            return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+        
+        // Add event listener for harga input
+        document.addEventListener('DOMContentLoaded', function() {
+            const hargaInput = document.getElementById('harga');
+            if (hargaInput) {
+                hargaInput.addEventListener('input', function(e) {
+                    let value = e.target.value;
+                    // Remove any non-numeric characters except decimal point and minus sign
+                    value = value.replace(/[^\d]/g, '');
+                    // Format the number
+                    let formattedValue = formatNumber(value);
+                    // Update the display
+                    e.target.value = formattedValue;
+                    // Update the hidden input with the numeric value
+                    document.getElementById('harga_hidden').value = value;
+                });
+            }
+            
+            // Form submission validation for biaya modal
+            const biayaForm = document.querySelector('#biayaModal form');
+            if (biayaForm) {
+                biayaForm.addEventListener('submit', function(e) {
+                    // Update hidden field if it's empty but the display field has a value
+                    const hargaDisplay = document.getElementById('harga').value;
+                    const hargaHidden = document.getElementById('harga_hidden');
+                    if (hargaHidden.value === '' && hargaDisplay !== '') {
+                        // Remove formatting and set the numeric value
+                        const numericValue = hargaDisplay.replace(/[^\d]/g, '');
+                        hargaHidden.value = numericValue;
+                    }
+                });
+            }
+        });
+    </script>
    
-   <script>
-     // Add validation to ensure the hidden fields are populated before form submission
-     document.querySelector('#biayaModal form').addEventListener('submit', function(e) {
-       // Update hidden field if it's empty but the display field has a value
-       const hargaDisplay = document.getElementById('harga').value;
-       const hargaHidden = document.getElementById('harga_hidden');
-       if (hargaHidden.value === '' && hargaDisplay !== '') {
-         // Remove formatting and set the numeric value
-         const numericValue = hargaDisplay.replace(/[^\d]/g, '');
-         hargaHidden.value = numericValue;
-       }
-       
-       // Update satuan hidden if it's empty but the display field has a value
-       const satuanDisplay = document.getElementById('satuan_display').value;
-       const satuanHidden = document.getElementById('satuan_hidden');
-       if (satuanHidden.value === '' && satuanDisplay !== '') {
-         satuanHidden.value = satuanDisplay;
-       }
-     });
-   </script>
- </body>
+   <?php include '_scripts_new.php'; ?>
+</body>
 </html>
          </form>
        </div>
