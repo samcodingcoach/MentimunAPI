@@ -251,25 +251,25 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="card-footer bg-light border-top py-3 px-4">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">Menampilkan 1-5 dari 50 pesanan</small>
-                                    <nav>
-                                        <ul class="pagination pagination-sm mb-0">
-                                            <li class="page-item disabled">
-                                                <a class="page-link" href="#">Previous</a>
-                                            </li>
-                                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                            <li class="page-item">
-                                                <a class="page-link" href="#">Next</a>
-                                            </li>
-                                        </ul>
-                                    </nav>
-                                </div>
+                        </div>
+                        <div class="card-footer bg-light border-top py-3 px-4">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                <small class="text-muted mb-0">Menampilkan 1-5 dari 50 pesanan</small>
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0">
+                                        <li class="page-item disabled">
+                                            <span class="page-link"><i class="bi bi-chevron-left"></i></span>
+                                        </li>
+                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>
+                                        </li>
+                                    </ul>
+                                </nav>
                             </div>
-                            </div>
+                        </div>
                         </div>
                     </div>
                 </div>

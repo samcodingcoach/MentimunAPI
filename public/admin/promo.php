@@ -206,6 +206,8 @@ if (!empty($params)) {
     }
 }
 
+$start_record = $total_records > 0 ? $offset + 1 : 0;
+$end_record = $total_records > 0 ? min($offset + count($promos), $total_records) : 0;
 
 ?>
 
@@ -357,39 +359,45 @@ if (!empty($params)) {
                                 </tbody>
                             </table>
                         </div>
+                        <div class="card-footer bg-light border-top py-3 px-4">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                <small class="text-muted mb-0">
+                                    <?php if ($total_records > 0): ?>
+                                        Menampilkan <?php echo number_format($start_record); ?> - <?php echo number_format($end_record); ?> dari <?php echo number_format($total_records); ?> promo
+                                    <?php else: ?>
+                                        Tidak ada data promo
+                                    <?php endif; ?>
+                                </small>
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0">
+                                        <?php if ($total_pages > 1): ?>
+                                            <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                                                <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>">
+                                                    <i class="bi bi-chevron-left"></i>
+                                                </a>
+                                            </li>
+                                            <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
+                                                <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
+                                                    <a class="page-link" href="?page=<?php echo $i; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>">
+                                                        <?php echo $i; ?>
+                                                    </a>
+                                                </li>
+                                            <?php endfor; ?>
+                                            <li class="page-item <?php echo $page >= $total_pages ? 'disabled' : ''; ?>">
+                                                <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>">
+                                                    <i class="bi bi-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                        <?php else: ?>
+                                            <li class="page-item active"><span class="page-link">1</span></li>
+                                        <?php endif; ?>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <?php if ($total_pages > 1): ?>
-            <nav aria-label="Page navigation" class="mt-4">
-                <ul class="pagination justify-content-center">
-                    <?php if ($page > 1): ?>
-                    <li class="page-item">
-                        <a class="page-link" href="?page=<?php echo $page - 1; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>">
-                            <i class="bi bi-chevron-left"></i>
-                        </a>
-                    </li>
-                    <?php endif; ?>
-
-                    <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-                    <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
-                        <a class="page-link" href="?page=<?php echo $i; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>">
-                            <?php echo $i; ?>
-                        </a>
-                    </li>
-                    <?php endfor; ?>
-
-                    <?php if ($page < $total_pages): ?>
-                    <li class="page-item">
-                        <a class="page-link" href="?page=<?php echo $page + 1; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?><?php echo !empty($filter) ? '&filter=' . urlencode($filter) : ''; ?>">
-                            <i class="bi bi-chevron-right"></i>
-                        </a>
-                    </li>
-                    <?php endif; ?>
-                </ul>
-            </nav>
-            <?php endif; ?>
         </div>
     </main>
 
