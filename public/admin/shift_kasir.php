@@ -193,36 +193,11 @@ try {
                                                 </tr>
                                             <?php else: ?>
                                                 <?php foreach ($shift_data as $index => $shift): ?>
-                                                    <?php
-                                                        $rawName = preg_replace('/\[[^\]]+\]\s*/', '', $shift['kasir']);
-                                                        $parts = preg_split('/\s+/', trim($rawName));
-                                                        $initials = '';
-                                                        foreach ($parts as $part) {
-                                                            if ($part === '') {
-                                                                continue;
-                                                            }
-                                                            $initials .= mb_strtoupper(mb_substr($part, 0, 1, 'UTF-8'), 'UTF-8');
-                                                            if (mb_strlen($initials, 'UTF-8') >= 2) {
-                                                                $initials = mb_substr($initials, 0, 2, 'UTF-8');
-                                                                break;
-                                                            }
-                                                        }
-                                                        if ($initials === '') {
-                                                            $initials = 'KS';
-                                                        }
-                                                    ?>
                                                     <tr class="align-middle">
                                                         <td class="fw-semibold"><?php echo $index + 1; ?></td>
                                                         <td>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
-                                                                    <strong><?php echo htmlspecialchars($initials, ENT_QUOTES, 'UTF-8'); ?></strong>
-                                                                </div>
-                                                                <div class="ms-3">
-                                                                    <div class="fw-bold"><?php echo htmlspecialchars($shift['kasir'], ENT_QUOTES, 'UTF-8'); ?></div>
-                                                                    <small class="text-muted"><?php echo htmlspecialchars($shift['tanggal_open'], ENT_QUOTES, 'UTF-8'); ?></small>
-                                                                </div>
-                                                            </div>
+                                                            <div class="fw-bold mb-1"><?php echo htmlspecialchars($shift['kasir'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                                            <small class="text-muted"><?php echo htmlspecialchars($shift['tanggal_open'], ENT_QUOTES, 'UTF-8'); ?></small>
                                                         </td>
                                                         <td class="text-center">
                                                             <?php if ($shift['status'] == '1'): ?>
