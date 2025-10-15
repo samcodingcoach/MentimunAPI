@@ -173,20 +173,20 @@ try {
                                 <table class="table table-hover mb-0">
                                         <thead>
                                             <tr>
-                                                <th>No</th>
-                                                <th>Kasir</th>
-                                                <th class="text-center">Status</th>
-                                                <th class="text-end">Tunai Awal</th>
-                                                <th class="text-end">QRIS</th>
-                                                <th class="text-end">Transfer</th>
-                                                <th class="text-end">Grand Total</th>
-                                                <th>Aksi</th>
+                                                <th style="width: 6%; text-align: center">No</th>
+                                                <th style="width: auto; text-align: left">Kasir</th>
+                                                <th style="width: 5%; text-align: center">Status</th>
+                                                <th style="width: 15%; text-align: right">Tunai Awal</th>
+                                                <th style="width: 10%; text-align: right">QRIS</th>
+                                                <th style="width: 10%; text-align: right">Transfer</th>
+                                                <th style="width: 15%; text-align: right">Grand Total</th>
+                                                <th style="width: 10%; text-align: center">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php if (empty($shift_data)): ?>
                                                 <tr>
-                                                    <td colspan="8" class="text-center py-5">
+                                                    <td colspan="8" class="text-center ">
                                                         <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
                                                         <p class="text-muted mb-0">Tidak ada data shift untuk tanggal <?php echo date('d F Y', strtotime($selected_date)); ?></p>
                                                     </td>
@@ -218,8 +218,8 @@ try {
                                                         <td class="text-end">
                                                             <span class="text-success fw-bold">Rp <?php echo $shift['grand_total']; ?></span>
                                                         </td>
-                                                        <td>
-                                                            <div class="table-actions d-flex align-items-center gap-2">
+                                                        <td class="text-center">
+                                                            <div class="table-actions d-flex align-items-end">
                                                                 <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailModal"
                                                                     data-shift-id="<?php echo (int)$shift['id_open']; ?>"
                                                                     data-shift-kasir="<?php echo htmlspecialchars($shift['kasir'], ENT_QUOTES, 'UTF-8'); ?>"
