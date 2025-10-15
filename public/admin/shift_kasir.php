@@ -169,7 +169,7 @@ try {
                                 </form>
                             </div>
                            
-                            <div class="table-responsive">
+                            <div class="table-responsive px-0">
                                 <table class="table table-hover mb-0">
                                         <thead>
                                             <tr>
@@ -194,7 +194,7 @@ try {
                                             <?php else: ?>
                                                 <?php foreach ($shift_data as $index => $shift): ?>
                                                     <tr class="align-middle">
-                                                        <td class="fw-semibold"><?php echo $index + 1; ?></td>
+                                                        <td class="fw-semibold text-center"><?php echo $index + 1; ?></td>
                                                         <td>
                                                             <div class="fw-bold mb-1"><?php echo htmlspecialchars($shift['kasir'], ENT_QUOTES, 'UTF-8'); ?></div>
                                                             <small class="text-muted"><?php echo htmlspecialchars($shift['tanggal_open'], ENT_QUOTES, 'UTF-8'); ?></small>
@@ -219,7 +219,7 @@ try {
                                                             <span class="text-success fw-bold">Rp <?php echo $shift['grand_total']; ?></span>
                                                         </td>
                                                         <td class="text-center">
-                                                            <div class="table-actions d-flex align-items-end">
+                                                            <div class="table-actions d-inline-flex justify-content-center align-items-center">
                                                                 <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailModal"
                                                                     data-shift-id="<?php echo (int)$shift['id_open']; ?>"
                                                                     data-shift-kasir="<?php echo htmlspecialchars($shift['kasir'], ENT_QUOTES, 'UTF-8'); ?>"
