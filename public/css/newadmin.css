@@ -298,7 +298,7 @@ body {
   border-top: 0 !important;
 }
 
-/* === Modern Table Design - SELESAI === */
+
 
 /* Modern Card Design */
 .card-modern {
@@ -426,7 +426,7 @@ body {
 }
 
 .card-modern .table tbody td {
-  padding: 18px 10px !important;
+  padding: 18px 15px !important;
   vertical-align: middle;
   border: none;
 }
@@ -434,8 +434,8 @@ body {
 /* FORCE padding untuk semua kolom */
 .card-modern .table th,
 .card-modern .table td {
-  padding-left: 10px !important;
-  padding-right: 10px !important;
+  padding-left: 15px !important;
+  padding-right: 15px !important;
 }
 
 /* Footer di card-modern */

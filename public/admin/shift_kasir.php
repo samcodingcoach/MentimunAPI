@@ -117,7 +117,7 @@ try {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
-    <link href="../css/newadmin.css" rel="stylesheet">
+    <link href="../css/newadmin.css?v=3" rel="stylesheet">
 </head>
 <body>
     <?php include '_header_new.php'; ?>
@@ -150,92 +150,147 @@ try {
             </div>
             <?php endif; ?>
 
-            <div class="card-modern">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-calendar-date me-2"></i>
-                        <span>Filter Tanggal</span>
-                    </div>
-                    <form method="GET" class="d-flex gap-2">
-                        <input type="date" class="form-control" name="tanggal" value="<?php echo $selected_date; ?>" style="width: 200px;">
-                        <button type="submit" class="btn btn-outline-light">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </form>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table mb-0">
-                            <thead>
-                                <tr>
-                                    <th style="width: 10%;">No</th>
-                                    <th style="width: auto;">Nama Kasir</th>
-                                    <th style="width: 15%;">Status</th>
-                                    <th style="width: 15%;" class="text-end">Tunai Awal</th>
-                                    <th style="width: 15%;" class="text-end">Grand Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (empty($shift_data)): ?>
-                                    <tr>
-                                        <td colspan="5" class="text-center py-4">
-                                            <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
-                                            <p class="text-muted mb-0">Tidak ada data shift untuk tanggal <?php echo date('d F Y', strtotime($selected_date)); ?></p>
-                                        </td>
-                                    </tr>
-                                <?php else: ?>
-                                    <?php foreach ($shift_data as $index => $shift): ?>
-                                        <tr onclick="showDetail(<?php echo $shift['id_open']; ?>, '<?php echo addslashes($shift['kasir']); ?>', '<?php echo $shift['cash']; ?>', '<?php echo $shift['qris']; ?>', '<?php echo $shift['transfer']; ?>')" data-bs-toggle="modal" data-bs-target="#detailModal" style="cursor: pointer;">
-                                            <td><?php echo $index + 1; ?></td>
-                                            <td style="text-align: left;">
-                                                <span class="fw-medium"><?php echo htmlspecialchars($shift['kasir']); ?></span>
-                                            </td>
-                                            <td>
-                                                <?php if ($shift['status'] == '1'): ?>
-                                                    <span class="badge bg-success">Open</span>
-                                                <?php else: ?>
-                                                    <span class="badge bg-secondary">Closed</span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="text-end">
-                                                <span class="text-primary fw-medium">Rp <?php echo $shift['cash_awal']; ?></span>
-                                            </td>
-                                            <td class="text-end">
-                                                <span class="text-success fw-bold">Rp <?php echo $shift['grand_total']; ?></span>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <?php if (!empty($shift_data)): ?>
-                <div class="card-footer bg-light border-top py-3 px-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <?php 
-                            $total_cash_awal = 0;
-                            $total_grand = 0;
-                            foreach ($shift_data as $shift) {
-                                $total_cash_awal += (int)str_replace(',', '', $shift['cash_awal']);
-                                $total_grand += (int)str_replace(',', '', $shift['grand_total']);
-                            }
-                        ?>
-                        <small class="text-muted">Total <?php echo count($shift_data); ?> shift</small>
-                        <div class="d-flex gap-4">
-                            <div>
-                                <small class="text-muted d-block">Total Tunai Awal</small>
-                                <strong class="text-primary">Rp <?php echo number_format($total_cash_awal, 0, ',', '.'); ?></strong>
+             <div class="row">
+                <div class="col-12">
+                        <div class="card-modern">
+                            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3 px-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-table me-2"></i>
+                                    <span>Daftar Shift Kasir</span>
+                                </div>
+                                <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
+                                    <div class="input-group" style="width: 180px;">
+                                        <span class="input-group-text bg-white border-end-0">
+                                           
+                                            <i class="bi bi-search"></i>
+                                        </span>
+                                        <input type="date" class="form-control border-start-0 ps-0" name="tanggal" value="<?php echo $selected_date; ?>">
+                                    </div>
+                                </form>
                             </div>
-                            <div>
-                                <small class="text-muted d-block">Total Grand Total</small>
-                                <strong class="text-success">Rp <?php echo number_format($total_grand, 0, ',', '.'); ?></strong>
+                           
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Kasir</th>
+                                                <th class="text-center">Status</th>
+                                                <th class="text-end">Tunai Awal</th>
+                                                <th class="text-end">QRIS</th>
+                                                <th class="text-end">Transfer</th>
+                                                <th class="text-end">Grand Total</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (empty($shift_data)): ?>
+                                                <tr>
+                                                    <td colspan="8" class="text-center py-5">
+                                                        <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                                        <p class="text-muted mb-0">Tidak ada data shift untuk tanggal <?php echo date('d F Y', strtotime($selected_date)); ?></p>
+                                                    </td>
+                                                </tr>
+                                            <?php else: ?>
+                                                <?php foreach ($shift_data as $index => $shift): ?>
+                                                    <?php
+                                                        $rawName = preg_replace('/\[[^\]]+\]\s*/', '', $shift['kasir']);
+                                                        $parts = preg_split('/\s+/', trim($rawName));
+                                                        $initials = '';
+                                                        foreach ($parts as $part) {
+                                                            if ($part === '') {
+                                                                continue;
+                                                            }
+                                                            $initials .= mb_strtoupper(mb_substr($part, 0, 1, 'UTF-8'), 'UTF-8');
+                                                            if (mb_strlen($initials, 'UTF-8') >= 2) {
+                                                                $initials = mb_substr($initials, 0, 2, 'UTF-8');
+                                                                break;
+                                                            }
+                                                        }
+                                                        if ($initials === '') {
+                                                            $initials = 'KS';
+                                                        }
+                                                    ?>
+                                                    <tr class="align-middle">
+                                                        <td class="fw-semibold"><?php echo $index + 1; ?></td>
+                                                        <td>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                                                                    <strong><?php echo htmlspecialchars($initials, ENT_QUOTES, 'UTF-8'); ?></strong>
+                                                                </div>
+                                                                <div class="ms-3">
+                                                                    <div class="fw-bold"><?php echo htmlspecialchars($shift['kasir'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                                                    <small class="text-muted"><?php echo htmlspecialchars($shift['tanggal_open'], ENT_QUOTES, 'UTF-8'); ?></small>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <?php if ($shift['status'] == '1'): ?>
+                                                                <span class="badge bg-success">Open</span>
+                                                            <?php else: ?>
+                                                                <span class="badge bg-secondary">Closed</span>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <span class="text-primary fw-medium">Rp <?php echo $shift['cash_awal']; ?></span>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <span class="fw-medium">Rp <?php echo $shift['qris']; ?></span>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <span class="fw-medium">Rp <?php echo $shift['transfer']; ?></span>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <span class="text-success fw-bold">Rp <?php echo $shift['grand_total']; ?></span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="table-actions d-flex align-items-center gap-2">
+                                                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailModal"
+                                                                    data-shift-id="<?php echo (int)$shift['id_open']; ?>"
+                                                                    data-shift-kasir="<?php echo htmlspecialchars($shift['kasir'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                                    data-shift-cash="<?php echo htmlspecialchars($shift['cash'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                                    data-shift-qris="<?php echo htmlspecialchars($shift['qris'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                                    data-shift-transfer="<?php echo htmlspecialchars($shift['transfer'], ENT_QUOTES, 'UTF-8'); ?>">
+                                                                    <i class="bi bi-eye"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
                             </div>
+                            
+                            <?php if (!empty($shift_data)): ?>
+                            <div class="card-footer bg-light border-top py-3 px-4">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                                    <?php 
+                                        $total_cash_awal = 0;
+                                        $total_grand = 0;
+                                        foreach ($shift_data as $shift) {
+                                            $total_cash_awal += (int)str_replace(',', '', $shift['cash_awal']);
+                                            $total_grand += (int)str_replace(',', '', $shift['grand_total']);
+                                        }
+                                    ?>
+                                    <small class="text-muted">Menampilkan <?php echo count($shift_data); ?> shift pada tanggal <?php echo date('d F Y', strtotime($selected_date)); ?></small>
+                                    <div class="d-flex align-items-center gap-4">
+                                        <div>
+                                            <small class="text-muted d-block">Total Tunai Awal</small>
+                                            <strong class="text-primary">Rp <?php echo number_format($total_cash_awal, 0, ',', '.'); ?></strong>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted d-block">Total Grand Total</small>
+                                            <strong class="text-success">Rp <?php echo number_format($total_grand, 0, ',', '.'); ?></strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endif; ?>
                         </div>
-                    </div>
-                </div>
-                <?php endif; ?>
-            </div>
+                 </div>
+             </div>
+            
         </main>
       </div>
     </div>
@@ -348,15 +403,27 @@ try {
     <?php include '_scripts_new.php'; ?>
     
     <script>
-        function showDetail(id, kasir, tunai, qris, transfer) {
-            document.getElementById('detail-kasir').textContent = kasir;
-            document.getElementById('detail-tunai').textContent = 'Rp ' + tunai;
-            document.getElementById('detail-qris').textContent = 'Rp ' + qris;
-            document.getElementById('detail-transfer').textContent = 'Rp ' + transfer;
-        }
-        
-        // Auto-submit form when date changes
         document.addEventListener('DOMContentLoaded', function() {
+            const detailModal = document.getElementById('detailModal');
+            if (detailModal) {
+                detailModal.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    if (!button) {
+                        return;
+                    }
+
+                    const kasir = button.getAttribute('data-shift-kasir') || '';
+                    const tunai = button.getAttribute('data-shift-cash') || '0';
+                    const qris = button.getAttribute('data-shift-qris') || '0';
+                    const transfer = button.getAttribute('data-shift-transfer') || '0';
+
+                    document.getElementById('detail-kasir').textContent = kasir;
+                    document.getElementById('detail-tunai').textContent = 'Rp ' + tunai;
+                    document.getElementById('detail-qris').textContent = 'Rp ' + qris;
+                    document.getElementById('detail-transfer').textContent = 'Rp ' + transfer;
+                });
+            }
+
             const dateInputs = document.querySelectorAll('input[name="tanggal"]');
             dateInputs.forEach(input => {
                 input.addEventListener('change', function() {
@@ -370,15 +437,12 @@ try {
             dateInputs.forEach(input => {
                 const today = new Date();
                 
-                // Yesterday
                 const yesterday = new Date(today);
                 yesterday.setDate(today.getDate() - 1);
                 
-                // 2 days ahead
                 const twoDaysAhead = new Date(today);
                 twoDaysAhead.setDate(today.getDate() + 2);
                 
-                // Format dates to YYYY-MM-DD
                 const formatDate = (date) => {
                     return date.getFullYear() + '-' + 
                            String(date.getMonth() + 1).padStart(2, '0') + '-' + 
