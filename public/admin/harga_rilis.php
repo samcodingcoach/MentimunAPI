@@ -67,47 +67,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 }
 
 $selected_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
-$search_nama = isset($_GET['search_nama']) ? trim($_GET['search_nama']) : '';
-$filter_kategori = isset($_GET['filter_kategori']) ? (int)$_GET['filter_kategori'] : 0;
 
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $selected_date)) {
     $selected_date = date('Y-m-d');
 }
 
-$categories = [];
-try {
-    $cat_result = $conn->query("SELECT id_kategori, nama_kategori FROM kategori_menu ORDER BY nama_kategori ASC");
-    $categories = $cat_result->fetch_all(MYSQLI_ASSOC);
-} catch (Exception $e) {
-    $error = 'Terjadi kesalahan saat mengambil kategori: ' . $e->getMessage();
-}
-
 $data = [];
 try {
-    $where_conditions = [];
-    $params = [];
-    $param_types = "";
-
-    $where_conditions[] = "harga_menu.nominal > 0";
-    $where_conditions[] = "harga_menu.id_resep IS NOT NULL";
-
-    if (!empty($search_nama)) {
-        $where_conditions[] = "produk_menu.nama_produk LIKE ?";
-        $params[] = "%" . $search_nama . "%";
-        $param_types .= "s";
-    }
-
-    if ($filter_kategori > 0) {
-        $where_conditions[] = "produk_menu.id_kategori = ?";
-        $params[] = $filter_kategori;
-        $param_types .= "i";
-    }
-
-    $params[] = $selected_date;
-    $param_types .= "s";
-
-    $where_clause = implode(" AND ", $where_conditions);
-
     $sql = "
         SELECT
             harga_menu.id_harga,
@@ -138,14 +104,14 @@ try {
         LEFT JOIN produk_sell
             ON harga_menu.id_produk = produk_sell.id_produk
             AND DATE(produk_sell.tgl_release) = ?
-        WHERE " . $where_clause . "
+        WHERE harga_menu.nominal > 0
+          AND harga_menu.id_resep IS NOT NULL
         ORDER BY produk_menu.nama_produk ASC
-    ";
+    "
+    ;
 
     $stmt = $conn->prepare($sql);
-    if (!empty($params)) {
-        $stmt->bind_param($param_types, ...$params);
-    }
+    $stmt->bind_param("s", $selected_date);
     $stmt->execute();
     $result = $stmt->get_result();
     $data = $result->fetch_all(MYSQLI_ASSOC);
@@ -193,68 +159,27 @@ try {
             </div>
             <?php endif; ?>
 
-            <div class="card-modern mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3 px-4">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-funnel me-2"></i>
-                        <span>Filter Data</span>
-                    </div>
-                </div>
-                <div class="card-body px-4">
-                    <form method="GET" class="row g-3 align-items-end">
-                        <div class="col-md-3 col-sm-6">
-                            <label for="date" class="form-label">Tanggal</label>
-                            <input type="date" class="form-control" id="date" name="date" value="<?php echo htmlspecialchars($selected_date); ?>">
-                        </div>
-                        <div class="col-md-3 col-sm-6">
-                            <label for="search_nama" class="form-label">Cari Produk</label>
-                            <input type="text" class="form-control" id="search_nama" name="search_nama" placeholder="Masukkan nama produk" value="<?php echo htmlspecialchars($search_nama); ?>">
-                        </div>
-                        <div class="col-md-3 col-sm-6">
-                            <label for="filter_kategori" class="form-label">Kategori</label>
-                            <select class="form-select" id="filter_kategori" name="filter_kategori">
-                                <option value="0">Semua Kategori</option>
-                                <?php foreach ($categories as $category): ?>
-                                <option value="<?php echo $category['id_kategori']; ?>" <?php echo ($filter_kategori == $category['id_kategori']) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($category['nama_kategori']); ?>
-                                </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-3 col-sm-6">
-                            <label class="form-label">&nbsp;</label>
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary flex-fill"><i class="bi bi-filter me-1"></i>Filter</button>
-                                <a href="harga_rilis.php" class="btn btn-outline-secondary" title="Reset filter"><i class="bi bi-arrow-counterclockwise"></i></a>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
             <div class="card-modern">
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-3 px-4">
                     <div class="d-flex align-items-center">
                         <i class="bi bi-table me-2"></i>
                         <span>Daftar Produk</span>
                     </div>
-                    <div>
-                        <span class="badge bg-primary-subtle text-primary">
-                            <i class="bi bi-calendar3 me-1"></i><?php echo date('d M Y', strtotime($selected_date)); ?>
-                        </span>
-                    </div>
+                    <form method="GET" class="d-flex align-items-center" onchange="this.submit()">
+                        <input type="date" class="form-control" name="date" value="<?php echo htmlspecialchars($selected_date); ?>">
+                    </form>
                 </div>
                 <div class="table-responsive px-0">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th style="width: 5%;" class="text-center">No</th>
+                                <th style="width: 6%;" class="text-center">No</th>
                                 <th style="width: 10%;">Kode</th>
-                                <th>Nama Produk</th>
-                                <th style="width: 16%;">Kategori</th>
-                                <th style="width: 14%;" class="text-end">Harga Pokok</th>
-                                <th style="width: 10%;" class="text-center">Stok</th>
-                                <th style="width: 14%;" class="text-center">Status Penjualan</th>
+                                <th class="text-start">Nama Produk</th>
+                                <th class="text-center" style="width: 12%;">Kategori</th>
+                                <th style="width: 16%;" class="text-end">Harga Pokok</th>
+                                <th style="width: 12%;" class="text-center">Stok</th>
+                                <th style="width: 16%;" class="text-center">Status Penjualan</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -262,13 +187,7 @@ try {
                             <tr>
                                 <td colspan="7" class="text-center py-5">
                                     <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
-                                    <span class="text-muted">
-                                        <?php if (!empty($search_nama) || $filter_kategori > 0): ?>
-                                            Tidak ada data yang sesuai dengan kriteria pencarian
-                                        <?php else: ?>
-                                            Tidak ada data untuk tanggal <?php echo htmlspecialchars($selected_date); ?>
-                                        <?php endif; ?>
-                                    </span>
+                                    <span class="text-muted">Tidak ada data untuk tanggal <?php echo htmlspecialchars($selected_date); ?></span>
                                 </td>
                             </tr>
                             <?php else: ?>
@@ -276,11 +195,8 @@ try {
                                 <tr>
                                     <td class="text-center fw-semibold"><?php echo $index + 1; ?></td>
                                     <td class="fw-medium text-uppercase"><?php echo htmlspecialchars($row['kode_produk']); ?></td>
-                                    <td>
-                                        <div class="fw-semibold mb-1"><?php echo htmlspecialchars($row['nama_produk']); ?></div>
-                                        <small class="text-muted">ID Harga: <?php echo htmlspecialchars($row['id_harga']); ?></small>
-                                    </td>
-                                    <td><?php echo htmlspecialchars($row['nama_kategori']); ?></td>
+                                    <td class="fw-semibold text-start" ><?php echo htmlspecialchars($row['nama_produk']); ?></td>
+                                    <td class="text-center"><?php echo htmlspecialchars($row['nama_kategori']); ?></td>
                                     <td class="text-end">Rp <?php echo number_format($row['nominal'], 0, ',', '.'); ?></td>
                                     <td class="text-center fw-semibold"><?php echo htmlspecialchars($row['stok']); ?></td>
                                     <td class="text-center">
@@ -311,19 +227,7 @@ try {
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                         <small class="text-muted mb-0">
                             <?php if (!empty($data)): ?>
-                                Menampilkan <?php echo count($data); ?> produk
-                                <?php if (!empty($search_nama)): ?> | Pencarian: "<?php echo htmlspecialchars($search_nama); ?>"<?php endif; ?>
-                                <?php if ($filter_kategori > 0 && !empty($categories)): ?>
-                                    <?php
-                                        $selected_category = array_filter($categories, function($cat) use ($filter_kategori) {
-                                            return $cat['id_kategori'] == $filter_kategori;
-                                        });
-                                        if (!empty($selected_category)) {
-                                            $selected_category = reset($selected_category);
-                                            echo ' | Kategori: ' . htmlspecialchars($selected_category['nama_kategori']);
-                                        }
-                                    ?>
-                                <?php endif; ?>
+                                Menampilkan <?php echo count($data); ?> produk | Tanggal: <?php echo date('d/m/Y', strtotime($selected_date)); ?>
                             <?php else: ?>
                                 Tidak ada data ditampilkan
                             <?php endif; ?>
