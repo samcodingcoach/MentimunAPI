@@ -294,7 +294,7 @@ $end_record = $total_records > 0 ? min($offset + count($promos), $total_records)
 
                         <div class="table-responsive px-0">
                             <table class="table table-hover mb-0">
-                                <thead>
+                                <thead> 
                                     <tr>
                                         <th style="width: 6%; text-align: center">No</th>
                                         <th style="width: 10%; text-align: left">Kode Promo</th>

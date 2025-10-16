@@ -200,19 +200,7 @@ body {
   border: none !important;
 }
 
-.table-modern .table thead th {
-  padding: 16px 20px;
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 12px;
-  letter-spacing: 0.5px;
-  border: none !important;
-  border-top: none !important;
-  border-left: none !important;
-  border-right: none !important;
-  border-bottom: none !important;
-  text-align: left;
-}
+
 
 .table-modern .table tbody tr {
   transition: all 0.2s ease-in-out;
@@ -227,7 +215,7 @@ body {
 }
 
 .table-modern .table tbody td {
-  padding: 16px 20px;
+  padding: 161px 20px;
   vertical-align: middle;
   text-align: left;
   border: none !important;
@@ -375,8 +363,10 @@ body {
   border-bottom: 2px solid #e5e7eb;
 }
 
+
+
 .card-modern .table thead th {
-  padding: 16px 10px !important;
+  padding: 10px 25px !important;
   font-weight: 600;
   text-transform: uppercase;
   font-size: 11px;
@@ -384,6 +374,8 @@ body {
   color: #6b7280;
   border: none;
 }
+
+
 
 /* Alignment untuk kolom tertentu */
 .card-modern .table thead th:nth-child(1),
@@ -426,7 +418,7 @@ body {
 }
 
 .card-modern .table tbody td {
-  padding: 18px 15px !important;
+  padding: 10px 25px !important;
   vertical-align: middle;
   border: none;
 }
