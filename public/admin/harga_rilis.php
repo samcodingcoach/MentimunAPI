@@ -254,28 +254,41 @@ try {
                         <input type="hidden" name="id_produk" id="modal_id_produk">
                         <input type="hidden" name="harga_jual" id="modal_harga_jual">
 
-                        <div class="mb-3">
-                            <label class="form-label text-muted">Nama Produk</label>
-                            <p id="modal_nama_produk" class="fw-semibold mb-0"></p>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted">Tanggal</label>
-                            <p class="mb-0 fw-medium"><?php echo date('d/m/Y'); ?></p>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted">Harga Jual</label>
-                            <p id="modal_harga_display" class="text-success fw-bold mb-0"></p>
-                        </div>
-                        <div class="mb-3">
-                            <label for="modal_stok" class="form-label">Stok</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-box"></i></span>
-                                <input type="number" class="form-control" id="modal_stok" name="stok" min="0" required>
+        				<div class="bg-body-tertiary rounded-3 p-3 mb-4">
+                            <div class="row g-3 align-items-start">
+                                <div class="col-12 col-md-6">
+                                    <span class="text-uppercase text-muted small fw-semibold d-block">Nama Produk</span>
+                                    <div id="modal_nama_produk" class="fw-semibold text-dark"></div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <span class="text-uppercase text-muted small fw-semibold d-block">Tanggal</span>
+                                    <div class="fw-medium text-dark"><?php echo date('d/m/Y'); ?></div>
+                                </div>
+                                <div class="col-6 col-md-3 text-md-end">
+                                    <span class="text-uppercase text-muted small fw-semibold d-block">Harga Jual</span>
+                                    <div id="modal_harga_display" class="fw-bold text-success"></div>
+                                </div>
                             </div>
                         </div>
-                        <div class="form-check">
+
+                        <div class="mb-4">
+                            <label for="modal_stok" class="form-label fw-semibold">Stok Tersedia</label>
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12 col-sm">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><i class="bi bi-box"></i></span>
+                                        <input type="number" class="form-control" id="modal_stok" name="stok" min="0" required>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-auto">
+                                    
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-check form-switch">
                             <input type="checkbox" class="form-check-input" id="modal_aktif" name="aktif" checked>
-                            <label class="form-check-label" for="modal_aktif">Aktif Jual</label>
+                            <label class="form-check-label fw-medium" for="modal_aktif">Aktifkan produk untuk penjualan</label>
                         </div>
                     </div>
                     <div class="modal-footer">
