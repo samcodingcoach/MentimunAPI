@@ -341,16 +341,16 @@ try {
                         </div>
 
                         <div class="tab-pane fade" id="takeaway" role="tabpanel" aria-labelledby="takeaway-tab">
-                            <div class="card border-0 shadow-sm mb-4">
+                           
                                
-                                <div class="table-responsive">
+                                <div class="table-responsive px-0">
                                     <table class="table table-hover align-middle mb-0">
                                         <thead class="table-light">
                                             <tr>
-                                                <th class="text-center" style="width: 80px;">No</th>
-                                                <th style="width: 220px;">Tanggal Rilis</th>
-                                                <th style="width: 220px;">Biaya per Item</th>
-                                                <th class="text-center" style="width: 160px;">Aksi</th>
+                                                <th class="text-center" style="width: 6%;">No</th>
+                                                <th style="width: 40%;" class="text-start">Tanggal Rilis</th>
+                                                <th style="width: 40%;" class="text-center">Biaya per Item</th>
+                                                <th class="text-center" style="width: 14%;">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -405,7 +405,7 @@ try {
                                         </nav>
                                     </div>
                                 </div>
-                            </div>
+                        
                         </div>
                     </div>
                 </div>
