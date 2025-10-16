@@ -296,7 +296,7 @@ $end_record = $total_records > 0 ? min($offset + count($promos), $total_records)
                             <table class="table table-hover mb-0">
                                 <thead> 
                                     <tr>
-                                        <th style="width: 6%; text-align: center">No</th>
+                                        <th style="width: 5%;" class="text-start">No</th>
                                         <th style="width: 10%; text-align: left">Kode Promo</th>
                                         <th style="text-align: left">Nama Promo</th>
                                         <th style="width: 10%; text-align: center">Kuota</th>
@@ -317,7 +317,7 @@ $end_record = $total_records > 0 ? min($offset + count($promos), $total_records)
                                         <?php $no = ($page - 1) * $limit + 1; ?>
                                         <?php foreach ($promos as $promo): ?>
                                         <tr class="align-middle">
-                                            <td class="fw-semibold text-center"><?php echo $no++; ?></td>
+                                            <td class="fw-semibold text-start"><?php echo $no++; ?></td>
                                             <td class="fw-medium">
                                                 <button type="button" class="btn btn-link p-0 fw-bold text-decoration-none" data-bs-toggle="modal" data-bs-target="#detailModal" data-promo='<?php echo htmlspecialchars(json_encode($promo), ENT_QUOTES, 'UTF-8'); ?>'>
                                                     <?php echo htmlspecialchars($promo['kode_promo']); ?>

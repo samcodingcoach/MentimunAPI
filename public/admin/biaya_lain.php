@@ -254,10 +254,10 @@ try {
                            
                                 
                                 <div class="table-responsive px-0">
-                                    <table class="table table-hover align-middle mb-0">
+                                    <table class="table table-hover mb-0">
                                         <thead class="table-light">
                                             <tr>
-                                                <th class="text-center" style="width: 6%;">No</th>
+                                                <th class="text-start" style="width: 5%;">No</th>
                                                 <th style="width: 10%;" class="text-center">Nilai PPN</th>
                                                 <th class="text-start">Keterangan</th>
                                                 <th style="width: 15%;" class="text-center">Tanggal Rilis</th>
@@ -276,7 +276,7 @@ try {
                                             <?php else: ?>
                                                 <?php foreach ($ppn_data as $index => $ppn): ?>
                                                 <tr>
-                                                    <td class="text-center fw-semibold"><?php echo $index + 1; ?></td>
+                                                    <td class="text-start fw-semibold"><?php echo $index + 1; ?></td>
                                                     <td class="fw-semibold text-primary text-center"><?php echo number_format($ppn['nilai_ppn'], 2); ?>%</td>
                                                     <td class="text-start"><?php echo htmlspecialchars($ppn['keterangan']); ?></td>
                                                     <td class="text-muted text-center"><?php echo $ppn['rilis']; ?></td>

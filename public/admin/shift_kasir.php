@@ -173,7 +173,7 @@ try {
                                 <table class="table table-hover mb-0">
                                         <thead>
                                             <tr>
-                                                <th style="width: 6%; text-align: center">No</th>
+                                                <th style="width: 5%; text-align: start">No</th>
                                                 <th style="width: auto; text-align: left">Kasir</th>
                                                 <th style="width: 5%; text-align: center">Status</th>
                                                 <th style="width: 15%; text-align: right">Tunai Awal</th>
@@ -194,7 +194,7 @@ try {
                                             <?php else: ?>
                                                 <?php foreach ($shift_data as $index => $shift): ?>
                                                     <tr class="align-middle">
-                                                        <td class="fw-semibold text-center"><?php echo $index + 1; ?></td>
+                                                        <td class="fw-semibold text-start"><?php echo $index + 1; ?></td>
                                                         <td>
                                                             <div class="fw-bold mb-1"><?php echo htmlspecialchars($shift['kasir'], ENT_QUOTES, 'UTF-8'); ?></div>
                                                             <small class="text-muted"><?php echo htmlspecialchars($shift['tanggal_open'], ENT_QUOTES, 'UTF-8'); ?></small>

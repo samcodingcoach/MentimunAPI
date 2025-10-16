@@ -169,13 +169,13 @@ try {
                         <input type="date" class="form-control" name="date" value="<?php echo htmlspecialchars($selected_date); ?>">
                     </form>
                 </div>
-                <div class="table-responsive px-0">
-                    <table class="table table-hover align-middle mb-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th style="width: 6%;" class="text-center">No</th>
+                                <th style="width: 5%;" class="text-start">No</th>
                                 <th style="width: 10%;">Kode</th>
-                                <th class="text-start">Nama Produk</th>
+                                <th class="text-start" style="width: auto;">Nama Produk</th>
                                 <th class="text-center" style="width: 12%;">Kategori</th>
                                 <th style="width: 16%;" class="text-end">Harga Pokok</th>
                                 <th style="width: 12%;" class="text-center">Stok</th>
@@ -193,7 +193,7 @@ try {
                             <?php else: ?>
                                 <?php foreach ($data as $index => $row): ?>
                                 <tr>
-                                    <td class="text-center fw-semibold"><?php echo $index + 1; ?></td>
+                                    <td class="text-start fw-semibold"><?php echo $index + 1; ?></td>
                                     <td class="fw-medium text-uppercase"><?php echo htmlspecialchars($row['kode_produk']); ?></td>
                                     <td class="fw-semibold text-start" ><?php echo htmlspecialchars($row['nama_produk']); ?></td>
                                     <td class="text-center"><?php echo htmlspecialchars($row['nama_kategori']); ?></td>
