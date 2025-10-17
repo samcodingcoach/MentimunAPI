@@ -435,7 +435,7 @@ $categories = $categories_result->fetch_all(MYSQLI_ASSOC);
                         <table class="table table-hover mb-0" >
                             <thead>
                                 <tr>
-                                    <th style= "text-align: center; width: 5%;">No</th>
+                                    <th style="text-align: center; width: 5%;">No</th>
                                     <th style="text-align: center; width: 10%;">Kode</th>
                                     <th style="text-align: left; width: auto;">Nama Produk</th>
                                     <th style="width: 15%; text-align: right;">Harga</th>

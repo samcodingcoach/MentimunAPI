@@ -134,21 +134,36 @@ require_once '../../config/koneksi.php';
                 $result = $conn->query($sql);
                 if ($result->num_rows > 0) {
                     while($row = $result->fetch_assoc()) {
+                        $hasImage = !empty($row["gambar"]);
                 ?>
-                <div class="col-lg-4 col-md-6">
-                    <div class="card-modern h-100">
-                        <?php if (!empty($row["gambar"])) { ?>
-                        <img src="../images/info/<?php echo htmlspecialchars($row["gambar"]); ?>" class="card-img-top img-fluid" alt="..." style="height: 200px; object-fit: cover;">
-                        <?php } ?>
-                        <div class="card-body">
-                            <h5 class="card-title"><?php echo htmlspecialchars($row["judul"]); ?></h5>
-                            <p class="card-text"><?php echo nl2br(htmlspecialchars(substr($row["isi"], 0, 150))); ?>...</p>
-                            <?php if (!empty($row["link"])) { ?>
-                            <a href="<?php echo htmlspecialchars($row["link"]); ?>" class="btn btn-primary btn-sm">Selengkapnya</a>
+                <div class="col-12">
+                    <div class="card-modern news-card h-100">
+                        <div class="row g-0 align-items-stretch">
+                            <?php if ($hasImage) { ?>
+                            <div class="col-lg-3 col-md-4 d-flex">
+                                <div class="news-card__media w-100 h-100">
+                                    <img src="../images/info/<?php echo htmlspecialchars($row["gambar"]); ?>" class="img-fluid" alt="Gambar informasi">
+                                </div>
+                            </div>
                             <?php } ?>
-                        </div>
-                        <div class="card-footer bg-light">
-                            <small class="text-muted">Oleh <?php echo htmlspecialchars($row["nama_lengkap"]); ?> - <?php echo htmlspecialchars($row["waktu_tampil"]); ?></small>
+                            <div class="<?php echo $hasImage ? 'col-lg-9 col-md-8' : 'col-12'; ?>">
+                                <div class="card-body h-100 d-flex flex-column">
+                                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                        <span class="badge rounded-pill px-3 py-2 news-card__badge text-uppercase">Informasi</span>
+                                        <?php if (!empty($row['divisi'])) { ?>
+                                        <span class="text-muted small">Divisi <?php echo htmlspecialchars($row['divisi']); ?></span>
+                                        <?php } ?>
+                                    </div>
+                                    <h5 class="card-title mb-2"><?php echo htmlspecialchars($row["judul"]); ?></h5>
+                                    <p class="card-text text-muted flex-grow-1 mb-3"><?php echo nl2br(htmlspecialchars(substr($row["isi"], 0, 180))); ?>...</p>
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                        <small class="text-muted">Oleh <?php echo htmlspecialchars($row["nama_lengkap"]); ?> &middot; <?php echo htmlspecialchars($row["waktu_tampil"]); ?></small>
+                                        <?php if (!empty($row["link"])) { ?>
+                                        <a href="<?php echo htmlspecialchars($row["link"]); ?>" class="btn btn-outline-primary btn-sm">Selengkapnya</a>
+                                        <?php } ?>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

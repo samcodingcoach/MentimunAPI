@@ -215,35 +215,35 @@ if (isset($_GET['edit'])) {
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table mb-0">
+                        <table class="table table-hover mb-0">
                             <thead>
                                 <tr>
-                                    <th style="width: 10%;">No</th>
-                                    <th style="width: 10%;">Kode Resep</th>
-                                    <th style="width: auto;">Produk</th>
+                                    <th class="text-start" style="width: 5%;">No</th>
+                                    <th class="text-center" style="width: 10%;">Kode Resep</th>
+                                    <th style="width: auto;" class="text-start">Produk</th>
                                    
-                                    <th style="width: 15%;" class="d-none d-lg-table-cell">Tanggal</th>
-                                    <th style="width: 5%;" class="d-none d-lg-table-cell text-center">Qty</th>
-                                    <th style="width: 10%;" class="d-none d-lg-table-cell text-end">Nilai</th>
-                                    <th style="width: 10%;">Aksi</th>
+                                    <th style="width: 15%;" class="text-center">Tanggal</th>
+                                    <th style="width: 5%;" class="text-center">Qty</th>
+                                    <th style="width: 10%;" class="text-end">Nilai</th>
+                                    <th style="width: 10%;"  class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (!empty($reseps)): ?>
                                     <?php foreach ($reseps as $index => $resep): ?>
                                         <tr>
-                                            <td><?php echo $offset + $index + 1; ?></td>
-                                            <td><span class="badge bg-secondary"><?php echo htmlspecialchars($resep['kode_resep']); ?></span></td>
+                                            <td class="text-start"><?php echo $offset + $index + 1; ?></td>
+                                            <td class="text-center"><span class="badge bg-secondary"><?php echo htmlspecialchars($resep['kode_resep']); ?></span></td>
                                             <td style="text-align: left;"><?php echo htmlspecialchars($resep['nama_produk']); ?></td>
                                            
-                                            <td class="d-none d-lg-table-cell"><?php echo htmlspecialchars($resep['tanggal_release']); ?></td>
-                                            <td class="d-none d-lg-table-cell text-center">
-                                                <span class="badge bg-info"><?php echo $resep['qty_bahan']; ?></span>
+                                            <td class="text-center"><?php echo htmlspecialchars($resep['tanggal_release']); ?></td>
+                                            <td class="text-center">
+                                               <?php echo $resep['qty_bahan']; ?>
                                             </td>
-                                            <td class="d-none d-lg-table-cell text-end">
+                                            <td class="text-end">
                                                 <strong><?php echo htmlspecialchars($resep['nilai']); ?></strong>
                                             </td>
-                                            <td>
+                                            <td class="text-center">
                                                 <a href="resep_detail.php?id=<?php echo $resep['id_resep']; ?>" class="btn btn-sm btn-outline-info">
                                                     <i class="bi bi-eye"></i>
                                                 </a>

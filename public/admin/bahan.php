@@ -210,48 +210,7 @@ if (!empty($params)) {
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <link href="../css/newadmin.css" rel="stylesheet">
-    <style>
-        /* Custom table wrapper padding for bahan page */
-        .card-modern .table-responsive {
-            padding: 0 15px !important;
-        }
-        
-        /* Custom table column widths for bahan page */
-        .card-modern .table th:nth-child(1),
-        .card-modern .table td:nth-child(1) { /* No - min width */
-            width: 50px !important;
-            max-width: 50px !important;
-            white-space: nowrap !important;
-            text-align: center !important;
-        }
-        
-        .card-modern .table th:nth-child(2),
-        .card-modern .table td:nth-child(2) { /* Kode Bahan - fit to content */
-            width: 100px !important;
-            max-width: 100px !important;
-            white-space: nowrap !important;
-        }
-        
-        .card-modern .table th:nth-child(3),
-        .card-modern .table td:nth-child(3) { /* Nama Bahan - flexible */
-            width: auto !important;
-            min-width: 200px !important;
-        }
-        
-        .card-modern .table th:nth-child(4),
-        .card-modern .table td:nth-child(4) { /* Kategori - fit to content */
-            width: 120px !important;
-            max-width: 120px !important;
-            white-space: nowrap !important;
-        }
-        
-        .card-modern .table th:nth-child(5),
-        .card-modern .table td:nth-child(5) { /* Aksi - fit to content */
-            width: 130px !important;
-            max-width: 130px !important;
-            white-space: nowrap !important;
-        }
-    </style>
+    
 </head>
 <body>
     <?php include '_header_new.php'; ?>
@@ -305,16 +264,16 @@ if (!empty($params)) {
                     </form>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive" style="padding-right: 1rem;">
+                    <div class="table-responsive">
 
-                    <table class="table table-hover mb-0" style="table-layout: fixed;">
+                    <table class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th>No</th>
-                                <th>Kode Bahan</th>
-                                <th>Nama Bahan</th>
-                                <th>Kategori</th>
-                                <th>Aksi</th>
+                                <th class="text-start" style="width: 5%;">No</th>
+                                <th class="text-center" style="width: 10%;">Kode Bahan</th>
+                                <th class="text-start" style="width: auto;">Nama Bahan</th>
+                                <th class="text-center" style="width: 10%;">Kategori</th>
+                                <th class="text-center" style="width: 12%;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -322,11 +281,11 @@ if (!empty($params)) {
                             <?php $no = $offset + 1; ?>
                             <?php while ($row = $result->fetch_assoc()): ?>
                             <tr>
-                                <td><?php echo $no++; ?></td>
-                                <td><?php echo htmlspecialchars($row['kode_bahan']); ?></td>
-                                <td><strong><?php echo htmlspecialchars($row['nama_bahan']); ?></strong></td>
-                                <td><?php echo htmlspecialchars($row['nama_kategori'] ?? '-') ?></td>
-                                <td>
+                                <td class="text-start"><?php echo $no++; ?></td>
+                                <td class="text-center"><?php echo htmlspecialchars($row['kode_bahan']); ?></td>
+                                <td class="text-start"><strong><?php echo htmlspecialchars($row['nama_bahan']); ?></strong></td>
+                                <td class="text-center"><?php echo htmlspecialchars($row['nama_kategori'] ?? '-') ?></td>
+                                <td class="text-center">
                                     <div class="table-actions">
                                         <button type="button" class="btn btn-sm btn-outline-warning btn-edit" 
                                                 data-id="<?php echo $row['id_bahan']; ?>" 
