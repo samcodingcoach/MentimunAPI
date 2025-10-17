@@ -183,13 +183,13 @@ $end_record = $total_records > 0 ? min($offset + count($hpp_data), $total_record
                             <tr>
                                 <th class="text-start" style="width:5%">No</th>
                                 <th style="width:10%">Kode</th>
-                                <th style="width:20%">Nama Produk</th>
-                                <th style="width:15%">Kategori</th>
+                                <th style="width:auto; text-align:left">Nama Produk</th>
+                                <th style="width:10%">Kategori</th>
                                 <th style="width:12%">Tanggal Rilis</th>
-                                <th style="width:10%">Resep</th>
-                                <th style="width:10%">Produksi</th>
+                                <th style="width:10%" class="text-end">Resep</th>
+                                <th style="width:10%" class="text-end">Produksi</th>
                                 <th class="text-end" style="width:10%">Margin</th>
-                                <th class="text-end" style="width:8%">Rilis</th>
+                                <th class="text-end" style="width:10%">Rilis</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -205,7 +205,7 @@ $end_record = $total_records > 0 ? min($offset + count($hpp_data), $total_record
                                     <tr>
                                         <td class="text-start fw-semibold"><?php echo $offset + $index + 1; ?></td>
                                         <td class="text-uppercase fw-semibold"><?php echo htmlspecialchars($row['kode_produk'] ?? '-'); ?></td>
-                                        <td class="fw-semibold text-dark"><?php echo htmlspecialchars($row['nama_produk'] ?? '-'); ?></td>
+                                        <td class="fw-semibold text-dark text-start"><?php echo htmlspecialchars($row['nama_produk'] ?? '-'); ?></td>
                                         <td><?php echo htmlspecialchars($row['nama_kategori'] ?? '-'); ?></td>
                                         <td class="text-nowrap">
                                             <?php echo !empty($row['tanggal_rilis']) ? date('d/m/Y', strtotime($row['tanggal_rilis'])) : '-'; ?>
