@@ -15,7 +15,7 @@ $error = '';
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$limit = 20;
+$limit = 10;
 $offset = ($page - 1) * $limit;
 
 // Handle form submissions
@@ -207,44 +207,44 @@ if (!empty($params)) {
                         <table class="table table-hover mb-0">
                             <thead>
                                 <tr>
-                                    <th style="width: 50px;">No</th>
-                                    <th>Kategori</th>
-                                    <th style="width: 200px;">No. Rekening</th>
-                                    <th style="width: 150px;">Biaya Admin</th>
-                                    <th style="width: 120px;">Pramusaji</th>
-                                    <th style="width: 100px;">Status</th>
-                                    <th style="width: 100px;">Aksi</th>
+                                    <th style="width: 5%; text-align:left;">No</th>
+                                    <th style="width: auto; text-align:left;">Kategori</th>
+                                    <th style="width: 15%; text-align:left;">No. Rekening</th>
+                                    <th style="width: 15%; text-align:right;">Biaya Admin</th>
+                                    <th style="width: 10%; text-align:center;">Pramusaji</th>
+                                    <th style="width: 10%; text-align:center;">Status</th>
+                                    <th style="width: 12%; text-align:center;">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                             <?php if (!empty($metode_list)): ?>
                                 <?php $no = $offset + 1; foreach ($metode_list as $metode): ?>
                                 <tr>
-                                    <td class="text-center"><?php echo $no++; ?></td>
-                                    <td><strong><?php echo htmlspecialchars($metode['kategori']); ?></strong></td>
-                                    <td><?php echo htmlspecialchars($metode['no_rek']); ?></td>
-                                    <td>
+                                    <td class="text-start"><?php echo $no++; ?></td>
+                                    <td class="text-start"><strong><?php echo htmlspecialchars($metode['kategori']); ?></strong></td>
+                                    <td class="text-start"><?php echo htmlspecialchars($metode['no_rek']); ?></td>
+                                    <td class="text-end">
                                         <?php if (stripos($metode['kategori'], 'qris') !== false): ?>
                                             <strong class="text-success"><?php echo number_format((float)$metode['biaya_admin'], 2, ',', '.'); ?>%</strong>
                                         <?php else: ?>
                                             <strong class="text-success">Rp <?php echo number_format((float)$metode['biaya_admin'], 0, ',', '.'); ?></strong>
                                         <?php endif; ?>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <?php if ($metode['pramusaji'] == '1'): ?>
                                             <span class="badge bg-success">Ya</span>
                                         <?php else: ?>
                                             <span class="badge bg-secondary">Tidak</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <?php if ($metode['aktif'] == '1'): ?>
                                             <span class="badge bg-success">Aktif</span>
                                         <?php else: ?>
                                             <span class="badge bg-secondary">Non-aktif</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <button class="btn btn-sm btn-outline-warning" onclick="editMetode(<?php echo htmlspecialchars(json_encode($metode)); ?>)" title="Edit">
                                             <i class="bi bi-pencil"></i>
                                         </button>
@@ -263,16 +263,30 @@ if (!empty($params)) {
                         </table>
                     </div>
                 </div>
-                <?php if ($total_pages > 1): ?>
                 <div class="card-footer bg-light border-top py-3 px-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-muted">Menampilkan <?php echo $offset + 1; ?>-<?php echo min($offset + $limit, $total_records); ?> dari <?php echo $total_records; ?> metode pembayaran</small>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <small class="text-muted mb-0">
+                            <?php if ($total_records > 0): ?>
+                                Menampilkan <?php echo $offset + 1; ?>-<?php echo min($offset + $limit, $total_records); ?> dari <?php echo $total_records; ?> metode pembayaran
+                            <?php else: ?>
+                                Tidak ada data metode pembayaran
+                            <?php endif; ?>
+                        </small>
+                        <?php if ($total_pages > 1): ?>
                         <nav>
                             <ul class="pagination pagination-sm mb-0">
                                 <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
                                     <a class="page-link" href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&filter=<?php echo urlencode($filter); ?>">Previous</a>
                                 </li>
-                                <?php for ($i = 1; $i <= min($total_pages, 5); $i++): ?>
+                                <?php
+                                    $maxPagesToShow = 5;
+                                    $startPage = max(1, $page - floor($maxPagesToShow / 2));
+                                    $endPage = min($total_pages, $startPage + $maxPagesToShow - 1);
+                                    if ($endPage - $startPage + 1 < $maxPagesToShow) {
+                                        $startPage = max(1, $endPage - $maxPagesToShow + 1);
+                                    }
+                                ?>
+                                <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
                                 <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
                                     <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&filter=<?php echo urlencode($filter); ?>"><?php echo $i; ?></a>
                                 </li>
@@ -282,9 +296,9 @@ if (!empty($params)) {
                                 </li>
                             </ul>
                         </nav>
+                        <?php endif; ?>
                     </div>
                 </div>
-                <?php endif; ?>
             </div>
         </div>
     </main>
