@@ -125,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 // Pagination and Search parameters
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$limit = 20;
+$limit = 10;
 $offset = ($page - 1) * $limit;
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $filter = isset($_GET['filter']) ? trim($_GET['filter']) : '';
@@ -314,16 +314,30 @@ if (isset($_GET['edit'])) {
                         </table>
                     </div>
                 </div>
-                <?php if ($total_pages > 1): ?>
                 <div class="card-footer bg-light border-top py-3 px-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-muted">Menampilkan <?php echo $offset + 1; ?>-<?php echo min($offset + $limit, $total_records); ?> dari <?php echo $total_records; ?> vendor</small>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <small class="text-muted mb-0">
+                            <?php if ($total_records > 0): ?>
+                                Menampilkan <?php echo $offset + 1; ?>-<?php echo min($offset + $limit, $total_records); ?> dari <?php echo $total_records; ?> vendor
+                            <?php else: ?>
+                                Tidak ada data vendor
+                            <?php endif; ?>
+                        </small>
+                        <?php if ($total_pages > 1): ?>
                         <nav>
                             <ul class="pagination pagination-sm mb-0">
                                 <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
                                     <a class="page-link" href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&filter=<?php echo urlencode($filter); ?>">Previous</a>
                                 </li>
-                                <?php for ($i = 1; $i <= min($total_pages, 5); $i++): ?>
+                                <?php
+                                    $maxPagesToShow = 5;
+                                    $startPage = max(1, $page - floor($maxPagesToShow / 2));
+                                    $endPage = min($total_pages, $startPage + $maxPagesToShow - 1);
+                                    if ($endPage - $startPage + 1 < $maxPagesToShow) {
+                                        $startPage = max(1, $endPage - $maxPagesToShow + 1);
+                                    }
+                                ?>
+                                <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
                                 <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
                                     <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&filter=<?php echo urlencode($filter); ?>"><?php echo $i; ?></a>
                                 </li>
@@ -333,9 +347,9 @@ if (isset($_GET['edit'])) {
                                 </li>
                             </ul>
                         </nav>
+                        <?php endif; ?>
                     </div>
                 </div>
-                <?php endif; ?>
             </div>
         </div>
     </main>

@@ -238,39 +238,39 @@ while ($row = $result->fetch_assoc()) {
                         <table class="table table-hover mb-0">
                             <thead>
                                 <tr>
-                                    <th style="width: 50px;">ID</th>
-                                    <th style="width: 150px;">Nomor Meja</th>
-                                    <th style="width: 100px;">Status</th>
-                                    <th style="width: 120px;">Kondisi</th>
-                                    <th style="width: 100px;">Posisi X</th>
-                                    <th style="width: 100px;">Posisi Y</th>
-                                    <th style="width: 180px;">Update Terakhir</th>
-                                    <th style="width: 120px;">Aksi</th>
+                                    <th style="width: 5%; text-align:left;">ID</th>
+                                    <th style="width: 12%; text-align:left;">No. Meja</th>
+                                    <th style="width: 12%; text-align:center;">Status</th>
+                                    <th style="width: 12%; text-align:center;">Kondisi</th>
+                                    <th style="width: 12%; text-align:center;">Posisi X</th>
+                                    <th style="width: 12%; text-align:center;">Posisi Y</th>
+                                    <th style="width: auto; text-align:center;">Update Terakhir</th>
+                                    <th style="width: 15%; text-align:center;">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                             <?php if (!empty($meja_list)): ?>
                                 <?php foreach ($meja_list as $meja): ?>
                                 <tr>
-                                    <td class="text-center"><?php echo htmlspecialchars($meja['id_meja']); ?></td>
-                                    <td><strong>Meja <?php echo htmlspecialchars($meja['nomor_meja']); ?></strong></td>
-                                    <td>
+                                    <td class="text-start"><?php echo htmlspecialchars($meja['id_meja']); ?></td>
+                                    <td class="text-start"><strong>Meja <?php echo htmlspecialchars($meja['nomor_meja']); ?></strong></td>
+                                    <td class="text-center">
                                         <?php if ($meja['aktif'] == '1'): ?>
                                             <span class="badge bg-success">Aktif</span>
                                         <?php else: ?>
                                             <span class="badge bg-secondary">Non-aktif</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <?php if ($meja['in_used'] == '1'): ?>
                                             <span class="badge bg-warning text-dark">Terpakai</span>
                                         <?php else: ?>
                                             <span class="badge bg-success">Kosong</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td><?php echo htmlspecialchars($meja['pos_x']); ?></td>
-                                    <td><?php echo htmlspecialchars($meja['pos_y']); ?></td>
-                                    <td>
+                                    <td class="text-center"><?php echo htmlspecialchars($meja['pos_x']); ?></td>
+                                    <td class="text-center"><?php echo htmlspecialchars($meja['pos_y']); ?></td>
+                                    <td class="text-center">
                                         <?php 
                                         if ($meja['update_at']) {
                                             echo date('d/m/Y H:i', strtotime($meja['update_at']));
@@ -279,7 +279,7 @@ while ($row = $result->fetch_assoc()) {
                                         }
                                         ?>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <div class="table-actions">
                                             <button class="btn btn-sm btn-outline-warning" onclick="editMeja(<?php echo htmlspecialchars(json_encode($meja)); ?>)" title="Edit">
                                                 <i class="bi bi-pencil"></i>
