@@ -63,12 +63,15 @@ $details = $result->fetch_all(MYSQLI_ASSOC);
 $total_amount = 0;
 $total_qty = 0;
 $employees = [];
+$orders = [];
 foreach ($details as $detail) {
     $total_amount += ($detail['harga_jual'] * $detail['qty']);
     $total_qty += $detail['qty'];
     $employees[$detail['nama_lengkap']] = true;
+    $orders[$detail['kode_produk']] = true;
 }
 $employee_names = implode(', ', array_keys($employees));
+$total_transactions = count($orders);
 ?>
 
 <?php if (empty($details)): ?>
@@ -82,6 +85,8 @@ $employee_names = implode(', ', array_keys($employees));
             <small class="text-muted">Meja <?php echo htmlspecialchars($details[0]['nomor_meja']); ?></small>
             <span class="mx-2">•</span>
             <small class="text-muted"><?php echo $total_qty; ?> item</small>
+            <span class="mx-2">•</span>
+            <small class="text-muted"><?php echo $total_transactions; ?> transaksi</small>
             <span class="mx-2">•</span>
             <small class="text-muted">Oleh: <?php echo htmlspecialchars($employee_names); ?></small>
         </div>

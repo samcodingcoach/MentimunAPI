@@ -23,16 +23,20 @@ $limit = 20;
 $offset = ($page - 1) * $limit;
 
 $count_sql = "
-    SELECT COUNT(DISTINCT pesanan.id_tagihan) AS total
-    FROM dapur_batal
-    INNER JOIN dapur_order_detail ON dapur_batal.id_order_detail = dapur_order_detail.id_order_detail
-    INNER JOIN pesanan ON dapur_batal.id_pesanan = pesanan.id_pesanan
-    INNER JOIN pesanan_detail ON dapur_order_detail.id_pesanan_detail = pesanan_detail.id_pesanan_detail
-    INNER JOIN produk_sell ON pesanan_detail.id_produk_sell = produk_sell.id_produk_sell
-    INNER JOIN meja ON pesanan.id_meja = meja.id_meja
-    INNER JOIN view_produk ON produk_sell.id_produk = view_produk.id_produk
-    INNER JOIN pegawai ON dapur_batal.id_user = pegawai.id_user
-    WHERE DATE(dapur_batal.waktu) BETWEEN ? AND ?
+    SELECT COUNT(*) AS total
+    FROM (
+        SELECT pesanan.id_pesanan
+        FROM dapur_batal
+        INNER JOIN dapur_order_detail ON dapur_batal.id_order_detail = dapur_order_detail.id_order_detail
+        INNER JOIN pesanan ON dapur_batal.id_pesanan = pesanan.id_pesanan
+        INNER JOIN pesanan_detail ON dapur_order_detail.id_pesanan_detail = pesanan_detail.id_pesanan_detail
+        INNER JOIN produk_sell ON pesanan_detail.id_produk_sell = produk_sell.id_produk_sell
+        INNER JOIN meja ON pesanan.id_meja = meja.id_meja
+        INNER JOIN view_produk ON produk_sell.id_produk = view_produk.id_produk
+        INNER JOIN pegawai ON dapur_batal.id_user = pegawai.id_user
+        WHERE DATE(dapur_batal.waktu) BETWEEN ? AND ?
+        GROUP BY pesanan.id_pesanan
+    ) AS grouped_pembatalan
 ";
 
 $count_stmt = $conn->prepare($count_sql);
@@ -46,9 +50,10 @@ $sql = "
     SELECT
         MAX(dapur_batal.waktu) AS waktu,
         pesanan.id_tagihan,
+        pesanan.id_pesanan,
         meja.nomor_meja,
-        pegawai.nama_lengkap,
-        SUM(produk_sell.harga_jual) AS total_harga_jual,
+        GROUP_CONCAT(DISTINCT pegawai.nama_lengkap ORDER BY pegawai.nama_lengkap SEPARATOR ', ') AS nama_pegawai,
+        SUM(produk_sell.harga_jual * dapur_batal.qty) AS total_harga_jual,
         SUM(dapur_batal.qty) AS total_item
     FROM dapur_batal
     INNER JOIN dapur_order_detail ON dapur_batal.id_order_detail = dapur_order_detail.id_order_detail
@@ -59,8 +64,8 @@ $sql = "
     INNER JOIN view_produk ON produk_sell.id_produk = view_produk.id_produk
     INNER JOIN pegawai ON dapur_batal.id_user = pegawai.id_user
     WHERE DATE(dapur_batal.waktu) BETWEEN ? AND ?
-    GROUP BY pesanan.id_tagihan, meja.nomor_meja, pegawai.nama_lengkap
-    ORDER BY pesanan.id_tagihan DESC
+    GROUP BY pesanan.id_pesanan, pesanan.id_tagihan, meja.nomor_meja
+    ORDER BY waktu DESC
     LIMIT ? OFFSET ?
 ";
 
@@ -185,9 +190,9 @@ $end_record = $total_records > 0 ? min($offset + count($pembatalan_data), $total
                                 <th class="text-start" style="width:5%">No</th>
                                 <th style="width: 10%;">Waktu</th>
                                 <th class="fw-semibold text-start" style="width: auto;">ID Tagihan</th>
-                                <th class="text-center" style="width: 8%;">No. Meja</th>
+                                <th class="text-center" style="width: 11%;">No. Meja</th>
                                 <th class="text-start">Pegawai</th>
-                                <th class="text-center" style="width: 10%;">Total Item</th>
+                                <th class="text-center" style="width: 12%;">Total Item</th>
                                 <th class="text-end" style="width: 15%;">Total Harga</th>
                             </tr>
                         </thead>
@@ -211,7 +216,7 @@ $end_record = $total_records > 0 ? min($offset + count($pembatalan_data), $total
                                         </button>
                                     </td>
                                     <td class="text-center text-uppercase fw-semibold"><?php echo htmlspecialchars($row['nomor_meja']); ?></td>
-                                    <td class="fw-semibold text-dark text-start"><?php echo htmlspecialchars($row['nama_lengkap']); ?></td>
+                                    <td class="fw-semibold text-dark text-start"><?php echo htmlspecialchars($row['nama_pegawai'] ?? '-'); ?></td>
                                     <td class="text-center">
                                         <span class="badge bg-secondary-subtle text-secondary-emphasis px-3 py-2"><?php echo (int) $row['total_item']; ?> item</span>
                                     </td>

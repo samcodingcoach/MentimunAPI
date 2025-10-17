@@ -94,7 +94,7 @@ $laporan_kuantitas_active = ($current_page == 'laporan_kuantitas.php') ? 'active
         </a>
         <a href="metode_pembayaran.php" class="menu-item <?php echo $metode_pembayaran_active; ?>">
             <i class="bi bi-credit-card"></i>
-            <span class="menu-text">Metode Pembayaran</span>
+            <span class="menu-text">Metode Bayar</span>
         </a>
     </div>
     <?php endif; ?>
@@ -169,7 +169,7 @@ $laporan_kuantitas_active = ($current_page == 'laporan_kuantitas.php') ? 'active
         </a>
         <a href="harga_pokok_penjualan.php" class="menu-item <?php echo $harga_pokok_penjualan_active; ?>">
             <i class="bi bi-calculator"></i>
-            <span class="menu-text">Harga Pokok Penjualan</span>
+            <span class="menu-text">Harga Pokok</span>
         </a>
         <a href="harga_rilis.php" class="menu-item <?php echo $harga_rilis_active; ?>">
             <i class="bi bi-currency-dollar"></i>
