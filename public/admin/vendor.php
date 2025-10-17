@@ -265,32 +265,32 @@ if (isset($_GET['edit'])) {
                         <table class="table table-hover mb-0">
                             <thead>
                                 <tr>
-                                    <th style="width: 50px;">No</th>
-                                    <th style="width: 120px;">Kode</th>
-                                    <th>Nama Vendor</th>
-                                    <th style="width: 150px;">Kota</th>
-                                    <th style="width: 150px;">HP</th>
-                                    <th style="width: 200px;">Email</th>
-                                    <th style="width: 100px;">Status</th>
-                                    <th style="width: 120px;">Aksi</th>
+                                    <th style="width: 5%; text-align:left;">No</th>
+                                    <th style="width: 10%; text-align:center;">Kode</th>
+                                    <th style="width: auto; text-align:left;">Nama</th>
+                                    <th style="width: 15%; text-align:center;">Kota</th>
+                                    <th style="width: 10%; text-align:center;">HP</th>
+                                    <th style="width: 15%; text-align:center;">Email</th>
+                                    <th style="width: 5%; text-align:center;">Status</th>
+                                    <th style="width: 10%; text-align:center;">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                             <?php if (!empty($vendors)): ?>
                                 <?php foreach ($vendors as $index => $vendor): ?>
                                 <tr>
-                                    <td class="text-center"><?php echo $offset + $index + 1; ?></td>
-                                    <td><span class="badge bg-info"><?php echo htmlspecialchars($vendor['kode_vendor']); ?></span></td>
-                                    <td><strong><?php echo htmlspecialchars($vendor['nama_vendor']); ?></strong></td>
-                                    <td><?php echo htmlspecialchars($vendor['kota']); ?></td>
-                                    <td><?php echo htmlspecialchars($vendor['hp']); ?></td>
-                                    <td><?php echo htmlspecialchars($vendor['email']); ?></td>
-                                    <td>
+                                    <td class="text-start"><?php echo $offset + $index + 1; ?></td>
+                                    <td class="text-center"><span class="badge bg-info"><?php echo htmlspecialchars($vendor['kode_vendor']); ?></span></td>
+                                    <td class="text-start"><strong><?php echo htmlspecialchars($vendor['nama_vendor']); ?></strong></td>
+                                    <td class="text-center"><?php echo htmlspecialchars($vendor['kota']); ?></td>
+                                    <td class="text-center"><?php echo htmlspecialchars($vendor['hp']); ?></td>
+                                    <td class="text-center"><?php echo htmlspecialchars($vendor['email']); ?></td>
+                                    <td class="text-center">
                                         <span class="badge bg-<?php echo $vendor['status'] == '1' ? 'success' : 'secondary'; ?>">
                                             <?php echo $vendor['status'] == '1' ? 'Aktif' : 'Tidak Aktif'; ?>
                                         </span>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <div class="table-actions">
                                             <button class="btn btn-sm btn-outline-warning" onclick="editVendor(<?php echo htmlspecialchars(json_encode($vendor)); ?>)" title="Edit">
                                                 <i class="bi bi-pencil"></i>
