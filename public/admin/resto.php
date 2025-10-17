@@ -345,7 +345,12 @@ if (isset($_GET['edit'])) {
                         <div class="row mb-3">
                             <label class="col-sm-3 col-form-label">Server Key Midtrans</label>
                             <div class="col-sm-9">
-                                <input type="text" name="serverkeymidtrans" id="edit_serverkeymidtrans" class="form-control">
+                                <div class="input-group">
+                                    <input type="password" name="serverkeymidtrans" id="edit_serverkeymidtrans" class="form-control">
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleEditServerKey" aria-label="Tampilkan atau sembunyikan server key">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -366,7 +371,13 @@ if (isset($_GET['edit'])) {
             document.getElementById('edit_nama_aplikasi').value = resto.nama_aplikasi;
             document.getElementById('edit_alamat').value = resto.alamat;
             document.getElementById('edit_no_hp').value = resto.no_hp;
-            document.getElementById('edit_serverkeymidtrans').value = resto.serverkeymidtrans || '';
+            const serverKeyInput = document.getElementById('edit_serverkeymidtrans');
+            serverKeyInput.type = 'password';
+            serverKeyInput.value = resto.serverkeymidtrans || '';
+            const toggleButton = document.getElementById('toggleEditServerKey');
+            const toggleIcon = toggleButton.querySelector('i');
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
             
             var editModal = new bootstrap.Modal(document.getElementById('editModal'));
             editModal.show();
@@ -377,6 +388,15 @@ if (isset($_GET['edit'])) {
             editResto(<?php echo json_encode($edit_resto); ?>);
         });
         <?php endif; ?>
+
+        document.getElementById('toggleEditServerKey').addEventListener('click', function () {
+            const input = document.getElementById('edit_serverkeymidtrans');
+            const icon = this.querySelector('i');
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            icon.classList.toggle('bi-eye', !isPassword);
+            icon.classList.toggle('bi-eye-slash', isPassword);
+        });
     </script>
 </body>
 </html>
