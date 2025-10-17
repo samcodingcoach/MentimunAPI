@@ -189,7 +189,7 @@ $end_record = $total_records > 0 ? min($offset + count($hpp_data), $total_record
                                 <th style="width:10%">Resep</th>
                                 <th style="width:10%">Produksi</th>
                                 <th class="text-end" style="width:10%">Margin</th>
-                                <th class="text-center" style="width:8%">Rilis</th>
+                                <th class="text-end" style="width:8%">Rilis</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -211,21 +211,22 @@ $end_record = $total_records > 0 ? min($offset + count($hpp_data), $total_record
                                             <?php echo !empty($row['tanggal_rilis']) ? date('d/m/Y', strtotime($row['tanggal_rilis'])) : '-'; ?>
                                         </td>
                                         <td class="text-end fw-semibold">
-                                            <?php echo isset($row['harga_pokok_resep']) ? number_format((float) $row['harga_pokok_resep'], 0, ',', '.') : '-'; ?>
+                                            <?php echo isset($row['harga_pokok_resep']) ? 'Rp ' . number_format((float) $row['harga_pokok_resep'], 0, ',', '.') : '-'; ?>
                                         </td>
                                         <td class="text-end fw-semibold">
-                                            <?php echo isset($row['biaya_produksi']) ? number_format((float) $row['biaya_produksi'], 0, ',', '.') : '-'; ?>
+                                            <?php echo isset($row['biaya_produksi']) ? 'Rp ' . number_format((float) $row['biaya_produksi'], 0, ',', '.') : '-'; ?>
                                         </td>
                                         <td class="text-end fw-semibold">
-                                            <?php echo isset($row['margin']) ? number_format((float) $row['margin'], 0, ',', '.') : '-'; ?>
+                                            <?php echo isset($row['margin']) ? 'Rp ' . number_format((float) $row['margin'], 0, ',', '.') : '-'; ?>
                                         </td>
-                                        <td class="text-center">
-                                            <?php
-                                                $isReleased = isset($row['nominal']) ? (float) $row['nominal'] > 0 : false;
-                                                $badgeClass = $isReleased ? 'bg-success-subtle text-success-emphasis' : 'bg-secondary-subtle text-secondary-emphasis';
-                                                $badgeText = $isReleased ? 'Ya' : 'Tidak';
-                                            ?>
-                                            <span class="badge <?php echo $badgeClass; ?> px-3 py-2"><?php echo $badgeText; ?></span>
+                                        <td class="text-end">
+                                            <?php if (isset($row['nominal']) && $row['nominal'] !== null): ?>
+                                                <span class="badge bg-primary-subtle text-primary-emphasis px-3 py-2">
+                                                    Rp <?php echo number_format((float) $row['nominal'], 0, ',', '.'); ?>
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary-subtle text-secondary-emphasis px-3 py-2">-</span>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
