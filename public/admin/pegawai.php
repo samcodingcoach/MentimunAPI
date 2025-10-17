@@ -233,7 +233,7 @@ $jabatan_options = ['admin', 'kasir', 'koki', 'pelayan'];
                                 <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Cari pegawai..." value="<?php echo htmlspecialchars($search); ?>">
                             </div>
                         </form>
-                        <select class="form-select" style="width: 150px;" onchange="window.location.href='?filter='+this.value+'&search=<?php echo urlencode($search); ?>'">
+                        <select class="form-select" style="width: 160px;" onchange="window.location.href='?filter='+this.value+'&search=<?php echo urlencode($search); ?>'">
                             <option value="">Semua Jabatan</option>
                             <option value="Admin" <?php echo $filter === 'Admin' ? 'selected' : ''; ?>>Admin</option>
                             <option value="Kasir" <?php echo $filter === 'Kasir' ? 'selected' : ''; ?>>Kasir</option>
@@ -246,22 +246,22 @@ $jabatan_options = ['admin', 'kasir', 'koki', 'pelayan'];
                         <table class="table table-hover mb-0">
                             <thead>
                                 <tr>
-                                    <th style="width: 50px;">No</th>
-                                    <th>Nama Lengkap</th>
-                                    <th style="width: 120px;">Jabatan</th>
-                                    <th style="width: 150px;">Nomor HP</th>
-                                    <th>Email</th>
-                                    <th style="width: 100px;">Status</th>
-                                    <th style="width: 120px;">Aksi</th>
+                                    <th style="width: 5%; text-align:left">No</th>
+                                    <th style="width: auto; text-align:left">Nama Lengkap</th>
+                                    <th style="width: 10%; text-align:center">Jabatan</th>
+                                    <th style="width: 10%; text-align:center">Nomor HP</th>
+                                    <th style="width: 15%; text-align:center">Email</th>
+                                    <th style="width: 15%; text-align:center">Status</th>
+                                    <th style="width: 15%; text-align:center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                             <?php if (!empty($pegawais)): ?>
                                 <?php foreach ($pegawais as $index => $pegawai): ?>
                                 <tr>
-                                    <td class="text-center"><?php echo $offset + $index + 1; ?></td>
-                                    <td><strong><?php echo htmlspecialchars($pegawai['nama_lengkap']); ?></strong></td>
-                                    <td>
+                                    <td class="text-start"><?php echo $offset + $index + 1; ?></td>
+                                    <td class="text-start"><strong><?php echo htmlspecialchars($pegawai['nama_lengkap']); ?></strong></td>
+                                    <td class="text-center">
                                         <span class="badge <?php 
                                             echo $pegawai['jabatan'] == 'Admin' ? 'bg-danger' : 
                                                 ($pegawai['jabatan'] == 'Kasir' ? 'bg-primary' : 'bg-success'); 
@@ -269,9 +269,9 @@ $jabatan_options = ['admin', 'kasir', 'koki', 'pelayan'];
                                             <?php echo htmlspecialchars($pegawai['jabatan']); ?>
                                         </span>
                                     </td>
-                                    <td><?php echo htmlspecialchars($pegawai['nomor_hp']); ?></td>
-                                    <td><?php echo htmlspecialchars($pegawai['email']); ?></td>
-                                    <td>
+                                    <td class="text-center"> <?php echo htmlspecialchars($pegawai['nomor_hp']); ?></td>
+                                    <td class="text-center"><?php echo htmlspecialchars($pegawai['email']); ?></td>
+                                    <td class="text-center">
                                         <?php if ($pegawai['aktif'] == 1): ?>
                                             <span class="badge bg-success">Aktif</span>
                                         <?php else: ?>
