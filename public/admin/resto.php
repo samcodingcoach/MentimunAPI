@@ -159,9 +159,9 @@ if (isset($_GET['edit'])) {
                     <h2 class="mb-1"><i class="bi bi-shop me-2"></i>Data Resto</h2>
                     <p class="text-muted mb-0">Kelola informasi restoran/perusahaan</p>
                 </div>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+                <!-- <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
                     <i class="bi bi-plus-lg me-2"></i>Tambah Resto
-                </button>
+                </button> -->
             </div>
 
             <?php if ($message): ?>
@@ -200,25 +200,25 @@ if (isset($_GET['edit'])) {
                         <table class="table table-hover mb-0">
                             <thead>
                                 <tr>
-                                    <th style="width: 50px;">No</th>
-                                    <th>Nama Aplikasi</th>
-                                    <th>Alamat</th>
-                                    <th style="width: 150px;">No HP</th>
-                                    <th style="width: 200px;">Server Key Midtrans</th>
-                                    <th style="width: 150px;">Update Time</th>
-                                    <th style="width: 120px;">Aksi</th>
+                                    <th style="width: 5%; text-align: left">No</th>
+                                    <th style="width: auto; text-align: left" >Nama Aplikasi</th>
+                                    <th style="width: 25%; text-align: left">Alamat</th>
+                                    <th style="width: 15%; text-align: center">No HP</th>
+                                    <th style="width: 15%; text-align: center">Server Key Midtrans</th>
+                                    <th style="width: 14%; text-align: center">Update Time</th>
+                                    <th style="width: 10%; text-align:center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                             <?php if (!empty($restos)): ?>
                                 <?php foreach ($restos as $index => $resto): ?>
                                 <tr>
-                                    <td class="text-center"><?php echo $offset + $index + 1; ?></td>
-                                    <td><strong><?php echo htmlspecialchars($resto['nama_aplikasi']); ?></strong></td>
-                                    <td><?php echo htmlspecialchars($resto['alamat']); ?></td>
-                                    <td><?php echo htmlspecialchars($resto['no_hp']); ?></td>
-                                    <td><small class="font-monospace"><?php echo htmlspecialchars(substr($resto['serverkeymidtrans'], 0, 20)); ?>...</small></td>
-                                    <td><?php echo date('d/m/Y H:i', strtotime($resto['update_time'])); ?></td>
+                                    <td class="text-start"><?php echo $offset + $index + 1; ?></td>
+                                    <td class="text-start"><strong><?php echo htmlspecialchars($resto['nama_aplikasi']); ?></strong></td>
+                                    <td class="text-start"><?php echo htmlspecialchars($resto['alamat']); ?></td>
+                                    <td class="text-center"><?php echo htmlspecialchars($resto['no_hp']); ?></td>
+                                    <td class="text-center"><small class="font-monospace"><?php echo htmlspecialchars(substr($resto['serverkeymidtrans'], 0, 20)); ?>...</small></td>
+                                    <td class="text-center"><?php echo date('d/m/Y H:i', strtotime($resto['update_time'])); ?></td>
                                     <td>
                                         <div class="table-actions">
                                             <button class="btn btn-sm btn-outline-warning" onclick="editResto(<?php echo htmlspecialchars(json_encode($resto)); ?>)" title="Edit">
