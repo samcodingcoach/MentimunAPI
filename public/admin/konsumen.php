@@ -226,26 +226,26 @@ if (!empty($params)) {
                         <table class="table table-hover mb-0">
                             <thead>
                                 <tr>
-                                    <th style="width: 50px;">No</th>
-                                    <th>Nama Konsumen</th>
-                                    <th style="width: 150px;">No. HP</th>
-                                    <th style="width: 200px;">Email</th>
-                                    <th style="width: 150px;">Total Pembelian</th>
-                                    <th style="width: 100px;">Status</th>
-                                    <th style="width: 120px;">Aksi</th>
+                                    <th style="width: 5%; text-align:left;">No</th>
+                                    <th style="width: auto; text-align:left;">Nama</th>
+                                    <th style="width: 10%; text-align:center;">No. HP</th>
+                                    <th style="width: 15%; text-align:center">Email</th>
+                                    <th style="width: 20%; text-align:right">Total Pembelian</th>
+                                    <th style="width: 7%; text-align:center">Status</th>
+                                    <th style="width: 15%; text-align:center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                             <?php if (!empty($konsumen_data)): ?>
                                 <?php foreach ($konsumen_data as $index => $row): ?>
                                 <tr>
-                                    <td class="text-center"><?php echo $offset + $index + 1; ?></td>
-                                    <td>
+                                    <td class="text-start"><?php echo $offset + $index + 1; ?></td>
+                                    <td class="text-start">
                                         <a href="#" class="text-decoration-none fw-semibold" onclick="showDetailModal(
                                             '<?php echo htmlspecialchars($row['id_konsumen']); ?>',
                                             '<?php echo htmlspecialchars(addslashes($row['nama_konsumen'])); ?>',
                                             '<?php echo htmlspecialchars($row['no_hp']); ?>',
-                                            '<?php echo htmlspecialchars(str_replace(["\r", "\n"], ' ', $row['alamat'])); ?>',
+                                           
                                             '<?php echo htmlspecialchars($row['email']); ?>',
                                             '<?php echo $row['aktif']; ?>',
                                             '<?php echo number_format($row['total_cart'], 0, ',', '.'); ?>'
@@ -253,17 +253,17 @@ if (!empty($params)) {
                                             <?php echo htmlspecialchars($row['nama_konsumen']); ?>
                                         </a>
                                     </td>
-                                    <td><?php echo htmlspecialchars($row['no_hp'] ?: '-'); ?></td>
-                                    <td><?php echo htmlspecialchars($row['email'] ?: '-'); ?></td>
-                                    <td><strong class="text-success">Rp <?php echo number_format($row['total_cart'], 0, ',', '.'); ?></strong></td>
-                                    <td>
+                                    <td class="text-center"><?php echo htmlspecialchars($row['no_hp'] ?: '-'); ?></td>
+                                    <td class="text-center"><?php echo htmlspecialchars($row['email'] ?: '-'); ?></td>
+                                    <td class="text-end"><strong class="text-success">Rp <?php echo number_format($row['total_cart'], 0, ',', '.'); ?></strong></td>
+                                    <td class="text-center">
                                         <?php if ($row['aktif'] == '1'): ?>
                                             <span class="badge bg-success">Aktif</span>
                                         <?php else: ?>
                                             <span class="badge bg-secondary">Nonaktif</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <div class="table-actions">
                                             <button class="btn btn-sm btn-outline-warning" onclick="editKonsumen(<?php echo htmlspecialchars(json_encode($row)); ?>)" title="Edit">
                                                 <i class="bi bi-pencil"></i>
