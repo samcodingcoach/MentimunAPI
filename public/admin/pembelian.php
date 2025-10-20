@@ -615,26 +615,39 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
               </div>
             </div>
             
-            <!-- Detail Items Table -->
-            <div class="table-responsive">
-              <table class="table table-striped table-hover" id="table_detail_items">
-                <thead class="table-dark">
-                  <tr>
-                    <th width="5%">No</th>
-                    <th width="25%">Bahan</th>
-                    <th width="15%">Vendor</th>
-                    <th width="8%">Qty</th>
-                    <th width="10%">Harga</th>
-                    <th width="12%">Subtotal</th>
-                    <th width="8%">Payment</th>
-                    <th width="8%">Status</th>
-                    <th width="9%">No. Bukti</th>
-                  </tr>
-                </thead>
-                <tbody id="tbody_detail_items">
-                  <!-- Data akan dimuat via AJAX -->
-                </tbody>
-              </table>
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-light border-0 py-3">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-list-check me-2 text-primary"></i>
+                  <span class="fw-semibold">Daftar Item Request</span>
+                </div>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0" id="table_detail_items">
+                    <thead class="table-light border-bottom">
+                      <tr class="text-uppercase small text-muted">
+                        <th style="width:6%;" class="ps-4">No</th>
+                        <th style="width:28%;">Bahan</th>
+                        <th style="width:18%;">Vendor</th>
+                        <th style="width:8%;" class="text-center">Qty</th>
+                        <th style="width:12%;" class="text-end">Harga</th>
+                        <th style="width:12%;" class="text-end">Subtotal</th>
+                        <th style="width:8%;" class="text-center">Payment</th>
+                        <th style="width:8%;" class="text-center">Status</th>
+                        <th style="width:10%;" class="text-center pe-4">No. Bukti</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody_detail_items">
+                      <tr>
+                        <td colspan="9" class="text-center text-muted py-4">
+                          Tidak ada item pada request ini
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
           
