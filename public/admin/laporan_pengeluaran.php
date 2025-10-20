@@ -2,7 +2,6 @@
 session_start();
 require_once __DIR__ . '/../../config/koneksi.php';
 
-// Check if user is logged in
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header('Location: login.php');
     exit();
@@ -117,487 +116,355 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
 ?>
 
 <!doctype html>
-<html lang="en">
-  <head>
+<html lang="id" data-bs-theme="light">
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Laporan Pengeluaran vs Penjualan - Admin Dashboard</title>
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="../css/admin.css" rel="stylesheet">
+    <title>Laporan Pengeluaran vs Penjualan - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="../css/newadmin.css?v=3" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  </head>
-  <body>
-    <!-- Top Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="navbar-brand" href="#"><?php echo isset($_SESSION['nama_aplikasi']) ? htmlspecialchars($_SESSION['nama_aplikasi']) : 'Admin'; ?></a>
-        <div class="navbar-nav ms-auto">
-          <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-              <?php echo htmlspecialchars($_SESSION["nama_lengkap"]); ?> (<?php echo htmlspecialchars($_SESSION["jabatan"]); ?>)
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="profile.php">Ubah Profil</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="logout.php">Logout</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </nav>
+</head>
+<body>
+    <?php include '_header_new.php'; ?>
+    <?php include '_sidebar_new.php'; ?>
 
-    <div class="container-fluid">
-      <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
-          <div class="position-sticky pt-3">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <a class="nav-link" href="index.php">
-                  <i class="bi bi-house-door"></i>
-                  <span>Beranda</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="informasi.php">
-                  <i class="bi bi-info-circle"></i>
-                  <span>Informasi</span>
-                </a>
-              </li>
-              
-              <?php if($_SESSION["jabatan"] == "Admin"): ?>
-              <!-- Master Menu - Admin Only -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#masterMenu" role="button">
-                  <i class="bi bi-gear-fill"></i>
-                  <span>Master</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="masterMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pegawai.php"><i class="bi bi-people"></i> Pegawai</a></li>
-                    <li class="nav-item"><a class="nav-link" href="konsumen.php"><i class="bi bi-person-check"></i> Konsumen</a></li>
-                    <li class="nav-item"><a class="nav-link" href="vendor.php"><i class="bi bi-truck"></i> Vendor</a></li>
-                    <li class="nav-item"><a class="nav-link" href="meja.php"><i class="bi bi-table"></i> Meja</a></li>
-                    <li class="nav-item"><a class="nav-link" href="metode_pembayaran.php"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <!-- Produk Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#produkMenu" role="button">
-                  <i class="bi bi-box-seam"></i>
-                  <span>Produk</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="produkMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="kategori_menu.php"><i class="bi bi-tags"></i> Kategori Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="menu.php"><i class="bi bi-card-list"></i> Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-collection"></i> Kategori Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="bahan.php"><i class="bi bi-basket"></i> Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-journal-text"></i> Resep</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <!-- Pembelian Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#pembelianMenu" role="button">
-                  <i class="bi bi-cart-plus"></i>
-                  <span>Pembelian</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="pembelianMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="pembelian.php"><i class="bi bi-clipboard-check"></i> Pesanan Pembelian</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembayaran_pembelian.php"><i class="bi bi-currency-dollar"></i> Pembayaran</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Kasir"): ?>
-              <!-- Penjualan Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#penjualanMenu" role="button">
-                  <i class="bi bi-cash-coin"></i>
-                  <span>Penjualan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="penjualanMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
-                    <li class="nav-item"><a class="nav-link" href="promo.php"><i class="bi bi-percent"></i> Promo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <!-- Inventory Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#inventoryMenu" role="button">
-                  <i class="bi bi-boxes"></i>
-                  <span>Inventory</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="inventoryMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="inventory.php"><i class="bi bi-box-seam"></i> Inventory</a></li>
-                    <li class="nav-item"><a class="nav-link" href="transaksi_inventory.php"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <!-- Laporan Menu - All Roles -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#laporanMenu" role="button">
-                  <i class="bi bi-graph-up"></i>
-                  <span>Laporan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse show" id="laporanMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="laporan_transaksi.php"><i class="bi bi-list-ul"></i> Transaksi</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="laporan_pengeluaran.php"><i class="bi bi-bar-chart"></i> Pengeluaran vs Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="laporan_kuantitas.php"><i class="bi bi-pie-chart"></i> Kuantitas</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <!-- Pengaturan Menu - All Roles -->
-              <li class="nav-item">
-                <a class="nav-link" href="pengaturan.php">
-                  <i class="bi bi-gear"></i>
-                  <span>Pengaturan</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Main content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Laporan Pengeluaran vs Penjualan</h1>
-          </div>
-
-          <!-- Date Filter -->
-          <div class="mb-4">
-            <form method="GET" class="row g-3 align-items-end">
-              <div class="col-md-4">
-                <label for="tgl_start" class="form-label">Tanggal Mulai</label>
-                <input type="date" class="form-control" id="tgl_start" name="tgl_start" 
-                       value="<?php echo htmlspecialchars($tgl_start); ?>" required>
-              </div>
-              <div class="col-md-4">
-                <label for="tgl_end" class="form-label">Tanggal Selesai</label>
-                <input type="date" class="form-control" id="tgl_end" name="tgl_end" 
-                       value="<?php echo htmlspecialchars($tgl_end); ?>" required>
-              </div>
-              <div class="col-md-4">
-                <button type="submit" class="btn btn-primary">
-                  <i class="bi bi-search"></i> Tampilkan
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <!-- Report Header -->
-         
-
-          <!-- Tabs Navigation -->
-          <ul class="nav nav-tabs" id="reportTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button class="nav-link active" id="section1-tab" data-bs-toggle="tab" data-bs-target="#section1" type="button" role="tab" aria-controls="section1" aria-selected="true">Pembelian Bahan (PO)</button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="section2-tab" data-bs-toggle="tab" data-bs-target="#section2" type="button" role="tab" aria-controls="section2" aria-selected="false">Pengeluaran Produk</button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="section3-tab" data-bs-toggle="tab" data-bs-target="#section3" type="button" role="tab" aria-controls="section3" aria-selected="false">Penjualan Bruto</button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="section4-tab" data-bs-toggle="tab" data-bs-target="#section4" type="button" role="tab" aria-controls="section4" aria-selected="false">Penjualan Neto</button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab" aria-controls="summary" aria-selected="false">Summary</button>
-            </li>
-          </ul>
-
-          <!-- Tabs Content -->
-          <div class="tab-content mt-3" id="reportTabsContent">
-            <!-- Section 1: Pengeluaran Pembelian Bahan (PO) -->
-            <div class="tab-pane fade show active" id="section1" role="tabpanel" aria-labelledby="section1-tab">
-              <div class="mb-4">
-                <?php echo count($rincianpo) > 0 ? $rincianpo[0]['nama'] : "Tidak ada data pengeluaran pembelian bahan"; ?>
+    <main class="main-content" id="mainContent">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                 <div>
-                  <div>
-                    <table class="table table-hover">
-                      <thead class="table-dark">
-                        <tr>
-                          <th class="text-center" width="5%">NO</th>
-                          <th class="text-center" width="15%">TANGGAL</th>
-                          <th class="text-center" width="15%">CASH PAID</th>
-                          <th class="text-center" width="15%">CASH UNPAID</th>
-                          <th class="text-center" width="15%">INVOICE PAID</th>
-                          <th class="text-center" width="20%">INVOICE UNPAID</th>
-                          <th class="text-center" width="15%">TOTAL</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php if (empty($rincianpo)): ?>
-                        <tr>
-                          <td colspan="7" class="text-center text-muted py-3">Tidak ada data</td>
-                        </tr>
-                        <?php else: ?>
-                        <?php $no = 1; foreach ($rincianpo as $rowpo): ?>
-                        <tr>
-                          <td class="text-center"><?php echo $no++; ?></td>
-                          <td class="text-center"><?php echo htmlspecialchars($rowpo['tanggal']); ?></td>
-                          <td class="text-end"><?php echo htmlspecialchars($rowpo['cash_done']); ?></td>
-                          <td class="text-end"><?php echo htmlspecialchars($rowpo['cash_hutang']); ?></td>
-                          <td class="text-end"><?php echo htmlspecialchars($rowpo['invoice_done']); ?></td>
-                          <td class="text-end"><?php echo htmlspecialchars($rowpo['invoice_hutang']); ?></td>
-                          <td class="text-end fw-bold"><?php echo htmlspecialchars($rowpo['total']); ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                        <?php endif; ?>
-                      </tbody>
-                    </table>
-                    
-                    <?php if (!empty($rincianpo)): ?>
-                    <div class="row mt-3">
-                      <div class="col-md-8">
-                        <strong>GRAND TOTAL:</strong>
-                      </div>
-                      <div class="col-md-4 text-end">
-                        <strong class="text-danger">Rp <?php echo number_format($sum_po, 0, ',', '.'); ?></strong>
-                      </div>
-                    </div>
-                    <?php endif; ?>
-                  </div>
+                    <h2 class="mb-1"><i class="bi bi-bar-chart-line me-2"></i>Laporan Pengeluaran vs Penjualan</h2>
+                    <p class="text-muted mb-0">Pantau arus keluar masuk dana Anda dalam satu layar</p>
                 </div>
-              </div>
+                <div class="d-flex gap-2">
+                    <span class="badge bg-secondary-subtle text-secondary px-3 py-2">
+                        <i class="bi bi-calendar-week me-1"></i><?php echo date('d M Y', strtotime($tgl_start)); ?>
+                    </span>
+                    <span class="badge bg-secondary-subtle text-secondary px-3 py-2">
+                        <i class="bi bi-calendar-week me-1"></i><?php echo date('d M Y', strtotime($tgl_end)); ?>
+                    </span>
+                </div>
             </div>
 
-            <!-- Section 2: Pengeluaran Produk -->
-            <div class="tab-pane fade" id="section2" role="tabpanel" aria-labelledby="section2-tab">
-              <div class="mb-4">
-                <?php echo count($rincianbahan) > 0 ? $rincianbahan[0]['nama'] : "Tidak ada data rincian pembelian bahan"; ?>
-                <div>
-                  <div>
-                    <table class="table table-hover">
-                      <thead class="table-dark">
-                        <tr>
-                          <th class="text-center" width="5%">NO</th>
-                          <th class="text-center" width="80%">TANGGAL</th>
-                          <th class="text-center" width="15%">TOTAL</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php if (empty($rincianbahan)): ?>
-                        <tr>
-                          <td colspan="3" class="text-center text-muted py-3">Tidak ada data</td>
-                        </tr>
-                        <?php else: ?>
-                        <?php $no_bahan = 1; foreach ($rincianbahan as $rowbahan): ?>
-                        <tr>
-                          <td class="text-center"><?php echo $no_bahan++; ?></td>
-                          <td class="text-center"><?php echo htmlspecialchars($rowbahan['tgl_release']); ?></td>
-                          <td class="text-end fw-bold"><?php echo htmlspecialchars($rowbahan['profit']); ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                        <?php endif; ?>
-                      </tbody>
-                    </table>
-                    
-                    <?php if (!empty($rincianbahan)): ?>
-                    <div class="row mt-3">
-                      <div class="col-md-8">
-                        <strong>GRAND TOTAL:</strong>
-                      </div>
-                      <div class="col-md-4 text-end">
-                        <strong class="text-danger">Rp <?php echo number_format($sum_bahan, 0, ',', '.'); ?></strong>
-                      </div>
+            <div class="card-modern mb-4">
+                <div class="card-header px-4 py-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-funnel me-2"></i>
+                        <span>Filter Periode</span>
                     </div>
-                    <?php endif; ?>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Section 3: Penjualan Bruto -->
-            <div class="tab-pane fade" id="section3" role="tabpanel" aria-labelledby="section3-tab">
-              <div class="mb-4">
-                <?php echo count($rincianpenjualanb) > 0 ? $rincianpenjualanb[0]['nama'] : "Tidak ada data penjualan"; ?>
-                <div>
-                  <div>
-                    <table class="table table-hover">
-                      <thead class="table-dark">
-                        <tr>
-                          <th class="text-center" width="5%">NO</th>
-                          <th class="text-center" width="80%">TANGGAL</th>
-                          <th class="text-center" width="15%">TOTAL</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php if (empty($rincianpenjualanb)): ?>
-                        <tr>
-                          <td colspan="3" class="text-center text-muted py-3">Tidak ada data</td>
-                        </tr>
-                        <?php else: ?>
-                        <?php $no_penjualanb = 1; foreach ($rincianpenjualanb as $rowpenjualanb): ?>
-                        <tr>
-                          <td class="text-center"><?php echo $no_penjualanb++; ?></td>
-                          <td class="text-center"><?php echo htmlspecialchars($rowpenjualanb['tanggal_payment']); ?></td>
-                          <td class="text-end fw-bold"><?php echo htmlspecialchars($rowpenjualanb['total']); ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                        <?php endif; ?>
-                      </tbody>
-                    </table>
-                    
-                    <?php if (!empty($rincianpenjualanb)): ?>
-                    <div class="row mt-3">
-                      <div class="col-md-8">
-                        <strong>GRAND TOTAL:</strong>
-                      </div>
-                      <div class="col-md-4 text-end">
-                        <strong class="text-success">Rp <?php echo number_format($sum_penjualanb, 0, ',', '.'); ?></strong>
-                      </div>
-                    </div>
-                    <?php endif; ?>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Section 4: Penjualan Neto -->
-            <div class="tab-pane fade" id="section4" role="tabpanel" aria-labelledby="section4-tab">
-              <div class="mb-4">
-                <?php echo count($rincianpenjualan2) > 0 ? $rincianpenjualan2[0]['nama'] : "Tidak ada data penjualan"; ?>
-                <div>
-                  <div >
-                    <table class="table table-hover">
-                      <thead class="table-dark">
-                        <tr>
-                          <th class="text-center" width="5%">NO</th>
-                          <th class="text-center" width="80%">TANGGAL</th>
-                          <th class="text-center" width="15%">TOTAL</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php if (empty($rincianpenjualan2)): ?>
-                        <tr>
-                          <td colspan="3" class="text-center text-muted py-3">Tidak ada data</td>
-                        </tr>
-                        <?php else: ?>
-                        <?php $no_penjualan2 = 1; foreach ($rincianpenjualan2 as $rowpenjualan2): ?>
-                        <tr>
-                          <td class="text-center"><?php echo $no_penjualan2++; ?></td>
-                          <td class="text-center"><?php echo htmlspecialchars($rowpenjualan2['tanggal_payment']); ?></td>
-                          <td class="text-end fw-bold"><?php echo htmlspecialchars($rowpenjualan2['total']); ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                        <?php endif; ?>
-                      </tbody>
-                    </table>
-                    
-                    <?php if (!empty($rincianpenjualan2)): ?>
-                    <div class="row mt-3">
-                      <div class="col-md-8">
-                        <strong>GRAND TOTAL:</strong>
-                      </div>
-                      <div class="col-md-4 text-end">
-                        <strong class="text-success">Rp <?php echo number_format($sum_penjualan2, 0, ',', '.'); ?></strong>
-                      </div>
-                    </div>
-                    <?php endif; ?>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Summary -->
-            <div class="tab-pane fade" id="summary" role="tabpanel" aria-labelledby="summary-tab">
-              <div class="card mb-4 border-primary">
-                <div class="card-header bg-primary text-white">
-                  <h5>RINGKASAN TOTAL</h5>
                 </div>
                 <div class="card-body">
-                  <div class="row">
-                    <div class="col-md-6">
-                      <h6 class="text-danger">PENGELUARAN</h6>
-                      <p>Pembelian Bahan (PO): <strong>Rp <?php echo number_format($sum_po, 0, ',', '.'); ?></strong></p>
-                      <p>Produk Bahan Terpakai: <strong>Rp <?php echo number_format($sum_bahan, 0, ',', '.'); ?></strong></p>
-                      <hr>
-                      <p class="fw-bold text-danger">Total Pengeluaran: Rp <?php echo number_format($sum_po + $sum_bahan, 0, ',', '.'); ?></p>
-                    </div>
-                    <div class="col-md-6">
-                      <h6 class="text-success">PENJUALAN</h6>
-                      <p>Penjualan Bruto: <strong>Rp <?php echo number_format($sum_penjualanb, 0, ',', '.'); ?></strong></p>
-                      <p>Penjualan Neto: <strong>Rp <?php echo number_format($sum_penjualan2, 0, ',', '.'); ?></strong></p>
-                      <hr>
-                      <p class="fw-bold text-success">Total Penjualan: Rp <?php echo number_format($sum_penjualanb + $sum_penjualan2, 0, ',', '.'); ?></p>
-                    </div>
-                  </div>
-                  <hr>
-                  <div class="text-center">
-                    <?php 
-                    $total_pengeluaran = $sum_po + $sum_bahan;
-                    $total_penjualan = $sum_penjualanb + $sum_penjualan2;
-                    $net_profit = $total_penjualan - $total_pengeluaran;
-                    ?>
-                    <h4 class="<?php echo $net_profit >= 0 ? 'text-success' : 'text-danger'; ?>">
-                      NET PROFIT: Rp <?php echo number_format($net_profit, 0, ',', '.'); ?>
-                    </h4>
-                  </div>
+                    <form method="GET" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label for="tgl_start" class="form-label">Tanggal Mulai</label>
+                            <input type="text" class="form-control" id="tgl_start" name="tgl_start" value="<?php echo htmlspecialchars($tgl_start); ?>" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="tgl_end" class="form-label">Tanggal Selesai</label>
+                            <input type="text" class="form-control" id="tgl_end" name="tgl_end" value="<?php echo htmlspecialchars($tgl_end); ?>" required>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search me-2"></i>Tampilkan
+                            </button>
+                        </div>
+                    </form>
                 </div>
-              </div>
             </div>
-          </div>
 
-          <small class="text-muted">Export time: <?php echo date("d F Y H:i"); ?></small>
-        </main>
-      </div>
-    </div>
+            <div class="card-modern mb-4">
+                <div class="card-header px-4 py-3">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-diagram-3 me-2"></i>
+                            <span>Rincian Laporan</span>
+                        </div>
+                        <ul class="nav nav-pills gap-2" id="reportTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="section1-tab" data-bs-toggle="tab" data-bs-target="#section1" type="button" role="tab">
+                                    <i class="bi bi-truck me-1"></i>PO Bahan
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="section2-tab" data-bs-toggle="tab" data-bs-target="#section2" type="button" role="tab">
+                                    <i class="bi bi-basket me-1"></i>Pengeluaran Produk
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="section3-tab" data-bs-toggle="tab" data-bs-target="#section3" type="button" role="tab">
+                                    <i class="bi bi-graph-up me-1"></i>Penjualan Bruto
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="section4-tab" data-bs-toggle="tab" data-bs-target="#section4" type="button" role="tab">
+                                    <i class="bi bi-graph-up-arrow me-1"></i>Penjualan Neto
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab">
+                                    <i class="bi bi-journal-check me-1"></i>Ringkasan
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="tab-content" id="reportTabsContent">
+                        <div class="tab-pane fade show active" id="section1" role="tabpanel" aria-labelledby="section1-tab">
+                            <div class="px-0 py-0">
+                                
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light text-center">
+                                            <tr>
+                                                <th style="width:5%;">No</th>
+                                                <th style="width:12%;">Tanggal</th>
+                                                <th class="text-end">Cash Paid</th>
+                                                <th class="text-end">Cash Unpaid</th>
+                                                <th class="text-end">Invoice Paid</th>
+                                                <th class="text-end">Invoice Unpaid</th>
+                                                <th class="text-end">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (empty($rincianpo)): ?>
+                                            <tr>
+                                                <td colspan="7" class="text-center py-5">
+                                                    <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                                    <span class="text-muted">Tidak ada data</span>
+                                                </td>
+                                            </tr>
+                                            <?php else: ?>
+                                                <?php $no = 1; foreach ($rincianpo as $rowpo): ?>
+                                                <tr>
+                                                    <td class="text-center fw-semibold"><?php echo $no++; ?></td>
+                                                    <td class="text-center text-nowrap"><?php echo htmlspecialchars($rowpo['tanggal']); ?></td>
+                                                    <td class="text-end">Rp <?php echo htmlspecialchars($rowpo['cash_done']); ?></td>
+                                                    <td class="text-end text-warning">Rp <?php echo htmlspecialchars($rowpo['cash_hutang']); ?></td>
+                                                    <td class="text-end">Rp <?php echo htmlspecialchars($rowpo['invoice_done']); ?></td>
+                                                    <td class="text-end text-warning">Rp <?php echo htmlspecialchars($rowpo['invoice_hutang']); ?></td>
+                                                    <td class="text-end fw-semibold text-danger">Rp <?php echo htmlspecialchars($rowpo['total']); ?></td>
+                                                </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <?php if (!empty($rincianpo)): ?>
+                                <div class="d-flex justify-content-end mt-3">
+                                    <div class="badge bg-danger-subtle text-danger px-3 py-2">
+                                        <i class="bi bi-calculator me-1"></i>Grand Total: Rp <?php echo number_format($sum_po, 0, ',', '.'); ?>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
 
-    <script src="../js/bootstrap.bundle.min.js"></script>
+                        <div class="tab-pane fade" id="section2" role="tabpanel" aria-labelledby="section2-tab">
+                            <div class="px-4 py-4">
+                                <h6 class="fw-semibold mb-3 text-primary">Pengeluaran Produk (Akumulasi Bahan Baku Terpakai)</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light text-center">
+                                            <tr>
+                                                <th style="width:5%;">No</th>
+                                                <th>Tanggal</th>
+                                                <th class="text-end">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (empty($rincianbahan)): ?>
+                                            <tr>
+                                                <td colspan="3" class="text-center py-5">
+                                                    <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                                    <span class="text-muted">Tidak ada data</span>
+                                                </td>
+                                            </tr>
+                                            <?php else: ?>
+                                                <?php $no = 1; foreach ($rincianbahan as $rowbahan): ?>
+                                                <tr>
+                                                    <td class="text-center fw-semibold"><?php echo $no++; ?></td>
+                                                    <td class="text-center text-nowrap"><?php echo htmlspecialchars($rowbahan['tgl_release']); ?></td>
+                                                    <td class="text-end fw-semibold text-danger">Rp <?php echo htmlspecialchars($rowbahan['profit']); ?></td>
+                                                </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <?php if (!empty($rincianbahan)): ?>
+                                <div class="d-flex justify-content-end mt-3">
+                                    <div class="badge bg-danger-subtle text-danger px-3 py-2">
+                                        <i class="bi bi-calculator me-1"></i>Grand Total: Rp <?php echo number_format($sum_bahan, 0, ',', '.'); ?>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="section3" role="tabpanel" aria-labelledby="section3-tab">
+                            <div class="px-4 py-4">
+                                <h6 class="fw-semibold mb-3 text-primary">Penjualan Bruto (Termasuk Penambahan)</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light text-center">
+                                            <tr>
+                                                <th style="width:5%;">No</th>
+                                                <th>Tanggal</th>
+                                                <th class="text-end">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (empty($rincianpenjualanb)): ?>
+                                            <tr>
+                                                <td colspan="3" class="text-center py-5">
+                                                    <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                                    <span class="text-muted">Tidak ada data</span>
+                                                </td>
+                                            </tr>
+                                            <?php else: ?>
+                                                <?php $no = 1; foreach ($rincianpenjualanb as $rowpenjualanb): ?>
+                                                <tr>
+                                                    <td class="text-center fw-semibold"><?php echo $no++; ?></td>
+                                                    <td class="text-center text-nowrap"><?php echo htmlspecialchars($rowpenjualanb['tanggal_payment']); ?></td>
+                                                    <td class="text-end fw-semibold text-success">Rp <?php echo htmlspecialchars($rowpenjualanb['total']); ?></td>
+                                                </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <?php if (!empty($rincianpenjualanb)): ?>
+                                <div class="d-flex justify-content-end mt-3">
+                                    <div class="badge bg-success-subtle text-success px-3 py-2">
+                                        <i class="bi bi-calculator me-1"></i>Grand Total: Rp <?php echo number_format($sum_penjualanb, 0, ',', '.'); ?>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="section4" role="tabpanel" aria-labelledby="section4-tab">
+                            <div class="px-4 py-4">
+                                <h6 class="fw-semibold mb-3 text-primary">Penjualan Neto (Non Biaya Penambahan)</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light text-center">
+                                            <tr>
+                                                <th style="width:5%;">No</th>
+                                                <th>Tanggal</th>
+                                                <th class="text-end">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (empty($rincianpenjualan2)): ?>
+                                            <tr>
+                                                <td colspan="3" class="text-center py-5">
+                                                    <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                                    <span class="text-muted">Tidak ada data</span>
+                                                </td>
+                                            </tr>
+                                            <?php else: ?>
+                                                <?php $no = 1; foreach ($rincianpenjualan2 as $rowpenjualan2): ?>
+                                                <tr>
+                                                    <td class="text-center fw-semibold"><?php echo $no++; ?></td>
+                                                    <td class="text-center text-nowrap"><?php echo htmlspecialchars($rowpenjualan2['tanggal_payment']); ?></td>
+                                                    <td class="text-end fw-semibold text-success">Rp <?php echo htmlspecialchars($rowpenjualan2['total']); ?></td>
+                                                </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <?php if (!empty($rincianpenjualan2)): ?>
+                                <div class="d-flex justify-content-end mt-3">
+                                    <div class="badge bg-success-subtle text-success px-3 py-2">
+                                        <i class="bi bi-calculator me-1"></i>Grand Total: Rp <?php echo number_format($sum_penjualan2, 0, ',', '.'); ?>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+                            <div class="px-4 py-4">
+                                <?php
+                                $total_pengeluaran = $sum_po + $sum_bahan;
+                                $total_penjualan = $sum_penjualanb + $sum_penjualan2;
+                                $net_profit = $total_penjualan - $total_pengeluaran;
+                                ?>
+                                <div class="row g-4">
+                                    <div class="col-lg-6">
+                                        <div class="summary-card bg-danger-subtle">
+                                            <h6 class="text-danger mb-3"><i class="bi bi-arrow-down-circle me-2"></i>Pengeluaran</h6>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Pembelian Bahan (PO)</span>
+                                                <strong>Rp <?php echo number_format($sum_po, 0, ',', '.'); ?></strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Produk Bahan Terpakai</span>
+                                                <strong>Rp <?php echo number_format($sum_bahan, 0, ',', '.'); ?></strong>
+                                            </div>
+                                            <hr>
+                                            <div class="d-flex justify-content-between">
+                                                <span>Total Pengeluaran</span>
+                                                <strong>Rp <?php echo number_format($total_pengeluaran, 0, ',', '.'); ?></strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="summary-card bg-success-subtle">
+                                            <h6 class="text-success mb-3"><i class="bi bi-arrow-up-circle me-2"></i>Penjualan</h6>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Penjualan Bruto</span>
+                                                <strong>Rp <?php echo number_format($sum_penjualanb, 0, ',', '.'); ?></strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Penjualan Neto</span>
+                                                <strong>Rp <?php echo number_format($sum_penjualan2, 0, ',', '.'); ?></strong>
+                                            </div>
+                                            <hr>
+                                            <div class="d-flex justify-content-between">
+                                                <span>Total Penjualan</span>
+                                                <strong>Rp <?php echo number_format($total_penjualan, 0, ',', '.'); ?></strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 text-center">
+                                    <div class="badge <?php echo $net_profit >= 0 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'; ?> px-4 py-3 fs-5">
+                                        <i class="bi bi-cash-coin me-2"></i>Net Profit: Rp <?php echo number_format($net_profit, 0, ',', '.'); ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light border-top py-3 px-4 d-flex justify-content-between align-items-center">
+                    <small class="text-muted">Pengeluaran: Rp <?php echo number_format($sum_po + $sum_bahan, 0, ',', '.'); ?></small>
+                    <small class="text-muted">Penjualan: Rp <?php echo number_format($sum_penjualanb + $sum_penjualan2, 0, ',', '.'); ?></small>
+                    <small class="text-muted"><i class="bi bi-clock-history me-1"></i>Export time: <?php echo date('d F Y H:i'); ?></small>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <?php include '_scripts_new.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-      // Initialize date pickers
-      flatpickr("#tgl_start", {
-        dateFormat: "Y-m-d",
-        maxDate: "today",
-        defaultDate: "<?php echo $tgl_start; ?>",
-        locale: {
-          firstDayOfWeek: 1
-        }
-      });
-      
-      flatpickr("#tgl_end", {
-        dateFormat: "Y-m-d",
-        maxDate: "today", 
-        defaultDate: "<?php echo $tgl_end; ?>",
-        locale: {
-          firstDayOfWeek: 1
-        }
-      });
+        flatpickr('#tgl_start', {
+            dateFormat: 'Y-m-d',
+            maxDate: 'today',
+            defaultDate: '<?php echo $tgl_start; ?>',
+            locale: { firstDayOfWeek: 1 }
+        });
+        flatpickr('#tgl_end', {
+            dateFormat: 'Y-m-d',
+            maxDate: 'today',
+            defaultDate: '<?php echo $tgl_end; ?>',
+            locale: { firstDayOfWeek: 1 }
+        });
     </script>
-  </body>
+</body>
 </html>
