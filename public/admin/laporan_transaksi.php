@@ -153,6 +153,16 @@ $kasir_list_stmt->execute();
 $kasir_list_result = $kasir_list_stmt->get_result();
 $kasir_list = $kasir_list_result->fetch_all(MYSQLI_ASSOC);
 
+$selected_kasir_name = '';
+if (!empty($selected_kasir)) {
+    foreach ($kasir_list as $kasir_option) {
+        if ($kasir_option['id_user'] == $selected_kasir) {
+            $selected_kasir_name = $kasir_option['nama_lengkap'];
+            break;
+        }
+    }
+}
+
 // Query for Per Kasir data
 $kasir_data = [];
 $total_kasir = 0;
@@ -260,746 +270,617 @@ $total_semua = 0;
 foreach ($semua_data as $row) {
     $total_semua += $row['total'];
 }
+
+$total_pembayaran_harian = $total_tunai + $total_transfer + $total_qris;
+$total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qris_data);
 ?>
 
 <!doctype html>
-<html lang="en">
-  <head>
+<html lang="id" data-bs-theme="light">
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Laporan Transaksi - Admin Dashboard</title>
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="../css/admin.css" rel="stylesheet">
-    <!-- Flatpickr CSS for Date Picker -->
+    <title>Laporan Transaksi - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="../css/newadmin.css?v=3" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <style>
-      .loading-spinner {
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(0,0,0,.1);
-        border-radius: 50%;
-        border-top-color: #0d6efd;
-        animation: spin 0.6s linear infinite;
-      }
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Top Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="navbar-brand" href="#"><?php echo isset($_SESSION['nama_aplikasi']) ? htmlspecialchars($_SESSION['nama_aplikasi']) : 'Admin'; ?></a>
-        <div class="navbar-nav ms-auto">
-          <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-              <?php echo htmlspecialchars($_SESSION["nama_lengkap"]); ?> (<?php echo htmlspecialchars($_SESSION["jabatan"]); ?>)
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="profile.php">Ubah Profil</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="logout.php">Logout</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </nav>
+</head>
+<body>
+    <?php include '_header_new.php'; ?>
+    <?php include '_sidebar_new.php'; ?>
 
-    <div class="container-fluid">
-      <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
-          <div class="position-sticky pt-3">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <a class="nav-link" href="index.php">
-                  <i class="bi bi-house-door"></i>
-                  <span>Beranda</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="informasi.php">
-                  <i class="bi bi-info-circle"></i>
-                  <span>Informasi</span>
-                </a>
-              </li>
-              
-              <?php if($_SESSION["jabatan"] == "Admin"): ?>
-              <!-- Master Menu - Admin Only -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#masterMenu" role="button">
-                  <i class="bi bi-gear-fill"></i>
-                  <span>Master</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="masterMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="resto.php"><i class="bi bi-building"></i> Resto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pegawai.php"><i class="bi bi-people"></i> Pegawai</a></li>
-                    <li class="nav-item"><a class="nav-link" href="vendor.php"><i class="bi bi-truck"></i> Vendor</a></li>
-                    <li class="nav-item"><a class="nav-link" href="meja.php"><i class="bi bi-table"></i> Meja</a></li>
-                    <li class="nav-item"><a class="nav-link" href="metode_pembayaran.php"><i class="bi bi-credit-card"></i> Metode Pembayaran</a></li>
-                  </ul>
+    <main class="main-content" id="mainContent">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <div>
+                    <h2 class="mb-1"><i class="bi bi-list-ul me-2"></i>Laporan Transaksi</h2>
+                    <p class="text-muted mb-0">Pantau transaksi harian Anda dengan tampilan modern</p>
                 </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <!-- Produk Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#produkMenu" role="button">
-                  <i class="bi bi-box-seam"></i>
-                  <span>Produk</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="produkMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="kategori_menu.php"><i class="bi bi-tags"></i> Kategori Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="menu.php"><i class="bi bi-card-list"></i> Menu</a></li>
-                    <li class="nav-item"><a class="nav-link" href="kategori_bahan.php"><i class="bi bi-collection"></i> Kategori Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="bahan.php"><i class="bi bi-basket"></i> Bahan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="resep.php"><i class="bi bi-journal-text"></i> Resep</a></li>
-                  </ul>
+                <div class="d-flex gap-2">
+                    <span class="badge bg-secondary-subtle text-secondary px-3 py-2">
+                        <i class="bi bi-calendar-week me-1"></i><?php echo date('d M Y', strtotime($selected_date)); ?>
+                    </span>
+                    <span class="badge bg-secondary-subtle text-secondary px-3 py-2">
+                        <i class="bi bi-person-lines-fill me-1"></i><?php echo $selected_kasir_name ? 'Kasir: ' . htmlspecialchars($selected_kasir_name) : 'Semua Kasir'; ?>
+                    </span>
                 </div>
-              </li>
-              
-              <!-- Pembelian Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#pembelianMenu" role="button">
-                  <i class="bi bi-cart-plus"></i>
-                  <span>Pembelian</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="pembelianMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="pembelian.php"><i class="bi bi-clipboard-check"></i> Pesanan Pembelian</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembayaran_pembelian.php"><i class="bi bi-currency-dollar"></i> Pembayaran</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Kasir"): ?>
-              <!-- Penjualan Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#penjualanMenu" role="button">
-                  <i class="bi bi-cash-coin"></i>
-                  <span>Penjualan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="penjualanMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="shift_kasir.php"><i class="bi bi-clock"></i> Shift Kasir</a></li>
-                    <li class="nav-item"><a class="nav-link" href="promo.php"><i class="bi bi-percent"></i> Promo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="biaya_lain.php"><i class="bi bi-receipt"></i> Biaya Lain</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_pokok_penjualan.php"><i class="bi bi-calculator"></i> Harga Pokok Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="harga_rilis.php"><i class="bi bi-tag"></i> Harga Rilis</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pembatalan.php"><i class="bi bi-x-circle"></i> Pembatalan</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <?php if($_SESSION["jabatan"] == "Admin" || $_SESSION["jabatan"] == "Dapur"): ?>
-              <!-- Inventory Menu -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#inventoryMenu" role="button">
-                  <i class="bi bi-boxes"></i>
-                  <span>Inventory</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse" id="inventoryMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link" href="inventory.php"><i class="bi bi-box-seam"></i> Inventory</a></li>
-                    <li class="nav-item"><a class="nav-link" href="transaksi_inventory.php"><i class="bi bi-arrow-left-right"></i> Transaksi</a></li>
-                  </ul>
-                </div>
-              </li>
-              <?php endif; ?>
-              
-              <!-- Laporan Menu - All Roles -->
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#laporanMenu" role="button">
-                  <i class="bi bi-graph-up"></i>
-                  <span>Laporan</span>
-                  <i class="bi bi-chevron-down ms-auto"></i>
-                </a>
-                <div class="collapse show" id="laporanMenu">
-                  <ul class="nav flex-column ms-3">
-                    <li class="nav-item"><a class="nav-link active" href="laporan_transaksi.php"><i class="bi bi-list-ul"></i> Transaksi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="laporan_pengeluaran.php"><i class="bi bi-bar-chart"></i> Pengeluaran vs Penjualan</a></li>
-                    <li class="nav-item"><a class="nav-link" href="laporan_kuantitas.php"><i class="bi bi-pie-chart"></i> Kuantitas</a></li>
-                  </ul>
-                </div>
-              </li>
-              
-              <!-- Pengaturan Menu - All Roles -->
-              <li class="nav-item">
-                <a class="nav-link" href="pengaturan.php">
-                  <i class="bi bi-gear"></i>
-                  <span>Pengaturan</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
+            </div>
 
-        <!-- Main content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Laporan Transaksi</h1>
-          </div>
-
-          <!-- Date Filter -->
-          <div class="mb-3">
-          
-              <form method="GET" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                  <label for="tanggal" class="form-label">Pilih Tanggal</label>
-                  <input type="date" class="form-control" id="tanggal" name="tanggal" 
-                         value="<?php echo htmlspecialchars($selected_date); ?>" required>
+            <div class="card-modern mb-4">
+                <div class="card-header px-4 py-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-funnel me-2"></i>
+                        <span>Filter Harian</span>
+                    </div>
                 </div>
-                <div class="col-md-2">
-                  <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-search"></i> Filter
-                  </button>
+                <div class="card-body">
+                    <form method="GET" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                           
+                            <input type="text" class="form-control" id="tanggal" name="tanggal" value="<?php echo htmlspecialchars($selected_date); ?>" required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search me-2"></i>Tampilkan
+                            </button>
+                        </div>
+                    </form>
                 </div>
-               
-              </form>
-           
-          </div>
+            </div>
 
-          <!-- Tabs -->
-          <ul class="nav nav-tabs mb-3" id="transactionTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button class="nav-link active" id="tunai-tab" data-bs-toggle="tab" data-bs-target="#tunai" type="button" role="tab">
-                <i class="bi bi-cash"></i> Tunai
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="transfer-tab" data-bs-toggle="tab" data-bs-target="#transfer" type="button" role="tab">
-                <i class="bi bi-bank"></i> Transfer
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="qris-tab" data-bs-toggle="tab" data-bs-target="#qris" type="button" role="tab">
-                <i class="bi bi-qr-code"></i> QRIS
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="kasir-tab" data-bs-toggle="tab" data-bs-target="#kasir" type="button" role="tab">
-                <i class="bi bi-person-badge"></i> Per Kasir
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link" id="semua-tab" data-bs-toggle="tab" data-bs-target="#semua" type="button" role="tab">
-                <i class="bi bi-list-ul"></i> Semua
-              </button>
-            </li>
-          </ul>
+            <div class="card-modern">
+                <div class="card-header px-4 py-3">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-diagram-3 me-2"></i>
+                            <span>Rincian Transaksi</span>
+                        </div>
+                        <ul class="nav nav-pills gap-2" id="transactionTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="tunai-tab" data-bs-toggle="tab" data-bs-target="#tunai" type="button" role="tab">
+                                    <i class="bi bi-cash me-1"></i>Tunai
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="transfer-tab" data-bs-toggle="tab" data-bs-target="#transfer" type="button" role="tab">
+                                    <i class="bi bi-bank me-1"></i>Transfer
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="qris-tab" data-bs-toggle="tab" data-bs-target="#qris" type="button" role="tab">
+                                    <i class="bi bi-qr-code me-1"></i>QRIS
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="kasir-tab" data-bs-toggle="tab" data-bs-target="#kasir" type="button" role="tab">
+                                    <i class="bi bi-person-badge me-1"></i>Per Kasir
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="semua-tab" data-bs-toggle="tab" data-bs-target="#semua" type="button" role="tab">
+                                    <i class="bi bi-list-ul me-1"></i>Semua
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab">
+                                    <i class="bi bi-journal-check me-1"></i>Ringkasan
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="tab-content" id="transactionTabsContent">
 
           <!-- Tab Content -->
           <div class="tab-content" id="transactionTabsContent">
             <!-- Tunai Tab -->
-            <div class="tab-pane fade show active" id="tunai" role="tabpanel">
-              <div class="table-responsive shadow-sm">
-                <table class="table table-hover align-middle">
-                  <thead class="table-dark">
-                    <tr>
-                      <th class="text-center">No</th>
-                      <th>Kode Payment</th>
-                      <th class="text-center">Jam</th>
-                     
-                      <th>Kasir</th>
-                      <th class="text-center">Status</th>
-                       <th class="text-end">Nominal</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php if (empty($tunai_data)): ?>
-                    <tr>
-                      <td colspan="7" class="text-center text-muted py-5">
-                        <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
-                        <span class="fs-5">Tidak ada transaksi tunai untuk tanggal <?php echo date('d F Y', strtotime($selected_date)); ?></span>
-                      </td>
-                    </tr>
-                    <?php else: ?>
-                    <?php 
-                    $no = 1;
-                    foreach ($tunai_data as $row): 
-                    ?>
-                    <tr>
-                      <td class="text-center fw-bold"><?php echo $no++; ?></td>
-                      <td class="fw-semibold"><?php echo htmlspecialchars($row['kode_payment']); ?></td>
-                      <td class="text-center"><?php echo htmlspecialchars($row['jam']); ?></td>
-                      
-                      <td><?php echo htmlspecialchars($row['kasir']); ?></td>
-                     
-                      <td class="text-center">
-                        <?php if ($row['status_bayar'] == 'DIBAYAR'): ?>
-                          <span class="badge bg-success fs-6 px-3 py-2">
-                            <i class="bi bi-check-circle me-1"></i>DIBAYAR
-                          </span>
-                        <?php else: ?>
-                          <span class="badge bg-warning fs-6 px-3 py-2">
-                            <i class="bi bi-clock me-1"></i>BELUM DIBAYAR
-                          </span>
-                        <?php endif; ?>
-                      </td>
-
-                       <td class="text-end fw-semibold">Rp <?php echo htmlspecialchars($row['nominal']); ?></td>
-                    </tr>
-                    <?php endforeach; ?>
+            <div class="tab-pane fade show active" id="tunai" role="tabpanel" aria-labelledby="tunai-tab">
+                <div class="px-0">
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light text-center">
+                                <tr>
+                                    <th style="width:5%;">No</th>
+                                    <th style="width:auto; text-align:left;">Kode Payment</th>
+                                    <th class="text-center" style="width:10%;">Jam</th>
+                                    <th style="width:10%; text-align:left;">Kasir</th>
+                                    <th class="text-center" style="width:10%;">Status</th>
+                                    <th class="text-end" style="width:15%;">Nominal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (empty($tunai_data)): ?>
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                        <span class="text-muted">Tidak ada transaksi tunai untuk tanggal <?php echo date('d F Y', strtotime($selected_date)); ?></span>
+                                    </td>
+                                </tr>
+                                <?php else: ?>
+                                    <?php $no = 1; foreach ($tunai_data as $row): ?>
+                                    <tr>
+                                        <td class="text-center fw-semibold"><?php echo $no++; ?></td>
+                                        <td class="fw-semibold">&num;<?php echo htmlspecialchars($row['kode_payment']); ?></td>
+                                        <td class="text-center text-nowrap"><?php echo htmlspecialchars($row['jam']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['kasir']); ?></td>
+                                        <td class="text-center">
+                                            <?php if ($row['status_bayar'] == 'DIBAYAR'): ?>
+                                                <span class="badge bg-success-subtle text-success px-3 py-2">
+                                                    <i class="bi bi-check-circle me-1"></i>DIBAYAR
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="badge bg-warning-subtle text-warning px-3 py-2">
+                                                    <i class="bi bi-clock me-1"></i>BELUM DIBAYAR
+                                                </span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-end fw-semibold">Rp <?php echo htmlspecialchars($row['nominal']); ?></td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php if (!empty($tunai_data)): ?>
+                    <div class="d-flex justify-content-end mt-3">
+                        <div class="badge bg-success-subtle text-success px-3 py-2">
+                            <i class="bi bi-calculator me-1"></i>Total Tunai: Rp <?php echo number_format($total_tunai, 0, ',', '.'); ?>
+                        </div>
+                    </div>
                     <?php endif; ?>
-                  </tbody>
-                </table>
-              </div>
-              
-              <!-- Total Summary -->
-              <?php if (!empty($tunai_data)): ?>
-              <div class="mt-3 p-3 bg-light rounded border">
-                <div class="row align-items-center">
-                  <div class="col-md-8">
-                    <span class="text-muted">Total Transaksi Tunai (<?php echo count($tunai_data); ?> transaksi)</span>
-                  </div>
-                  <div class="col-md-4 text-end">
-                    <span class="fw-bold fs-4 text-success">Rp <?php echo number_format($total_tunai, 0, ',', '.'); ?></span>
-                  </div>
                 </div>
-              </div>
-              <?php endif; ?>
             </div>
 
             <!-- Transfer Tab -->
-            <div class="tab-pane fade" id="transfer" role="tabpanel">
-              <div class="table-responsive shadow-sm">
-                <table class="table table-hover align-middle">
-                  <thead class="table-dark">
-                    <tr>
-                      <th class="text-center">NO</th>
-                      <th>KODE PAYMENT</th>
-                      <th>BANK/METODE</th>
-                      <th class="text-center">TANGGAL TRF</th>
-                      <th class="text-center">STATUS</th>
-                      <th class="text-end">NOMINAL</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php if (empty($transfer_data)): ?>
-                    <tr>
-                      <td colspan="6" class="text-center text-muted py-5">
-                        <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
-                        <span class="fs-5">Tidak ada transaksi transfer untuk tanggal <?php echo date('d F Y', strtotime($selected_date)); ?></span>
-                      </td>
-                    </tr>
-                    <?php else: ?>
-                    <?php 
-                    $no = 1;
-                    foreach ($transfer_data as $row): 
-                    ?>
-                    <tr>
-                      <td class="text-center fw-bold"><?php echo $no++; ?></td>
-                      <td class="fw-semibold"><?php echo htmlspecialchars($row['kode_payment']); ?></td>
-                      <td><?php echo htmlspecialchars($row['bank']); ?></td>
-                      <td class="text-center"><?php echo date('d/m/Y H:i', strtotime($row['tanggal_transfer'])); ?></td>
-                      <td class="text-center">
-                        <a href="#" class="text-decoration-none" onclick="showTransferDetail(
-                          '<?php echo addslashes($row['tanggal_transfer']); ?>',
-                          '<?php echo addslashes($row['no_referensi'] ?? '-'); ?>',
-                          '<?php echo addslashes($row['img_ss'] ?? ''); ?>',
-                          '<?php echo $row['status_pemeriksaan']; ?>',
-                          '<?php echo addslashes($row['tgl_pemeriksaan'] ?? ''); ?>'
-                        )" data-bs-toggle="modal" data-bs-target="#transferDetailModal">
-                          <?php 
-                          if ($row['status_pemeriksaan'] == 1): ?>
-                            <span class="badge bg-success fs-6 px-3 py-2" style="cursor: pointer;">
-                              <i class="bi bi-check-circle me-1"></i>DITERIMA
-                            </span>
-                          <?php elseif ($row['status_pemeriksaan'] == 2): ?>
-                            <span class="badge bg-danger fs-6 px-3 py-2" style="cursor: pointer;">
-                              <i class="bi bi-x-circle me-1"></i>PALSU
-                            </span>
-                          <?php else: ?>
-                            <span class="badge bg-warning fs-6 px-3 py-2" style="cursor: pointer;">
-                              <i class="bi bi-clock me-1"></i>BELUM DITERIMA
-                            </span>
-                          <?php endif; ?>
-                        </a>
-                      </td>
-                      <td class="text-end fw-bold text-primary">Rp <?php echo number_format($row['nominal_transfer'], 0, ',', '.'); ?></td>
-                    </tr>
-                    <?php endforeach; ?>
+            <div class="tab-pane fade" id="transfer" role="tabpanel" aria-labelledby="transfer-tab">
+                <div class="px-0">
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light text-center">
+                                <tr>
+                                    <th style="width:5%; text-align:left;" >No</th>
+                                    <th style="width:auto; text-align:left;">Kode Payment</th>
+                                    <th style="width:15%; text-align:left;">Bank / Metode</th>
+                                    <th class="text-center" style="width:10%;">Tanggal</th>
+                                    <th class="text-center" style="width:10%;">Status</th>
+                                    <th class="text-end" style="width:15%;">Nominal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (empty($transfer_data)): ?>
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                        <span class="text-muted">Tidak ada transaksi transfer untuk tanggal <?php echo date('d F Y', strtotime($selected_date)); ?></span>
+                                    </td>
+                                </tr>
+                                <?php else: ?>
+                                    <?php $no = 1; foreach ($transfer_data as $row): ?>
+                                    <tr>
+                                        <td class="text-left fw-semibold"><?php echo $no++; ?></td>
+                                        <td class="fw-semibold">&num;<?php echo htmlspecialchars($row['kode_payment']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['bank']); ?></td>
+                                        <td class="text-center text-nowrap"><?php echo date('d/m/Y H:i', strtotime($row['tanggal_transfer'])); ?></td>
+                                        <td class="text-center">
+                                            <a href="#" class="text-decoration-none" onclick="showTransferDetail(
+                                                '<?php echo addslashes($row['tanggal_transfer']); ?>',
+                                                '<?php echo addslashes($row['no_referensi'] ?? '-'); ?>',
+                                                '<?php echo addslashes($row['img_ss'] ?? ''); ?>',
+                                                '<?php echo $row['status_pemeriksaan']; ?>',
+                                                '<?php echo addslashes($row['tgl_pemeriksaan'] ?? ''); ?>'
+                                            )" data-bs-toggle="modal" data-bs-target="#transferDetailModal">
+                                                <?php if ($row['status_pemeriksaan'] == 1): ?>
+                                                    <span class="badge bg-success-subtle text-success px-3 py-2">
+                                                        <i class="bi bi-check-circle me-1"></i>DITERIMA
+                                                    </span>
+                                                <?php elseif ($row['status_pemeriksaan'] == 2): ?>
+                                                    <span class="badge bg-danger-subtle text-danger px-3 py-2">
+                                                        <i class="bi bi-x-circle me-1"></i>PALSU
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-warning-subtle text-warning px-3 py-2">
+                                                        <i class="bi bi-clock me-1"></i>BELUM DITERIMA
+                                                    </span>
+                                                <?php endif; ?>
+                                            </a>
+                                        </td>
+                                        <td class="text-end fw-semibold text-primary">Rp <?php echo number_format($row['nominal_transfer'], 0, ',', '.'); ?></td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php if (!empty($transfer_data)): ?>
+                    <div class="d-flex justify-content-end mt-3">
+                        <div class="badge bg-primary-subtle text-primary px-3 py-2">
+                            <i class="bi bi-calculator me-1"></i>Total Transfer: Rp <?php echo number_format($total_transfer, 0, ',', '.'); ?>
+                        </div>
+                    </div>
                     <?php endif; ?>
-                  </tbody>
-                </table>
-              </div>
-              
-              <!-- Total Summary -->
-              <?php if (!empty($transfer_data)): ?>
-              <div class="mt-3 p-3 bg-light rounded border">
-                <div class="row align-items-center">
-                  <div class="col-md-8">
-                    <span class="text-muted">Total Transaksi Transfer/EDC (<?php echo count($transfer_data); ?> transaksi)</span>
-                  </div>
-                  <div class="col-md-4 text-end">
-                    <span class="fw-bold fs-4 text-success">Rp <?php echo number_format($total_transfer, 0, ',', '.'); ?></span>
-                  </div>
                 </div>
-              </div>
-              <?php endif; ?>
             </div>
 
             <!-- QRIS Tab -->
-            <div class="tab-pane fade" id="qris" role="tabpanel">
-              <div class="table-responsive shadow-sm">
-                <table class="table table-hover align-middle">
-                  <thead class="table-dark">
-                    <tr>
-                      <th class="text-center">No</th>
-                      <th>Kode Payment</th>
-                      <th class="text-center">Jam</th>
-                      <th>Kasir</th>
-                      <th class="text-center">Status</th>
-                      <th class="text-end">Nominal</th>
-                      
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php if (empty($qris_data)): ?>
-                    <tr>
-                      <td colspan="7" class="text-center text-muted py-5">
-                        <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
-                        <span class="fs-5">Tidak ada transaksi QRIS untuk tanggal <?php echo date('d F Y', strtotime($selected_date)); ?></span>
-                      </td>
-                    </tr>
-                    <?php else: ?>
-                    <?php 
-                    $no = 1;
-                    foreach ($qris_data as $row): 
-                    ?>
-                    <tr>
-                      <td class="text-center fw-bold"><?php echo $no++; ?></td>
-                      <td class="fw-semibold"><?php echo htmlspecialchars($row['kode_payment']); ?></td>
-                      <td class="text-center"><?php echo htmlspecialchars($row['jam']); ?></td>
-                      <td><?php echo htmlspecialchars($row['kasir']); ?></td>
-                      <td class="text-center">
-                        <?php if ($row['status_bayar'] == 'SETTLEMENT'): ?>
-                          <span class="badge bg-success fs-6 px-3 py-2">
-                            <i class="bi bi-check-circle me-1"></i>SETTLEMENT
-                          </span>
-                        <?php else: ?>
-                          <span class="badge bg-warning fs-6 px-3 py-2">
-                            <i class="bi bi-clock me-1"></i>PENDING
-                          </span>
-                        <?php endif; ?>
-                      </td>
-                      <td class="text-end fw-semibold">Rp <?php echo htmlspecialchars($row['nominal']); ?></td>
-                     
-                    </tr>
-                    <?php endforeach; ?>
+            <div class="tab-pane fade" id="qris" role="tabpanel" aria-labelledby="qris-tab">
+                <div class="px-0">
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light text-center">
+                                <tr>
+                                    <th style="width:5%; text-align:left;">No</th>
+                                    <th style="width:auto; text-align:left;">Kode Payment</th>
+                                    <th class="text-center" style="width:10%;">Jam</th>
+                                    <th style="width:15%; text-align:left;">Kasir</th>
+                                    <th class="text-center" style="width:15%;">Status Bayar</th>
+                                    <th class="text-end" style="width:15%;">Nominal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (empty($qris_data)): ?>
+                                <tr>
+                                    <td colspan="6" class="text-center py-5">
+                                        <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                        <span class="text-muted">Tidak ada transaksi QRIS untuk tanggal <?php echo date('d F Y', strtotime($selected_date)); ?></span>
+                                    </td>
+                                </tr>
+                                <?php else: ?>
+                                    <?php $no = 1; foreach ($qris_data as $row): ?>
+                                    <tr>
+                                        <td class="text-start fw-semibold"><?php echo $no++; ?></td>
+                                        <td class="fw-semibold">&num;<?php echo htmlspecialchars($row['kode_payment']); ?></td>
+                                        <td class="text-center text-nowrap"><?php echo htmlspecialchars($row['jam']); ?></td>
+                                        <td class="text-start"><?php echo htmlspecialchars($row['kasir']); ?></td>
+                                        <td class="text-center">
+                                            <?php if ($row['status_bayar'] == 'SETTLEMENT'): ?>
+                                                <span class="badge bg-success-subtle text-success px-3 py-2">
+                                                    <i class="bi bi-check-circle me-1"></i>SETTLEMENT
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="badge bg-warning-subtle text-warning px-3 py-2">
+                                                    <i class="bi bi-clock me-1"></i>PENDING
+                                                </span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-end fw-semibold">Rp <?php echo htmlspecialchars($row['nominal']); ?></td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php if (!empty($qris_data)): ?>
+                    <div class="d-flex justify-content-end mt-3">
+                        <div class="badge bg-warning-subtle text-warning px-3 py-2">
+                            <i class="bi bi-calculator me-1"></i>Total QRIS: Rp <?php echo number_format($total_qris, 0, ',', '.'); ?>
+                        </div>
+                    </div>
                     <?php endif; ?>
-                  </tbody>
-                </table>
-              </div>
-              
-              <!-- Total Summary -->
-              <?php if (!empty($qris_data)): ?>
-              <div class="mt-3 p-3 bg-light rounded border">
-                <div class="row align-items-center">
-                  <div class="col-md-8">
-                    <span class="text-muted">Total Transaksi QRIS (<?php echo count($qris_data); ?> transaksi)</span>
-                  </div>
-                  <div class="col-md-4 text-end">
-                    <span class="fw-bold fs-4 text-success">Rp <?php echo number_format($total_qris, 0, ',', '.'); ?></span>
-                  </div>
                 </div>
-              </div>
-              <?php endif; ?>
             </div>
 
             <!-- Per Kasir Tab -->
-            <div class="tab-pane fade" id="kasir" role="tabpanel">
-              <!-- Filter for Per Kasir -->
-              <div class="mb-4 p-3 bg-light rounded">
-                <form method="GET" class="row g-3 align-items-end" id="kasirFilterForm">
-                  <input type="hidden" name="tab" value="kasir">
-                  <div class="col-md-3">
-                    <label for="tanggal_awal" class="form-label">Tanggal Awal</label>
-                    <input type="date" class="form-control" id="tanggal_awal" name="tanggal_awal" 
-                           value="<?php echo htmlspecialchars($tanggal_awal); ?>">
-                  </div>
-                  <div class="col-md-3">
-                    <label for="tanggal_akhir" class="form-label">Tanggal Akhir</label>
-                    <input type="date" class="form-control" id="tanggal_akhir" name="tanggal_akhir" 
-                           value="<?php echo htmlspecialchars($tanggal_akhir); ?>">
-                  </div>
-                  <div class="col-md-4">
-                    <label for="kasir" class="form-label">Pilih Kasir</label>
-                    <select class="form-select" id="kasir" name="kasir">
-                      <option value="">-- Pilih Kasir --</option>
-                      <?php foreach ($kasir_list as $kasir): ?>
-                      <option value="<?php echo htmlspecialchars($kasir['id_user']); ?>" 
-                              <?php echo ($selected_kasir == $kasir['id_user']) ? 'selected' : ''; ?>>
-                        <?php echo htmlspecialchars($kasir['nama_lengkap']); ?>
-                      </option>
-                      <?php endforeach; ?>
-                    </select>
-                  </div>
-                  <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary">
-                      <i class="bi bi-search"></i> Tampilkan
-                    </button>
-                  </div>
-                </form>
-              </div>
-              
-              <!-- Table for Per Kasir -->
-              <?php if (!empty($selected_kasir)): ?>
-              <div class="table-responsive shadow-sm">
-                <table class="table table-hover align-middle">
-                  <thead class="table-dark">
-                    <tr>
-                      <th class="text-center">No</th>
-                      <th class="text-center">Tanggal</th>
-                      <th>Kasir</th>
-                      <th class="text-end">Cash Awal</th>
-                      <th class="text-end">QRIS</th>
-                      <th class="text-end">Transfer</th>
-                      <th class="text-end">Cash</th>
-                      <th class="text-end">Total Diskon</th>
-                      <th class="text-end">Grand Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php if (empty($kasir_data)): ?>
-                    <tr>
-                      <td colspan="9" class="text-center text-muted py-5">
-                        <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
-                        <span class="fs-5">Tidak ada data untuk kasir yang dipilih pada periode tersebut</span>
-                      </td>
-                    </tr>
-                    <?php else: ?>
-                    <?php 
-                    $no = 1;
-                    foreach ($kasir_data as $row): 
-                    ?>
-                    <tr>
-                      <td class="text-center fw-bold"><?php echo $no++; ?></td>
-                      <td class="text-center">
-                        <a href="#" class="text-decoration-none" onclick="showKasirDetail('<?php echo $tanggal_awal; ?>', '<?php echo $tanggal_akhir; ?>', '<?php echo $row['id_user']; ?>', '<?php echo htmlspecialchars($row['kasir']); ?>')" data-bs-toggle="modal" data-bs-target="#kasirDetailModal">
-                          <span class="text-primary" style="cursor: pointer;">
-                            <i class="bi bi-calendar3"></i> <?php echo htmlspecialchars($row['tanggal_open']); ?>
-                          </span>
-                        </a>
-                      </td>
-                      <td><?php echo htmlspecialchars($row['kasir']); ?></td>
-                      <td class="text-end">Rp <?php echo number_format($row['cash_awal'], 0, ',', '.'); ?></td>
-                      <td class="text-end">Rp <?php echo number_format($row['qris'], 0, ',', '.'); ?></td>
-                      <td class="text-end">Rp <?php echo number_format($row['transfer'], 0, ',', '.'); ?></td>
-                      <td class="text-end">Rp <?php echo number_format($row['cash'], 0, ',', '.'); ?></td>
-                      <td class="text-end text-danger">Rp <?php echo number_format($row['total_diskon'], 0, ',', '.'); ?></td>
-                      <td class="text-end fw-bold text-primary">Rp <?php echo number_format($row['grand_total'], 0, ',', '.'); ?></td>
-                    </tr>
-                    <?php endforeach; ?>
-                    <?php endif; ?>
-                  </tbody>
-                </table>
-              </div>
-              
-              <!-- Total Summary -->
-              <?php if (!empty($kasir_data)): ?>
-              <div class="mt-3 p-3 bg-light rounded border">
-                <div class="row align-items-center">
-                  <div class="col-md-8">
-                    <span class="text-muted">Total Transaksi Per Kasir (<?php echo count($kasir_data); ?> periode)</span>
-                  </div>
-                  <div class="col-md-4 text-end">
-                    <span class="fw-bold fs-4 text-success">Rp <?php echo number_format($total_kasir, 0, ',', '.'); ?></span>
-                  </div>
-                </div>
-              </div>
-              <?php endif; ?>
-              <?php else: ?>
-              <div class="text-center py-5">
-                <i class="bi bi-person-badge display-1 text-muted"></i>
-                <p class="mt-3">Silakan pilih rentang tanggal dan kasir untuk melihat laporan</p>
-              </div>
-              <?php endif; ?>
-            </div>
+                        <div class="tab-pane fade" id="kasir" role="tabpanel" aria-labelledby="kasir-tab">
+                            <div class="px-0">
+                                
+                                <div class="card-modern border-0 shadow-none">
+                                    <div class="card-body px-0">
+                                        <form method="GET" class="row g-3 align-items-end px-4 py-2"  id="kasirFilterForm">
+                                            <input type="hidden" name="tab" value="kasir">
+                                            <div class="col-md-3">
+                                                <label for="tanggal_awal" class="form-label">Tanggal Awal</label>
+                                                <input type="text" class="form-control" id="tanggal_awal" name="tanggal_awal" value="<?php echo htmlspecialchars($tanggal_awal); ?>">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="tanggal_akhir" class="form-label">Tanggal Akhir</label>
+                                                <input type="text" class="form-control" id="tanggal_akhir" name="tanggal_akhir" value="<?php echo htmlspecialchars($tanggal_akhir); ?>">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="kasir" class="form-label">Pilih Kasir</label>
+                                                <select class="form-select" id="kasir" name="kasir">
+                                                    <option value="">-- Pilih Kasir --</option>
+                                                    <?php foreach ($kasir_list as $kasir): ?>
+                                                        <option value="<?php echo htmlspecialchars($kasir['id_user']); ?>" <?php echo ($selected_kasir == $kasir['id_user']) ? 'selected' : ''; ?>>
+                                                            <?php echo htmlspecialchars($kasir['nama_lengkap']); ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="submit" class="btn btn-primary w-100">
+                                                    <i class="bi bi-search me-2"></i>Tampilkan
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <?php if (!empty($selected_kasir)): ?>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light text-center">
+                                            <tr>
+                                                <th style="width:5%; text-align:left;">No</th>
+                                                <th style="width:12%; text-align:center;">Tanggal</th>
+                                                <th style="width:15%; text-align:left;">Kasir</th>
+                                                <th class="text-end" style="width:12%;">Cash Awal</th>
+                                                <th class="text-end" style="width:12%;">QRIS</th>
+                                                <th class="text-end" style="width:12%;">Transfer</th>
+                                                <th class="text-end" style="width:12%;">Cash</th>
+                                                <th class="text-end" style="width:12%;">Total Diskon</th>
+                                                <th class="text-end" style="width:12%;">Grand Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (empty($kasir_data)): ?>
+                                            <tr>
+                                                <td colspan="9" class="text-center py-5">
+                                                    <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                                    <span class="text-muted">Tidak ada data untuk kasir yang dipilih</span>
+                                                </td>
+                                            </tr>
+                                            <?php else: ?>
+                                                <?php $no = 1; foreach ($kasir_data as $row): ?>
+                                                <tr>
+                                                    <td class="text-left fw-semibold"><?php echo $no++; ?></td>
+                                                    <td class="text-center text-nowrap">
+                                                        <a href="#" class="text-decoration-none" onclick="showKasirDetail('<?php echo $tanggal_awal; ?>', '<?php echo $tanggal_akhir; ?>', '<?php echo $row['id_user']; ?>', '<?php echo htmlspecialchars($row['kasir']); ?>')" data-bs-toggle="modal" data-bs-target="#kasirDetailModal">
+                                                            <span class="text-primary">
+                                                                <i class="bi bi-calendar3 me-1"></i><?php echo htmlspecialchars($row['tanggal_open']); ?>
+                                                            </span>
+                                                        </a>
+                                                    </td>
+                                                    <td><?php echo htmlspecialchars($row['kasir']); ?></td>
+                                                    <td class="text-end">Rp <?php echo number_format($row['cash_awal'], 0, ',', '.'); ?></td>
+                                                    <td class="text-end">Rp <?php echo number_format($row['qris'], 0, ',', '.'); ?></td>
+                                                    <td class="text-end">Rp <?php echo number_format($row['transfer'], 0, ',', '.'); ?></td>
+                                                    <td class="text-end">Rp <?php echo number_format($row['cash'], 0, ',', '.'); ?></td>
+                                                    <td class="text-end text-danger">Rp <?php echo number_format($row['total_diskon'], 0, ',', '.'); ?></td>
+                                                    <td class="text-end fw-semibold text-primary">Rp <?php echo number_format($row['grand_total'], 0, ',', '.'); ?></td>
+                                                </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <?php if (!empty($kasir_data)): ?>
+                                <div class="d-flex justify-content-end mt-3 px-4 py-2">
+                                    <div class="badge bg-primary-subtle text-primary px-3 py-2">
+                                        <i class="bi bi-calculator me-1"></i>Total Kasir: Rp <?php echo number_format($total_kasir, 0, ',', '.'); ?>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                                <?php else: ?>
+                                <div class="text-center py-5">
+                                    <i class="bi bi-person-badge fs-1 text-muted"></i>
+                                    <p class="mt-3 text-muted">Silakan pilih kasir dan periode untuk melihat data</p>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
 
             <!-- Semua Tab -->
-            <div class="tab-pane fade" id="semua" role="tabpanel">
-              <!-- Filter for Semua -->
-              <div class="mb-4 p-3 bg-light rounded">
-                <form method="GET" class="row g-3 align-items-end">
-                  <input type="hidden" name="tab" value="semua">
-                  <input type="hidden" name="semua_page" value="1">
-                  <div class="col-md-3">
-                    <label for="tanggal1" class="form-label">Tanggal Awal</label>
-                    <input type="date" class="form-control" id="tanggal1" name="tanggal1" 
-                           value="<?php echo htmlspecialchars($semua_tanggal1); ?>">
-                  </div>
-                  <div class="col-md-3">
-                    <label for="tanggal2" class="form-label">Tanggal Akhir</label>
-                    <input type="date" class="form-control" id="tanggal2" name="tanggal2" 
-                           value="<?php echo htmlspecialchars($semua_tanggal2); ?>">
-                  </div>
-                  <div class="col-md-3">
-                    <label for="kategori" class="form-label">Kategori</label>
-                    <select class="form-select" id="kategori" name="kategori">
-                      <option value="Semua" <?php echo $semua_kategori == 'Semua' ? 'selected' : ''; ?>>Semua</option>
-                      <option value="Tunai" <?php echo $semua_kategori == 'Tunai' ? 'selected' : ''; ?>>Tunai</option>
-                      <option value="Transfer" <?php echo $semua_kategori == 'Transfer' ? 'selected' : ''; ?>>Transfer</option>
-                      <option value="QRIS" <?php echo $semua_kategori == 'QRIS' ? 'selected' : ''; ?>>QRIS</option>
-                    </select>
-                  </div>
-                  <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary">
-                      <i class="bi bi-search"></i> Tampilkan
-                    </button>
-                  </div>
-                </form>
-              </div>
-              
-              <!-- Table for Semua -->
-              <div class="table-responsive shadow-sm">
-                <table class="table table-hover align-middle">
-                  <thead class="table-dark">
-                    <tr>
-                      <th class="text-center">No</th>
-                      <th>Kode</th>
-                      <th>ID</th>
-                      <th>Kategori</th>
-                      <th class="text-end">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php if (empty($semua_data)): ?>
-                    <tr>
-                      <td colspan="5" class="text-center text-muted py-5">
-                        <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
-                        <span class="fs-5">Tidak ada data untuk filter yang dipilih</span>
-                      </td>
-                    </tr>
-                    <?php else: ?>
-                    <?php 
-                    $no = $semua_offset + 1;
-                    foreach ($semua_data as $row): 
-                    ?>
-                    <tr>
-                      <td class="text-center fw-bold"><?php echo $no++; ?></td>
-                      <td class="fw-semibold"><?php echo htmlspecialchars($row['kode']); ?></td>
-                      <td><?php echo htmlspecialchars($row['id_tagihan']); ?></td>
-                      <td>
-                        <?php 
-                        $badge_class = '';
-                        switch($row['kategori']) {
-                            case 'Tunai':
-                                $badge_class = 'bg-success';
-                                break;
-                            case 'Transfer':
-                                $badge_class = 'bg-info';
-                                break;
-                            case 'QRIS':
-                                $badge_class = 'bg-warning text-dark';
-                                break;
-                            default:
-                                $badge_class = 'bg-secondary';
-                        }
-                        ?>
-                        <span class="badge <?php echo $badge_class; ?>"><?php echo htmlspecialchars($row['kategori']); ?></span>
-                      </td>
-                      <td class="text-end fw-bold">Rp <?php echo number_format($row['total'], 0, ',', '.'); ?></td>
-                    </tr>
-                    <?php endforeach; ?>
-                    <?php endif; ?>
-                  </tbody>
-                </table>
-              </div>
-              
-              <!-- Pagination -->
-              <?php if ($semua_total_pages > 1): ?>
-              <nav aria-label="Page navigation" class="mt-3">
-                <ul class="pagination justify-content-center">
-                  <!-- Previous -->
-                  <li class="page-item <?php echo $semua_page <= 1 ? 'disabled' : ''; ?>">
-                    <a class="page-link" href="?tab=semua&tanggal1=<?php echo $semua_tanggal1; ?>&tanggal2=<?php echo $semua_tanggal2; ?>&kategori=<?php echo $semua_kategori; ?>&semua_page=<?php echo $semua_page - 1; ?>">
-                      Previous
-                    </a>
-                  </li>
-                  
-                  <!-- Page Numbers -->
-                  <?php
-                  $start_page = max(1, $semua_page - 2);
-                  $end_page = min($semua_total_pages, $semua_page + 2);
-                  
-                  if ($start_page > 1): ?>
-                  <li class="page-item">
-                    <a class="page-link" href="?tab=semua&tanggal1=<?php echo $semua_tanggal1; ?>&tanggal2=<?php echo $semua_tanggal2; ?>&kategori=<?php echo $semua_kategori; ?>&semua_page=1">1</a>
-                  </li>
-                  <?php if ($start_page > 2): ?>
-                  <li class="page-item disabled"><span class="page-link">...</span></li>
-                  <?php endif; ?>
-                  <?php endif; ?>
-                  
-                  <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
-                  <li class="page-item <?php echo $i == $semua_page ? 'active' : ''; ?>">
-                    <a class="page-link" href="?tab=semua&tanggal1=<?php echo $semua_tanggal1; ?>&tanggal2=<?php echo $semua_tanggal2; ?>&kategori=<?php echo $semua_kategori; ?>&semua_page=<?php echo $i; ?>">
-                      <?php echo $i; ?>
-                    </a>
-                  </li>
-                  <?php endfor; ?>
-                  
-                  <?php if ($end_page < $semua_total_pages): ?>
-                  <?php if ($end_page < $semua_total_pages - 1): ?>
-                  <li class="page-item disabled"><span class="page-link">...</span></li>
-                  <?php endif; ?>
-                  <li class="page-item">
-                    <a class="page-link" href="?tab=semua&tanggal1=<?php echo $semua_tanggal1; ?>&tanggal2=<?php echo $semua_tanggal2; ?>&kategori=<?php echo $semua_kategori; ?>&semua_page=<?php echo $semua_total_pages; ?>">
-                      <?php echo $semua_total_pages; ?>
-                    </a>
-                  </li>
-                  <?php endif; ?>
-                  
-                  <!-- Next -->
-                  <li class="page-item <?php echo $semua_page >= $semua_total_pages ? 'disabled' : ''; ?>">
-                    <a class="page-link" href="?tab=semua&tanggal1=<?php echo $semua_tanggal1; ?>&tanggal2=<?php echo $semua_tanggal2; ?>&kategori=<?php echo $semua_kategori; ?>&semua_page=<?php echo $semua_page + 1; ?>">
-                      Next
-                    </a>
-                  </li>
-                </ul>
-              </nav>
-              <?php endif; ?>
-              
-              <!-- Total Summary -->
-              <?php if (!empty($semua_data)): ?>
-              <div class="mt-3 p-3 bg-light rounded border">
-                <div class="row align-items-center">
-                  <div class="col-md-8">
-                    <span class="text-muted">
-                      Menampilkan <?php echo $semua_offset + 1; ?> - <?php echo min($semua_offset + $semua_limit, $semua_total_records); ?> 
-                      dari <?php echo $semua_total_records; ?> transaksi
-                      <?php if ($semua_kategori !== 'Semua'): ?>
-                        (Filter: <?php echo $semua_kategori; ?>)
-                      <?php endif; ?>
-                    </span>
-                  </div>
-                  <div class="col-md-4 text-end">
-                    <span class="fw-bold fs-4 text-success">Halaman Total: Rp <?php echo number_format($total_semua, 0, ',', '.'); ?></span>
-                  </div>
-                </div>
-              </div>
-              <?php endif; ?>
+                        <div class="tab-pane fade" id="semua" role="tabpanel" aria-labelledby="semua-tab">
+                            <div class="px-0">
+                                
+                                <form method="GET" class="row g-3 align-items-end mb-4 px-4 py-4">
+                                    <input type="hidden" name="tab" value="semua">
+                                    <input type="hidden" name="semua_page" value="1">
+                                    <div class="col-md-3">
+                                        <label for="tanggal1" class="form-label">Tanggal Awal</label>
+                                        <input type="text" class="form-control" id="tanggal1" name="tanggal1" value="<?php echo htmlspecialchars($semua_tanggal1); ?>">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="tanggal2" class="form-label">Tanggal Akhir</label>
+                                        <input type="text" class="form-control" id="tanggal2" name="tanggal2" value="<?php echo htmlspecialchars($semua_tanggal2); ?>">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="kategori" class="form-label">Kategori</label>
+                                        <select class="form-select" id="kategori" name="kategori">
+                                            <option value="Semua" <?php echo $semua_kategori == 'Semua' ? 'selected' : ''; ?>>Semua</option>
+                                            <option value="Tunai" <?php echo $semua_kategori == 'Tunai' ? 'selected' : ''; ?>>Tunai</option>
+                                            <option value="Transfer" <?php echo $semua_kategori == 'Transfer' ? 'selected' : ''; ?>>Transfer</option>
+                                            <option value="QRIS" <?php echo $semua_kategori == 'QRIS' ? 'selected' : ''; ?>>QRIS</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="bi bi-search me-2"></i>Tampilkan
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light text-center">
+                                            <tr>
+                                                <th style="width:5%; text-align:left;">No</th>
+                                                <th style="width:auto; text-align:left;">Kode</th>
+                                                <th style="width:20%; text-align:left;">ID</th>
+                                                <th style="width:8%; text-align:center;">Kategori</th>
+                                                <th class="text-end" style="width:15%;">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (empty($semua_data)): ?>
+                                            <tr>
+                                                <td colspan="5" class="text-center py-5">
+                                                    <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                                    <span class="text-muted">Tidak ada data untuk filter yang dipilih</span>
+                                                </td>
+                                            </tr>
+                                            <?php else: ?>
+                                                <?php $no = $semua_offset + 1; foreach ($semua_data as $row): ?>
+                                                <tr>
+                                                    <td class="text-start fw-semibold"><?php echo $no++; ?></td>
+                                                    <td class="fw-semibold"><?php echo htmlspecialchars($row['kode']); ?></td>
+                                                    <td class="fw-semibold text-start" ><?php echo htmlspecialchars($row['id_tagihan']); ?></td>
+                                                    <td>
+                                                        <?php
+                                                        $badge_class = 'bg-secondary';
+                                                        if ($row['kategori'] === 'Tunai') {
+                                                            $badge_class = 'bg-success';
+                                                        } elseif ($row['kategori'] === 'Transfer') {
+                                                            $badge_class = 'bg-info';
+                                                        } elseif ($row['kategori'] === 'QRIS') {
+                                                            $badge_class = 'bg-warning text-dark';
+                                                        }
+                                                        ?>
+                                                        <span class="badge <?php echo $badge_class; ?>"><?php echo htmlspecialchars($row['kategori']); ?></span>
+                                                    </td>
+                                                    <td class="text-end fw-semibold">Rp <?php echo number_format($row['total'], 0, ',', '.'); ?></td>
+                                                </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <?php if ($semua_total_pages > 1): ?>
+                                <nav aria-label="Page navigation" class="mt-3">
+                                    <ul class="pagination justify-content-center mb-0">
+                                        <li class="page-item <?php echo $semua_page <= 1 ? 'disabled' : ''; ?>">
+                                            <a class="page-link" href="?tab=semua&tanggal1=<?php echo $semua_tanggal1; ?>&tanggal2=<?php echo $semua_tanggal2; ?>&kategori=<?php echo $semua_kategori; ?>&semua_page=<?php echo $semua_page - 1; ?>">Previous</a>
+                                        </li>
+                                        <?php
+                                        $start_page = max(1, $semua_page - 2);
+                                        $end_page = min($semua_total_pages, $semua_page + 2);
+                                        if ($start_page > 1): ?>
+                                        <li class="page-item"><a class="page-link" href="?tab=semua&tanggal1=<?php echo $semua_tanggal1; ?>&tanggal2=<?php echo $semua_tanggal2; ?>&kategori=<?php echo $semua_kategori; ?>&semua_page=1">1</a></li>
+                                        <?php if ($start_page > 2): ?><li class="page-item disabled"><span class="page-link">...</span></li><?php endif; ?>
+                                        <?php endif; ?>
+                                        <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                                        <li class="page-item <?php echo $i == $semua_page ? 'active' : ''; ?>">
+                                            <a class="page-link" href="?tab=semua&tanggal1=<?php echo $semua_tanggal1; ?>&tanggal2=<?php echo $semua_tanggal2; ?>&kategori=<?php echo $semua_kategori; ?>&semua_page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                                        </li>
+                                        <?php endfor; ?>
+                                        <?php if ($end_page < $semua_total_pages): ?>
+                                        <?php if ($end_page < $semua_total_pages - 1): ?><li class="page-item disabled"><span class="page-link">...</span></li><?php endif; ?>
+                                        <li class="page-item"><a class="page-link" href="?tab=semua&tanggal1=<?php echo $semua_tanggal1; ?>&tanggal2=<?php echo $semua_tanggal2; ?>&kategori=<?php echo $semua_kategori; ?>&semua_page=<?php echo $semua_total_pages; ?>"><?php echo $semua_total_pages; ?></a></li>
+                                        <?php endif; ?>
+                                        <li class="page-item <?php echo $semua_page >= $semua_total_pages ? 'disabled' : ''; ?>">
+                                            <a class="page-link" href="?tab=semua&tanggal1=<?php echo $semua_tanggal1; ?>&tanggal2=<?php echo $semua_tanggal2; ?>&kategori=<?php echo $semua_kategori; ?>&semua_page=<?php echo $semua_page + 1; ?>">Next</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                                <?php endif; ?>
+
+                                <?php if (!empty($semua_data)): ?>
+                                <div class="d-flex justify-content-between align-items-center mt-3 px-4 py-2">
+                                    <span class="text-muted">Menampilkan <?php echo $semua_offset + 1; ?> - <?php echo min($semua_offset + $semua_limit, $semua_total_records); ?> dari <?php echo $semua_total_records; ?> transaksi <?php echo $semua_kategori !== 'Semua' ? '(Filter: ' . htmlspecialchars($semua_kategori) . ')' : ''; ?></span>
+                                    <div class="badge bg-success-subtle text-success px-3 py-2">
+                                        <i class="bi bi-calculator me-1"></i>Total Halaman: Rp <?php echo number_format($total_semua, 0, ',', '.'); ?>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="summary" role="tabpanel" aria-labelledby="summary-tab">
+                            <div class="px-4 py-4">
+                                <div class="row g-4">
+                                    <div class="col-lg-4">
+                                        <div class="summary-card bg-success-subtle">
+                                            <h6 class="text-success mb-3"><i class="bi bi-cash-stack me-2"></i>Tunai</h6>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Total Nominal</span>
+                                                <strong>Rp <?php echo number_format($total_tunai, 0, ',', '.'); ?></strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Jumlah Transaksi</span>
+                                                <strong><?php echo count($tunai_data); ?></strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="summary-card bg-primary-subtle">
+                                            <h6 class="text-primary mb-3"><i class="bi bi-bank me-2"></i>Transfer / EDC</h6>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Total Nominal</span>
+                                                <strong>Rp <?php echo number_format($total_transfer, 0, ',', '.'); ?></strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Jumlah Transaksi</span>
+                                                <strong><?php echo count($transfer_data); ?></strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="summary-card bg-warning-subtle">
+                                            <h6 class="text-warning mb-3"><i class="bi bi-qr-code-scan me-2"></i>QRIS</h6>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Total Nominal</span>
+                                                <strong>Rp <?php echo number_format($total_qris, 0, ',', '.'); ?></strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Jumlah Transaksi</span>
+                                                <strong><?php echo count($qris_data); ?></strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-4 mt-3">
+                                    <div class="col-lg-6">
+                                        <div class="summary-card bg-secondary-subtle">
+                                            <h6 class="text-secondary mb-3"><i class="bi bi-people me-2"></i>Per Kasir</h6>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Total Grand Total</span>
+                                                <strong>Rp <?php echo number_format($total_kasir, 0, ',', '.'); ?></strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Periode Dipilih</span>
+                                                <strong><?php echo htmlspecialchars($tanggal_awal); ?> s/d <?php echo htmlspecialchars($tanggal_akhir); ?></strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <span>Kasir Dipilih</span>
+                                                <strong><?php echo $selected_kasir_name ? htmlspecialchars($selected_kasir_name) : 'Semua'; ?></strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="summary-card bg-info-subtle">
+                                            <h6 class="text-info mb-3"><i class="bi bi-list-check me-2"></i>Semua Transaksi</h6>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Total Halaman Saat Ini</span>
+                                                <strong>Rp <?php echo number_format($total_semua, 0, ',', '.'); ?></strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span>Rentang Tanggal</span>
+                                                <strong><?php echo htmlspecialchars($semua_tanggal1); ?> s/d <?php echo htmlspecialchars($semua_tanggal2); ?></strong>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <span>Kategori</span>
+                                                <strong><?php echo htmlspecialchars($semua_kategori); ?></strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 text-center">
+                                    <div class="badge bg-secondary-subtle text-secondary px-4 py-3 fs-5">
+                                        <i class="bi bi-calculator me-2"></i>Total Kombinasi: Rp <?php echo number_format($total_tunai + $total_transfer + $total_qris, 0, ',', '.'); ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
             </div>
-          </div>
-        </main>
-      </div>
+        </div>
+    </main>
+
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+        <div id="kasirToast" class="toast align-items-center text-bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+            <div class="d-flex">
+                <div class="toast-body">
+                    Silakan pilih kasir terlebih dahulu.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
     </div>
 
     <!-- Kasir Detail Modal -->
@@ -1088,8 +969,7 @@ foreach ($semua_data as $row) {
       </div>
     </div>
 
-    <script src="../js/bootstrap.bundle.min.js"></script>
-    <!-- Flatpickr JS for Date Picker -->
+    <?php include '_scripts_new.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
@@ -1187,11 +1067,21 @@ foreach ($semua_data as $row) {
         // Prevent form submission on Enter key except for button
         const kasirForm = document.getElementById('kasirFilterForm');
         if (kasirForm) {
-          // Only prevent Enter key submission, no validation
           kasirForm.addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && e.target.tagName !== 'BUTTON') {
               e.preventDefault();
               return false;
+            }
+          });
+          kasirForm.addEventListener('submit', function(e) {
+            const kasirSelect = document.getElementById('kasir');
+            if (kasirSelect && !kasirSelect.value) {
+              e.preventDefault();
+              const toast = document.getElementById('kasirToast');
+              if (toast) {
+                const toastInstance = bootstrap.Toast.getOrCreateInstance(toast);
+                toastInstance.show();
+              }
             }
           });
         }
