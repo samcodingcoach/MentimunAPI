@@ -34,9 +34,9 @@ if (mysqli_num_rows($result_set) > 0) {
         case
           WHEN pesanan_detail.ta_dinein = 1 then 'TAKE AWAY'
           ELSE 'DINE IN'
-        end as mode_pesanan, 
+        end as sub_mode_pesanan, 
         produk_sell.harga_jual AS harga,
-        pesanan_detail.qty * produk_sell.harga_jual AS subtotal
+        pesanan_detail.qty * produk_sell.harga_jual AS subtotal_produk
     FROM
         pesanan_detail
         INNER JOIN produk_sell ON pesanan_detail.id_produk_sell = produk_sell.id_produk_sell
