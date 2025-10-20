@@ -425,7 +425,10 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
                         </table>
                     </div>
                     <?php if (!empty($tunai_data)): ?>
-                    <div class="d-flex justify-content-end mt-3 px-4 py-2">
+                    <div class="d-flex flex-wrap justify-content-between gap-2 mt-3 px-4 py-2 align-items-center">
+                        <div class="badge bg-secondary-subtle text-secondary px-3 py-2">
+                            <i class="bi bi-123 me-1"></i><?php echo count($tunai_data); ?> transaksi
+                        </div>
                         <div class="badge bg-success-subtle text-success px-3 py-2">
                             <i class="bi bi-calculator me-1"></i>Total Tunai: Rp <?php echo number_format($total_tunai, 0, ',', '.'); ?>
                         </div>

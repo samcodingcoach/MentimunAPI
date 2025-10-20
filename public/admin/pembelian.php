@@ -319,147 +319,107 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
 ?>
 
 <!doctype html>
-<html lang="en">
-  <head>
+<html lang="id" data-bs-theme="light">
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Transaksi Pembelian - Admin Dashboard</title>
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="../css/admin.css" rel="stylesheet">
+    <title>Transaksi Pembelian - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
-    <style>
-      .btn-close-overlay {
-        position: absolute;
-        top: -15px;
-        right: -15px;
-        z-index: 1056;
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        color: red;
-        opacity: 0.8;
-        padding: 0;
-      }
-      .btn-close-overlay:hover {
-        opacity: 1;
-      }
-      #modalBuktiPembayaran .modal-dialog {
-        max-width: fit-content;
-        margin: 1.75rem auto;
-      }
-      #modalBuktiPembayaran .modal-content {
-        text-align: center;
-        background: transparent;
-        border: none;
-      }
-      #modalBuktiPembayaran .modal-body {
-        padding: 0;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Top Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="navbar-brand" href="#"><?php echo isset($_SESSION['nama_aplikasi']) ? htmlspecialchars($_SESSION['nama_aplikasi']) : 'Admin'; ?></a>
-        <div class="navbar-nav ms-auto">
-          <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-              <?php echo htmlspecialchars($_SESSION["nama_lengkap"]); ?> (<?php echo htmlspecialchars($_SESSION["jabatan"]); ?>)
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="profile.php">Ubah Profil</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="logout.php">Logout</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <link href="../css/newadmin.css?v=3" rel="stylesheet">
+    
+</head>
+<body>
+    <?php include '_header_new.php'; ?>
+    <?php include '_sidebar_new.php'; ?>
 
-    <div class="container-fluid">
-      <div class="row">
-        <?php include '_sidebar.php'; ?>
-
-        <!-- Main content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Transaksi Pembelian</h1>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddRequest">
-              <i class="bi bi-plus-circle"></i> Tambah Request
-            </button>
-          </div>
-
-          <?php if ($message): ?>
-          <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <?php echo htmlspecialchars($message); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
-          <?php endif; ?>
-
-          <?php if ($error): ?>
-          <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <?php echo htmlspecialchars($error); ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
-          <?php endif; ?>
-
-          <!-- Daftar Request / PO -->
-          <div class="mb-4">
-            
-            <div>
-              <!-- Filter Tanggal & Kode -->
-              <div class="row mb-4 align-items-end">
-                <div class="col-md-4">
-                  <label for="filter_tanggal" class="form-label fw-semibold">Filter Tanggal:</label>
-                  <input type="date" class="form-control" id="filter_tanggal" value="<?php echo date('Y-m-d'); ?>">
+    <main class="main-content" id="mainContent">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <div>
+                    <h2 class="mb-1"><i class="bi bi-cart-plus me-2"></i>Transaksi Pembelian</h2>
+                    <p class="text-muted mb-0">Kelola permintaan pembelian bahan dan pantau statusnya</p>
                 </div>
-                <div class="col-md-4">
-                    <label for="filter_kode" class="form-label fw-semibold">Cari Kode Request / No. PO:</label>
-                    <input type="text" class="form-control" id="filter_kode" placeholder="Masukkan kode request...">
-                </div>
-                <div class="col-md-4">
-                    <button class="btn btn-primary" type="button" id="btn_filter">
-                        <i class="bi bi-search"></i> Filter
-                    </button>
-                    <button class="btn btn-secondary ms-2" type="button" id="btn_reset_filter">
-                        <i class="bi bi-arrow-clockwise"></i> Reset
-                    </button>
-                </div>
-              </div>
-              
-              <div class="table-responsive">
-                <table class="table table-striped table-hover" id="table_requests">
-                  <thead class="table-dark">
-                    <tr>
-                      <th>No.</th>
-                      <th>Kode Request</th>
-                      <th>Tanggal</th>
-                      <th>Pegawai</th>
-                      <th>Grand Total</th>
-                      <th>Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tbody_requests">
-                    <!-- Data akan dimuat via AJAX -->
-                  </tbody>
-                  <tfoot class="table">
-                    <!-- Total akan dimuat via AJAX -->
-                  </tfoot>
-                </table>
-              </div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddRequest">
+                    <i class="bi bi-plus-circle me-2"></i>Tambah Request
+                </button>
             </div>
-          </div>
-          
-        </main>
-      </div>
-    </div>
 
+            <?php if ($message): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i><?php echo htmlspecialchars($message); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php endif; ?>
+
+            <?php if ($error): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i><?php echo htmlspecialchars($error); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php endif; ?>
+
+            <div class="card-modern">
+                <div class="card-header px-4 py-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-table me-2"></i>
+                        <span>Daftar Request Pembelian</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form class="row g-3 align-items-end" id="filterForm">
+                        <div class="col-md-4">
+                            <label for="filter_tanggal" class="form-label">Filter Tanggal</label>
+                            <input type="date" class="form-control" id="filter_tanggal" value="<?php echo date('Y-m-d'); ?>">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="filter_kode" class="form-label">Cari Kode Request / No. PO</label>
+                            <input type="text" class="form-control" id="filter_kode" placeholder="Masukkan kode request...">
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary flex-fill" type="button" id="btn_filter">
+                                    <i class="bi bi-search me-2"></i>Filter
+                                </button>
+                                <button class="btn btn-secondary flex-fill" type="button" id="btn_reset_filter">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>Reset
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="table-responsive px-0">
+                    <table class="table table-hover align-middle mb-0" id="table_requests">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:7%;">No</th>
+                                <th>Kode Request</th>
+                                <th style="width:18%;">Tanggal</th>
+                                <th style="width:28%;">Pegawai</th>
+                                <th style="width:18%;" class="text-end">Grand Total</th>
+                                <th style="width:12%;" class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody_requests">
+                            <!-- Data akan dimuat via AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-footer-info d-flex flex-wrap align-items-center justify-content-between gap-3 px-3 px-md-4 py-3 mt-3" id="table_summary">
+                    <span class="text-muted mb-0" id="summary_rows">Total Item: 0</span>
+                    <div class="d-flex flex-wrap align-items-center gap-2 justify-content-end">
+                        <span class="fw-semibold mb-0">Grand Total:</span>
+                        <span class="badge bg-primary-subtle text-primary px-3 py-2" id="summary_total">Rp 0</span>
+                        <nav aria-label="Table pagination" class="mb-0 ms-2">
+                            <ul class="pagination pagination-sm align-items-center mb-0" id="requests-pagination"></ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
     <!-- Modal Tambah Request -->
     <div class="modal fade" id="modalAddRequest" tabindex="-1" aria-labelledby="modalAddRequestLabel" aria-hidden="true">
       <div class="modal-dialog modal-xl">
@@ -696,12 +656,17 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
       </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="../js/bootstrap.bundle.min.js"></script>
+    <?php include '_scripts_new.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     
     <script>
     $(document).ready(function() {
+        const PAGE_SIZE = 10;
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentRequests = [];
+        let currentGrandTotalFormatted = 'Rp 0';
+
         let modalDetailItems = [];
         let modalGrandTotal = 0;
         let modalCurrentRequestId = null;
@@ -733,61 +698,133 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                 dataType: 'json',
                 success: function(response) {
                     if (response.success) {
-                        renderRequestsTable(response.data, response.grand_total_sum_formatted);
+                        currentRequests = response.data || [];
+                        currentGrandTotalFormatted = response.grand_total_sum_formatted || 'Rp 0';
+                        totalPages = Math.max(1, Math.ceil(currentRequests.length / PAGE_SIZE));
+                        if (currentPage > totalPages) {
+                            currentPage = totalPages;
+                        }
+                        renderRequestsTablePage();
                     } else {
-                        $('#tbody_requests').html('<tr><td colspan="6" class="text-center text-muted">Error loading data</td></tr>');
-                        $('tfoot').empty();
+                        $('#tbody_requests').html('<tr><td colspan="6" class="text-center text-muted">Tidak ada data request pembelian</td></tr>');
+                        updateSummary(0, 0, 0, 'Rp 0');
+                        renderPagination(0);
                     }
                 },
                 error: function() {
                     $('#tbody_requests').html('<tr><td colspan="6" class="text-center text-muted">Error loading data</td></tr>');
-                    $('tfoot').empty();
+                    updateSummary(0, 0, 0, 'Rp 0');
+                    renderPagination(0);
                 }
             });
         }
-        
-        // Render requests table
-        function renderRequestsTable(requests, grandTotalSumFormatted) {
+
+        function renderRequestsTablePage() {
             const tbody = $('#tbody_requests');
-            const tfoot = $('tfoot');
             tbody.empty();
-            tfoot.empty();
-            
-            if (requests.length === 0) {
+
+            const totalRecords = currentRequests.length;
+            if (totalRecords === 0) {
                 tbody.append('<tr><td colspan="6" class="text-center text-muted">Tidak ada data request pembelian</td></tr>');
+                updateSummary(0, 0, 0, currentGrandTotalFormatted);
+                renderPagination(0);
                 return;
             }
-            
-            requests.forEach(function(request, index) {
+
+            const startIndex = (currentPage - 1) * PAGE_SIZE;
+            const paginatedData = currentRequests.slice(startIndex, startIndex + PAGE_SIZE);
+
+            paginatedData.forEach(function(request, index) {
                 tbody.append(`
                     <tr>
-                        <td>${index + 1}</td>
+                        <td class="fw-semibold">${startIndex + index + 1}</td>
                         <td>${request.kode_request}</td>
                         <td>${request.tanggal_request}</td>
                         <td>${request.nama_lengkap}</td>
-                        <td>${request.grand_total}</td>
-                        <td>
-                            <button type="button" class="btn btn-sm btn-info" onclick="showDetailModal(${request.id_request})">
-                                <i class="bi bi-eye"></i> Detail
+                        <td class="text-end">${request.grand_total}</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="showDetailModal(${request.id_request})">
+                                <i class="bi bi-eye"></i>
                             </button>
                         </td>
                     </tr>
                 `);
             });
 
-            tfoot.append(`
-                <tr>
-                    <td colspan="4" class="text-end fw-bold">Total</td>
-                    <td class="fw-bold">${grandTotalSumFormatted}</td>
-                    <td></td>
-                </tr>
-            `);
+            const endIndex = startIndex + paginatedData.length;
+            updateSummary(startIndex + 1, endIndex, totalRecords, currentGrandTotalFormatted);
+
+            renderPagination(totalRecords);
         }
+
+        function updateSummary(start, end, totalRecords, totalFormatted) {
+            $('#summary_rows').text(`Total Item: ${totalRecords}`);
+            $('#summary_total').text(totalFormatted);
+        }
+
+        function renderPagination(totalRecords) {
+            const pagination = $('#requests-pagination');
+            pagination.empty();
+
+            if (totalRecords <= PAGE_SIZE) {
+                return;
+            }
+
+            totalPages = Math.max(1, Math.ceil(totalRecords / PAGE_SIZE));
+
+            const createPageItem = (page, label, disabled = false, active = false) => {
+                const liClass = `page-item ${disabled ? 'disabled' : ''} ${active ? 'active' : ''}`;
+                return `
+                    <li class="${liClass}">
+                        <button type="button" class="page-link" data-page="${page}">${label}</button>
+                    </li>
+                `;
+            };
+
+            pagination.append(createPageItem(currentPage - 1, 'Previous', currentPage === 1));
+
+            const maxVisible = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            if (endPage - startPage + 1 < maxVisible) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+
+            if (startPage > 1) {
+                pagination.append(createPageItem(1, '1', false, currentPage === 1));
+                if (startPage > 2) {
+                    pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                }
+            }
+
+            for (let page = startPage; page <= endPage; page++) {
+                pagination.append(createPageItem(page, page, false, currentPage === page));
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+                }
+                pagination.append(createPageItem(totalPages, totalPages, false, currentPage === totalPages));
+            }
+
+            pagination.append(createPageItem(currentPage + 1, 'Next', currentPage === totalPages));
+        }
+
+        $('#requests-pagination').on('click', '.page-link', function() {
+            const targetPage = Number($(this).data('page'));
+            if (!targetPage || targetPage === currentPage || targetPage < 1 || targetPage > totalPages) {
+                return;
+            }
+            currentPage = targetPage;
+            renderRequestsTablePage();
+        });
         
         // Filter button click
         $('#btn_filter').on('click', function() {
             const tanggal = $('#filter_tanggal').val();
             const kode = $('#filter_kode').val();
+            currentPage = 1;
             loadRequests(tanggal, kode);
         });
         
@@ -795,6 +832,7 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
         $('#btn_reset_filter').on('click', function() {
             $('#filter_tanggal').val('');
             $('#filter_kode').val('');
+            currentPage = 1;
             loadRequests('', '');
         });
         
@@ -803,11 +841,11 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
             if (e.which === 13) {
                 const tanggal = $('#filter_tanggal').val();
                 const kode = $('#filter_kode').val();
+                currentPage = 1;
                 loadRequests(tanggal, kode);
             }
         });
         
-        // Load initial data (today)
         loadRequests($('#filter_tanggal').val(), $('#filter_kode').val());
         
         // === DETAIL MODAL FUNCTIONALITY ===
