@@ -385,11 +385,11 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                 <div class="card-body">
                     <form class="row g-3 align-items-end" id="filterForm">
                         <div class="col-md-4">
-                            <label for="filter_tanggal" class="form-label">Filter Tanggal</label>
+                           
                             <input type="date" class="form-control" id="filter_tanggal" value="<?php echo date('Y-m-d'); ?>">
                         </div>
                         <div class="col-md-4">
-                            <label for="filter_kode" class="form-label">Cari Kode Request / No. PO</label>
+                          
                             <input type="text" class="form-control" id="filter_kode" placeholder="Masukkan kode request...">
                         </div>
                         <div class="col-md-4">
