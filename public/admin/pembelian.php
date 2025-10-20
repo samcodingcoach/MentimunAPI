@@ -329,7 +329,21 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <link href="../css/newadmin.css?v=3" rel="stylesheet">
-    
+    <style>
+        .card-header .btn-link {
+            color: inherit;
+        }
+        .card-header .btn-link:hover {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .table .text-center, .table .text-end, .table .text-start {
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <?php include '_header_new.php'; ?>
@@ -429,133 +443,165 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <!-- Header Info -->
-            <div class="row mb-4">
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label"><strong>Kode Request:</strong></label>
-                  <input type="text" class="form-control" id="modal_kode_request" value="" readonly>
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-header bg-light border-0 py-3">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-receipt-cutoff text-primary me-2"></i>
+                  <span class="fw-semibold">Informasi Request</span>
+                  <button class="btn btn-link text-decoration-none ms-auto p-0" type="button" data-bs-toggle="collapse" data-bs-target="#informasiRequestForm" aria-expanded="true" aria-controls="informasiRequestForm">
+                    <i class="bi bi-chevron-down"></i>
+                  </button>
                 </div>
               </div>
-              <div class="col-md-6">
-                <div class="mb-3">
-                  <label class="form-label"><strong>Tanggal:</strong></label>
-                  <input type="text" class="form-control" value="<?php echo date('d F Y'); ?>" readonly>
+              <div class="collapse show" id="informasiRequestForm">
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label class="form-label text-uppercase small text-muted">Kode Request</label>
+                      <div class="input-group">
+                        <span class="input-group-text bg-primary text-white"><i class="bi bi-upc"></i></span>
+                        <input type="text" class="form-control" id="modal_kode_request" value="" readonly>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label text-uppercase small text-muted">Tanggal</label>
+                      <div class="input-group">
+                        <span class="input-group-text bg-secondary text-white"><i class="bi bi-calendar3"></i></span>
+                        <input type="text" class="form-control" value="<?php echo date('d F Y'); ?>" readonly>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Form Add Item -->
-            <div class="card mb-4">
-              <div class="card-header bg-light">
-                <h6 class="mb-0">Tambah Item</h6>
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-header bg-light border-0 py-3">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-basket text-primary me-2"></i>
+                  <span class="fw-semibold">Detail Item Request</span>
+                  <button class="btn btn-link text-decoration-none ms-auto p-0" type="button" data-bs-toggle="collapse" data-bs-target="#detailItemRequestForm" aria-expanded="true" aria-controls="detailItemRequestForm">
+                    <i class="bi bi-chevron-down"></i>
+                  </button>
+                </div>
               </div>
-              <div class="card-body">
-                <!-- Baris 1: Pilihan Utama -->
-                <div class="row mb-3">
-                  <div class="col-md-4">
-                    <label class="form-label fw-semibold">Bahan <span class="text-danger">*</span></label>
-                    <select class="form-select" id="modal_select_bahan" required>
-                      <option value="">Pilih Bahan</option>
-                      <?php foreach ($bahan_data as $row): ?>
-                      <option value="<?php echo $row['id_bahan']; ?>" 
-                              data-kode="<?php echo $row['kode_bahan']; ?>"
-                              data-kategori="<?php echo $row['nama_kategori']; ?>">
-                        <?php echo $row['kode_bahan'] . ' - ' . $row['nama_bahan'] . ' (' . $row['nama_kategori'] . ')'; ?>
-                      </option>
-                      <?php endforeach; ?>
-                    </select>
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label fw-semibold">Vendor <span class="text-danger">*</span></label>
-                    <select class="form-select" id="modal_select_vendor" required>
-                      <option value="">Pilih Vendor</option>
-                      <?php foreach ($vendor_data as $row): ?>
-                      <option value="<?php echo $row['id_vendor']; ?>" 
-                              data-kode="<?php echo $row['kode_vendor']; ?>"
-                              data-keterangan="<?php echo $row['keterangan']; ?>">
-                        <?php echo $row['kode_vendor'] . ' - ' . $row['nama_vendor'] . ' (' . $row['keterangan'] . ')'; ?>
-                      </option>
-                      <?php endforeach; ?>
-                    </select>
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label fw-semibold">Satuan <span class="text-danger">*</span></label>
-                    <select class="form-select" id="modal_select_satuan" required disabled>
-                      <option value="">Pilih Satuan</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <!-- Baris 2: Harga & Jumlah -->
-                <div class="row mb-3">
-                  <div class="col-md-3">
-                    <label class="form-label fw-semibold">Harga Estimasi</label>
-                    <div class="input-group">
-                      <span class="input-group-text">Rp</span>
-                      <input type="number" class="form-control" id="modal_harga_est" step="0.01" readonly>
+              <div class="collapse show" id="detailItemRequestForm">
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label class="form-label fw-semibold">Bahan <span class="text-danger">*</span></label>
+                      <select class="form-select" id="modal_select_bahan" required>
+                        <option value="">Pilih Bahan</option>
+                        <?php foreach ($bahan_data as $row): ?>
+                        <option value="<?php echo $row['id_bahan']; ?>" 
+                                data-kode="<?php echo $row['kode_bahan']; ?>"
+                                data-kategori="<?php echo $row['nama_kategori']; ?>">
+                          <?php echo $row['kode_bahan'] . ' - ' . $row['nama_bahan'] . ' (' . $row['nama_kategori'] . ')'; ?>
+                        </option>
+                        <?php endforeach; ?>
+                      </select>
                     </div>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label fw-semibold">Jumlah <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" id="modal_jumlah_request" min="1" placeholder="Masukkan jumlah" required>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label fw-semibold">Subtotal</label>
-                    <div class="input-group">
-                      <span class="input-group-text">Rp</span>
-                      <input type="text" class="form-control" id="modal_subtotal_display" readonly>
+                    <div class="col-md-6">
+                      <label class="form-label fw-semibold">Vendor <span class="text-danger">*</span></label>
+                      <select class="form-select" id="modal_select_vendor" required>
+                        <option value="">Pilih Vendor</option>
+                        <?php foreach ($vendor_data as $row): ?>
+                        <option value="<?php echo $row['id_vendor']; ?>" 
+                                data-kode="<?php echo $row['kode_vendor']; ?>"
+                                data-keterangan="<?php echo $row['keterangan']; ?>">
+                          <?php echo $row['kode_vendor'] . ' - ' . $row['nama_vendor'] . ' (' . $row['keterangan'] . ')'; ?>
+                        </option>
+                        <?php endforeach; ?>
+                      </select>
                     </div>
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label fw-semibold">Tipe Pembayaran <span class="text-danger">*</span></label>
-                    <select class="form-select" id="modal_tipe_pembayaran">
-                      <option value="invoice">Invoice</option>
-                      <option value="bayar_langsung">Bayar Langsung</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <!-- Baris 3: Nomor Bukti & Tombol -->
-                <div class="row mb-3">
-                  <div class="col-md-6">
-                    <label class="form-label fw-semibold">Nomor Bukti Transaksi</label>
-                    <input type="text" class="form-control" id="modal_nomor_bukti" placeholder="Opsional - diisi nanti">
-                    <small class="text-muted">Dapat diisi setelah transaksi atau dikosongkan</small>
-                  </div>
-                  <div class="col-md-6 d-flex align-items-end">
-                    <button type="button" class="btn btn-primary btn-lg px-4" id="modal_btn_add_item">
-                      <i class="bi bi-plus-circle"></i> Tambah ke Daftar
-                    </button>
+                    <div class="col-md-4">
+                      <label class="form-label fw-semibold">Satuan <span class="text-danger">*</span></label>
+                      <select class="form-select" id="modal_select_satuan" required disabled>
+                        <option value="">Pilih Satuan</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label fw-semibold">Harga Estimasi</label>
+                      <div class="input-group">
+                        <span class="input-group-text">Rp</span>
+                        <input type="number" class="form-control" id="modal_harga_est" step="0.01" readonly>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label fw-semibold">Jumlah <span class="text-danger">*</span></label>
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                        <input type="number" class="form-control" id="modal_jumlah_request" min="1" placeholder="0" required>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label fw-semibold">Subtotal</label>
+                      <div class="input-group">
+                        <span class="input-group-text">Rp</span>
+                        <input type="text" class="form-control" id="modal_subtotal_display" readonly>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label fw-semibold">Tipe Pembayaran <span class="text-danger">*</span></label>
+                      <select class="form-select" id="modal_tipe_pembayaran">
+                        <option value="invoice">Invoice</option>
+                        <option value="bayar_langsung">Bayar Langsung</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label fw-semibold">Nomor Bukti Transaksi</label>
+                      <input type="text" class="form-control" id="modal_nomor_bukti" placeholder="Opsional">
+                      <small class="text-muted">Isi setelah transaksi jika diperlukan</small>
+                    </div>
+                    <div class="col-12 d-flex justify-content-end">
+                      <button type="button" class="btn btn-primary btn-lg px-4 mt-2" id="modal_btn_add_item">
+                        <i class="bi bi-plus-circle me-2"></i>Tambah ke Daftar
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             <!-- Tabel Detail Modal -->
-            <div class="table-responsive mb-4">
-              <table class="table table-striped table-hover" id="modal_table_detail">
-                <thead class="table-dark">
-                  <tr>
-                    <th width="5%">No</th>
-                    <th width="20%">Bahan</th>
-                    <th width="20%">Vendor</th>
-                    <th width="10%">Satuan</th>
-                    <th width="10%">Harga Est.</th>
-                    <th width="8%">Qty</th>
-                    <th width="12%">Subtotal</th>
-                    <th width="10%">Status</th>
-                    <th width="5%">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td colspan="9" class="text-center text-muted py-4">
-                      Belum ada item yang ditambahkan
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="card border-0 shadow-sm mb-4">
+              <div class="card-header bg-light border-0 py-3">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-list-check text-primary me-2"></i>
+                  <span class="fw-semibold">Daftar Item Request</span>
+                  <button class="btn btn-link text-decoration-none ms-auto p-0" type="button" data-bs-toggle="collapse" data-bs-target="#detailItemTable" aria-expanded="true" aria-controls="detailItemTable">
+                    <i class="bi bi-chevron-down"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="collapse show" id="detailItemTable">
+                <div class="card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="modal_table_detail">
+                      <thead class="table-light border-bottom">
+                        <tr class="text-uppercase small">
+                          <th style="width:5%;" class="ps-4">No</th>
+                          <th style="width:20%;">Bahan</th>
+                          <th style="width:20%;">Vendor</th>
+                          <th style="width:10%;" class="text-center">Satuan</th>
+                          <th style="width:10%;" class="text-end">Harga Est.</th>
+                          <th style="width:8%;" class="text-center">Qty</th>
+                          <th style="width:12%;" class="text-end">Subtotal</th>
+                          <th style="width:10%;" class="text-center">Status</th>
+                          <th style="width:5%;" class="text-center pe-4">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td colspan="9" class="text-center text-muted py-4">
+                            Belum ada item yang ditambahkan
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Grand Total Modal -->
@@ -695,6 +741,17 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                 return num.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             }
         }
+        
+        // Toggle chevron icons for collapsible elements
+        $('.collapse').on('show.bs.collapse', function () {
+            const icon = $(this).closest('.card').find('.bi-chevron-down');
+            icon.removeClass('bi-chevron-down').addClass('bi-chevron-up');
+        });
+        
+        $('.collapse').on('hide.bs.collapse', function () {
+            const icon = $(this).closest('.card').find('.bi-chevron-up');
+            icon.removeClass('bi-chevron-up').addClass('bi-chevron-down');
+        });
         
         // === REQUEST LIST FUNCTIONALITY ===
         
