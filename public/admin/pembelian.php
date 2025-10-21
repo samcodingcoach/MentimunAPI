@@ -1014,7 +1014,7 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                 dropdownParent: $('#modalAddRequest')
             });
             
-            // Generate new request code for modal
+            // Generate new request code for modal then create request
             $.ajax({
                 url: window.location.href,
                 type: 'POST', 
@@ -1023,14 +1023,17 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
                 },
                 dataType: 'json',
                 success: function(response) {
-                    if (response.success) {
+                    if (response.success && response.kode_request) {
                         $('#modal_kode_request').val(response.kode_request);
+                        createModalRequest(response.kode_request);
+                    } else {
+                        alert('Gagal mendapatkan kode request baru.');
                     }
+                },
+                error: function() {
+                    alert('Error mendapatkan kode request baru.');
                 }
             });
-            
-            // Create new request for modal
-            createModalRequest();
         });
         
         // Clear modal on close
@@ -1061,13 +1064,17 @@ while ($row = mysqli_fetch_assoc($result_vendor)) {
             updateModalGrandTotal();
         });
         
-        function createModalRequest() {
+        function createModalRequest(kodeRequest) {
+            if (!kodeRequest) {
+                alert('Kode request tidak tersedia.');
+                return;
+            }
             $.ajax({
                 url: window.location.href,
                 type: 'POST',
                 data: {
                     action: 'create_request',
-                    kode_request: $('#modal_kode_request').val()
+                    kode_request: kodeRequest
                 },
                 dataType: 'json',
                 success: function(response) {
