@@ -11,6 +11,58 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 $message = '';
 $error = '';
 
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'rilis_batch') {
+    $id_user = isset($_SESSION['id_user']) ? (int)$_SESSION['id_user'] : 0;
+    $id_produk_list = isset($_POST['id_produk']) && is_array($_POST['id_produk']) ? $_POST['id_produk'] : [];
+    $stok_list = isset($_POST['stok']) && is_array($_POST['stok']) ? $_POST['stok'] : [];
+    $harga_list = isset($_POST['harga_jual']) && is_array($_POST['harga_jual']) ? $_POST['harga_jual'] : [];
+
+    if (empty($id_produk_list) || count($id_produk_list) !== count($stok_list) || count($id_produk_list) !== count($harga_list)) {
+        $error = 'Data rilis batch tidak valid!';
+    } else {
+        $success_count = 0;
+        $check_stmt = $conn->prepare("SELECT id_produk_sell FROM produk_sell WHERE id_produk = ? AND DATE(tgl_release) = CURDATE() LIMIT 1");
+        $insert_stmt = $conn->prepare("INSERT INTO produk_sell (id_produk, stok_awal, harga_jual, id_user, stok) VALUES (?, ?, ?, ?, ?)");
+
+        if (!$check_stmt || !$insert_stmt) {
+            $error = 'Gagal mempersiapkan query rilis batch: ' . $conn->error;
+        } else {
+            foreach ($id_produk_list as $index => $id_produk_value) {
+                $id_produk = (int)$id_produk_value;
+                $stok_awal = isset($stok_list[$index]) ? max(0, (int)$stok_list[$index]) : 0;
+                $harga_jual = isset($harga_list[$index]) ? (float)$harga_list[$index] : 0.0;
+
+                if ($id_produk <= 0) {
+                    continue;
+                }
+
+                $check_stmt->bind_param('i', $id_produk);
+                $check_stmt->execute();
+                $check_result = $check_stmt->get_result();
+                if ($check_result && $check_result->num_rows > 0) {
+                    continue;
+                }
+
+                $insert_stmt->bind_param('iidii', $id_produk, $stok_awal, $harga_jual, $id_user, $stok_awal);
+                if ($insert_stmt->execute()) {
+                    $success_count++;
+                }
+            }
+
+            $check_stmt->close();
+            $insert_stmt->close();
+        }
+
+        if ($success_count > 0) {
+            $message = $success_count . ' produk berhasil dirilis!';
+        } else {
+            if (empty($error)) {
+                $error = 'Tidak ada produk yang dirilis. Data mungkin sudah dirilis hari ini.';
+            }
+        }
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'rilis') {
     $id_produk = (int)$_POST['id_produk'];
     $stok = (int)$_POST['stok'];
@@ -172,6 +224,18 @@ try {
             max-width: 110px;
             margin-inline: auto;
         }
+        #produkTerbaruModal .avatar-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            overflow: hidden;
+            background-color: var(--bs-body-tertiary);
+        }
+        #produkTerbaruModal .avatar-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     </style>
 </head>
 <body>
@@ -294,12 +358,15 @@ try {
                     <h5 class="modal-title" id="produkTerbaruModalLabel"><i class="bi bi-clock-history me-2"></i>Produk Rilis Terakhir</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
+                <form method="POST" class="form-modern">
+                    <input type="hidden" name="action" value="rilis_batch">
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th style="width: 5%;" class="text-start">No</th>
+                                    <th style="width: 8%;" class="text-start">Gambar</th>
                                     <th style="width: 12%;" class="text-start">Kode Produk</th>
                                     <th class="text-start" style="width: auto;">Nama Produk</th>
                                     <th style="width: 18%;" class="text-center">Nama Kategori</th>
@@ -307,40 +374,61 @@ try {
                                     <th style="width: 12%;" class="text-center">Stok</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <?php if (!empty($produk_rilis_terbaru)): ?>
-                                    <?php foreach ($produk_rilis_terbaru as $index => $produk): ?>
-                                    <tr>
-                                        <td class="text-start fw-semibold"><?php echo $index + 1; ?></td>
-                                        <td class="text-uppercase fw-medium text-start"><?php echo htmlspecialchars($produk['kode_produk']); ?></td>
-                                        <td class="text-start fw-semibold"><?php echo htmlspecialchars($produk['nama_produk']); ?></td>
-                                        <td class="text-center"><?php echo htmlspecialchars($produk['nama_kategori']); ?></td>
-                                        <td class="text-end">Rp <?php echo number_format((float)$produk['harga_jual'], 0, ',', '.'); ?></td>
-                                        <td class="text-center">
-                                            <input type="number" class="form-control text-center stok-input" name="stok[<?php echo (int)$produk['id_produk_sell']; ?>]" min="0" value="<?php echo (int)$produk['stok']; ?>">
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <tr>
-                                        <td colspan="6" class="text-center py-5">
-                                            <i class="bi bi-inbox fs-1 d-block mb-3 text-muted"></i>
-                                            <span class="text-muted">Tidak ada data rilis sebelumnya yang dapat ditampilkan.</span>
-                                        </td>
-                                    </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
+                                <tbody>
+                                    <?php if (!empty($produk_rilis_terbaru)): ?>
+                                        <?php foreach ($produk_rilis_terbaru as $index => $produk): ?>
+                                        <?php
+                                            $kodeProdukRaw = $produk['kode_produk'];
+                                            $kodeProdukSafe = htmlspecialchars($kodeProdukRaw);
+        								$localImagePath = __DIR__ . '/../images/' . $kodeProdukRaw . '.jpg';
+                                            $gambarPath = file_exists($localImagePath)
+                                                ? '../images/' . $kodeProdukRaw . '.jpg'
+                                                : '../images/default.jpg';
+                                            $idProdukValue = isset($produk['id_produk']) ? (int)$produk['id_produk'] : 0;
+                                            $hargaJualValue = isset($produk['harga_jual']) ? (float)$produk['harga_jual'] : 0.0;
+                                            $stokValue = isset($produk['stok']) ? max(0, (int)$produk['stok']) : 0;
+                                        ?>
+                                        <tr>
+                                            <input type="hidden" name="id_produk[]" value="<?php echo $idProdukValue; ?>">
+                                            <input type="hidden" name="harga_jual[]" value="<?php echo $hargaJualValue; ?>">
+                                            <td class="text-start fw-semibold"><?php echo $index + 1; ?></td>
+                                            <td class="text-center">
+                                                <div class="avatar-wrapper d-inline-flex align-items-center justify-content-center">
+                                                    <img src="<?php echo $gambarPath; ?>"
+                                                         alt="<?php echo $kodeProdukSafe; ?>"
+                                                         loading="lazy">
+                                                </div>
+                                            </td>
+                                            <td class="text-uppercase fw-medium text-start"><?php echo $kodeProdukSafe; ?></td>
+                                            <td class="text-start fw-semibold"><?php echo htmlspecialchars($produk['nama_produk']); ?></td>
+                                            <td class="text-center"><?php echo htmlspecialchars($produk['nama_kategori']); ?></td>
+                                            <td class="text-end">Rp <?php echo number_format($hargaJualValue, 0, ',', '.'); ?></td>
+                                            <td class="text-center">
+                                                <input type="number" class="form-control text-center stok-input" name="stok[]" min="0" value="<?php echo $stokValue; ?>">
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <tr>
+                                            <td colspan="7" class="text-center py-5">
+                                                <i class="bi bi-inbox fs-1 d-block mb-3 text-muted"></i>
+                                                <span class="text-muted">Tidak ada data rilis sebelumnya yang dapat ditampilkan.</span>
+                                            </td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-lg me-1"></i>Tutup
-                    </button>
-                    <button type="button" class="btn btn-primary">
-                        <i class="bi bi-upload me-1"></i>Rilis
-                    </button>
-                </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i>Tutup
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-upload me-1"></i>Rilis
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
