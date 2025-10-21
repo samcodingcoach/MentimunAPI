@@ -143,6 +143,10 @@ try {
                     <h2 class="mb-1"><i class="bi bi-tag me-2"></i>Harga Rilis</h2>
                     <p class="text-muted mb-0">Kelola harga jual harian, stok, dan status penjualan produk.</p>
                 </div>
+
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="">
+                    <i class="bi bi-plus-lg me-2"></i>Tambah Rilis
+                </button>
             </div>
 
             <?php if (!empty($message)): ?>
