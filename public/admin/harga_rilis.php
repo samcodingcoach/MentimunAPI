@@ -129,7 +129,7 @@ try {
             vp.nama_produk,
             vp.nama_kategori,
             ps.harga_jual,
-            ps.stok_awal
+            ps.stok
         FROM
             produk_sell ps
         INNER JOIN view_produk vp ON ps.id_produk = vp.id_produk
@@ -317,7 +317,7 @@ try {
                                         <td class="text-center"><?php echo htmlspecialchars($produk['nama_kategori']); ?></td>
                                         <td class="text-end">Rp <?php echo number_format((float)$produk['harga_jual'], 0, ',', '.'); ?></td>
                                         <td class="text-center">
-                                            <input type="number" class="form-control text-center stok-input" name="stok_awal[<?php echo (int)$produk['id_produk_sell']; ?>]" min="0" value="<?php echo (int)$produk['stok_awal']; ?>">
+                                            <input type="number" class="form-control text-center stok-input" name="stok[<?php echo (int)$produk['id_produk_sell']; ?>]" min="0" value="<?php echo (int)$produk['stok']; ?>">
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
