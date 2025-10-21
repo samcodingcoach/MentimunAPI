@@ -63,6 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_pembayaran'])) 
 
 $search_result = [];
 $kode_request_value = '';
+$total_subtotal = 0;
 if (($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) || isset($_GET['kode_request'])) {
     $kode_request = isset($_POST['kode_request']) ? $_POST['kode_request'] : $_GET['kode_request'];
     $kode_request_value = $kode_request;
@@ -93,311 +94,328 @@ if (($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_request'])) || i
         $stmt->execute();
         $result = $stmt->get_result();
         $search_result = $result->fetch_all(MYSQLI_ASSOC);
+        if (!empty($search_result)) {
+            foreach ($search_result as $row) {
+                $total_subtotal += (float)$row['subtotal'];
+            }
+        }
         $stmt->close();
     }
 }
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="id" data-bs-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Pembayaran Pembelian</title>
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="../css/admin.css" rel="stylesheet">
+    <title>Pembayaran Pembelian - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="../css/newadmin.css?v=3" rel="stylesheet">
 </head>
 <body>
-    <?php include '_header.php'; ?>
+    <?php include '_header_new.php'; ?>
+    <?php include '_sidebar_new.php'; ?>
 
-    <div class="container-fluid">
-        <div class="row">
-            <?php include '_sidebar.php'; ?>
-
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">Pembayaran Pembelian</h1>
-                </div>
-
-                <?php
-                if (isset($_SESSION['success_message'])) {
-                    echo '<div class="alert alert-success">' . $_SESSION['success_message'] . '</div>';
-                    unset($_SESSION['success_message']);
-                }
-                if (isset($_SESSION['error_message'])) {
-                    echo '<div class="alert alert-danger">' . $_SESSION['error_message'] . '</div>';
-                    unset($_SESSION['error_message']);
-                }
-                ?>
-
+    <main class="main-content" id="mainContent">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                 <div>
-                   
-                        <form action="pembayaran_pembelian.php" method="post">
-                            <div class="mb-3">
-                                <label for="kode_request" class="form-label">Kode Request / No PO</label>
-                                <div class="d-flex">
-                                    <input type="text" class="form-control" id="kode_request" name="kode_request" value="<?php echo htmlspecialchars($kode_request_value); ?>" required>
-                                    <button type="submit" class="btn btn-primary ms-2">Cari</button>
-                                </div>
-                            </div>
-                        </form>
+                    <h2 class="mb-1"><i class="bi bi-credit-card-2-front me-2"></i>Pembayaran Pembelian</h2>
+                    <p class="text-muted mb-0">Kelola pembayaran request pembelian dan unggah bukti transaksi</p>
                 </div>
+            </div>
 
-                <?php if (!empty($search_result)): ?>
-                <div class="mt-4">
-                   
-                   
-                        <table class="table table-responsive">
-                            <thead>
-                                <tr>
-                                    <th class="text-center">No</th>
-                                    <th>Nama Bahan</th>
-                                    <th>Vendor</th>
-                                    <th class="text-center">Status</th>
-                                    <th class="text-center">Tipe</th>
-                                    <th>Subtotal</th>
-                                    <th class="text-center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+            <?php if (isset($_SESSION['success_message'])): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i><?php echo htmlspecialchars($_SESSION['success_message']); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php unset($_SESSION['success_message']); endif; ?>
+
+            <?php if (isset($_SESSION['error_message'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i><?php echo htmlspecialchars($_SESSION['error_message']); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php unset($_SESSION['error_message']); endif; ?>
+
+            <div class="card-modern mb-4">
+                <div class="card-header px-4 py-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-search me-2"></i>
+                        <span>Cari Request Pembelian</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form class="row g-3 align-items-end" action="pembayaran_pembelian.php" method="post">
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">Kode Request / No PO</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-upc"></i></span>
+                                <input type="text" class="form-control" id="kode_request" name="kode_request" placeholder="Masukkan kode request" value="<?php echo htmlspecialchars($kode_request_value); ?>" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search me-2"></i>Cari Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card-modern">
+                <div class="card-header px-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-table me-2"></i>
+                        <span>Daftar Pembayaran</span>
+                    </div>
+                    <?php if (!empty($search_result)): ?>
+                    <span class="badge bg-primary-subtle text-primary px-3 py-2">
+                        Total Tagihan: Rp <?php echo number_format($total_subtotal, 0, ',', '.'); ?>
+                    </span>
+                    <?php endif; ?>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:6%;" class="text-start">No</th>
+                                <th style="width:20%;">Nama Bahan</th>
+                                <th style="width:20%;">Vendor</th>
+                                <th style="width:10%;" class="text-center">Status</th>
+                                <th style="width:12%;" class="text-center">Tipe</th>
+                                <th style="width:16%;" class="text-end">Subtotal</th>
+                                <th style="width:12%;" class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($search_result)): ?>
                                 <?php foreach ($search_result as $index => $row): ?>
+                                <?php
+                                    $statusPaid = (int)$row['isDone'] === 1;
+                                    $statusBadgeClass = $statusPaid ? 'bg-success' : 'bg-warning';
+                                    $statusText = $statusPaid ? 'PAID' : 'UNPAID';
+                                    $isInvoiceFlag = (int)$row['isInvoice'];
+                                    $typeText = $isInvoiceFlag === 0 ? 'INV' : 'BAYAR LANGSUNG';
+                                    $typeBadgeClass = $isInvoiceFlag === 0 ? 'bg-info' : 'bg-primary';
+                                ?>
                                 <tr>
-                                    <td class="text-center"><?php echo $index + 1; ?></td>
-                                    <td><?php echo htmlspecialchars($row['nama_bahan']); ?></td>
-                                    <td ><?php echo htmlspecialchars($row['nama_vendor']); ?></td>
-                                    <td class="text-center"><?php echo $row['isDone'] == 0 ? 'UNPAID' : 'PAID'; ?></td>
-                                    <td class="text-center"><?php echo $row['isInvoice'] == 0 ? 'INV' : 'BAYAR LANGSUNG'; ?></td>
-                                    <td class="text-end"><?php echo htmlspecialchars(number_format($row['subtotal'], 0, ',', '.')); ?></td>
+                                    <td class="text-start fw-semibold"><?php echo $index + 1; ?></td>
+                                    <td class="fw-medium"><?php echo htmlspecialchars($row['nama_bahan']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['nama_vendor']); ?></td>
                                     <td class="text-center">
-                                        <?php if($row['isDone'] == 0): ?>
-                                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#bayarModal"
-                                                data-id-request="<?php echo $row['id_request']; ?>"
-                                                data-id-vendor="<?php echo $row['id_vendor']; ?>"
-                                                data-kode-request="<?php echo htmlspecialchars($row['kode_request']); ?>"
-                                                data-nama-bahan="<?php echo htmlspecialchars($row['nama_bahan']); ?>"
-                                                data-vendor="<?php echo htmlspecialchars($row['nama_vendor']); ?>"
-                                                data-status="<?php echo $row['isDone'] == 0 ? 'UNPAID' : 'PAID'; ?>"
-                                                data-tipe="<?php echo $row['isInvoice'] == 0 ? 'INV' : 'BAYAR LANGSUNG'; ?>"
-                                                data-rekening1="<?php echo htmlspecialchars($row['nomor_rekening1']); ?>"
-                                                data-rekening2="<?php echo htmlspecialchars($row['nomor_rekening2']); ?>"
-                                                data-jumlah="<?php echo htmlspecialchars($row['jumlah_request']); ?>"
-                                                data-harga="<?php echo htmlspecialchars($row['harga_est']); ?>"
-                                                data-subtotal="<?php echo htmlspecialchars($row['subtotal']); ?>">
-                                                Bayar
-                                            </button>
-                                        <?php else: ?>
-                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#bayarModal"
-                                                data-id-request="<?php echo $row['id_request']; ?>"
-                                                data-id-vendor="<?php echo $row['id_vendor']; ?>"
-                                                data-kode-request="<?php echo htmlspecialchars($row['kode_request']); ?>"
-                                                data-nama-bahan="<?php echo htmlspecialchars($row['nama_bahan']); ?>"
-                                                data-vendor="<?php echo htmlspecialchars($row['nama_vendor']); ?>"
-                                                data-status="<?php echo $row['isDone'] == 0 ? 'UNPAID' : 'PAID'; ?>"
-                                                data-tipe="<?php echo $row['isInvoice'] == 0 ? 'INV' : 'BAYAR LANGSUNG'; ?>"
-                                                data-rekening1="<?php echo htmlspecialchars($row['nomor_rekening1']); ?>"
-                                                data-rekening2="<?php echo htmlspecialchars($row['nomor_rekening2']); ?>"
-                                                data-jumlah="<?php echo htmlspecialchars($row['jumlah_request']); ?>"
-                                                data-harga="<?php echo htmlspecialchars($row['harga_est']); ?>"
-                                                data-subtotal="<?php echo htmlspecialchars($row['subtotal']); ?>">
-                                                Terbayar
-                                            </button>
-                                        <?php endif; ?>
+                                        <span class="badge <?php echo $statusBadgeClass; ?> px-3 py-2"><?php echo $statusText; ?></span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge <?php echo $typeBadgeClass; ?> px-3 py-2"><?php echo $typeText; ?></span>
+                                    </td>
+                                    <td class="text-end">Rp <?php echo number_format((float)$row['subtotal'], 0, ',', '.'); ?></td>
+                                    <td class="text-center">
+                                        <button type="button"
+                                            class="btn btn-sm <?php echo $statusPaid ? 'btn-outline-secondary' : 'btn-outline-success'; ?>"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#bayarModal"
+                                            data-id-request="<?php echo (int)$row['id_request']; ?>"
+                                            data-id-vendor="<?php echo (int)$row['id_vendor']; ?>"
+                                            data-kode-request="<?php echo htmlspecialchars($row['kode_request']); ?>"
+                                            data-nama-bahan="<?php echo htmlspecialchars($row['nama_bahan']); ?>"
+                                            data-vendor="<?php echo htmlspecialchars($row['nama_vendor']); ?>"
+                                            data-status="<?php echo $statusText; ?>"
+                                            data-tipe="<?php echo $typeText; ?>"
+                                            data-rekening1="<?php echo htmlspecialchars($row['nomor_rekening1']); ?>"
+                                            data-rekening2="<?php echo htmlspecialchars($row['nomor_rekening2']); ?>"
+                                            data-jumlah="<?php echo (int)$row['jumlah_request']; ?>"
+                                            data-harga="<?php echo (float)$row['harga_est']; ?>"
+                                            data-subtotal="<?php echo (float)$row['subtotal']; ?>">
+                                            <i class="bi <?php echo $statusPaid ? 'bi-check-circle' : 'bi-credit-card'; ?> me-1"></i>
+                                            <?php echo $statusPaid ? 'Terbayar' : 'Bayar'; ?>
+                                        </button>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                  
+                            <?php elseif (!empty($kode_request_value)): ?>
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                    <span class="text-muted">Data tidak ditemukan untuk kode request tersebut.</span>
+                                </td>
+                            </tr>
+                            <?php else: ?>
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <i class="bi bi-search fs-1 d-block mb-2 text-muted"></i>
+                                    <span class="text-muted">Silakan cari request pembelian terlebih dahulu.</span>
+                                </td>
+                            </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
-                <?php elseif (($_SERVER["REQUEST_METHOD"] == "POST" || isset($_GET['kode_request'])) && empty($search_result)): ?>
-                <div class="alert alert-warning mt-4" role="alert">
-                    Data tidak ditemukan.
-                </div>
-                <?php endif; ?>
+            </div>
+        </div>
+    </main>
 
-                <!-- Modal -->
-                <div class="modal fade" id="bayarModal" tabindex="-1" aria-labelledby="bayarModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <form id="form-pembayaran" action="pembayaran_pembelian.php" method="post" enctype="multipart/form-data">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="bayarModalLabel">Form Pembayaran</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal fade" id="bayarModal" tabindex="-1" aria-labelledby="bayarModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <form id="form-pembayaran" action="pembayaran_pembelian.php" method="post" enctype="multipart/form-data" class="form-modern">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="bayarModalLabel"><i class="bi bi-credit-card me-2"></i>Form Pembayaran</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id_request" id="modal-id-request">
+                        <input type="hidden" name="id_vendor" id="modal-id-vendor">
+                        <input type="hidden" name="kode_request" id="modal-kode-request">
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <div class="bg-body-tertiary rounded-3 p-3 h-100">
+                                    <h6 class="fw-semibold mb-3"><i class="bi bi-info-circle me-2"></i>Informasi Request</h6>
+                                    <dl class="row mb-0 small">
+                                        <dt class="col-5 text-muted text-uppercase">Nama Bahan</dt>
+                                        <dd class="col-7" id="modal-nama-bahan">-</dd>
+                                        <dt class="col-5 text-muted text-uppercase">Vendor</dt>
+                                        <dd class="col-7" id="modal-vendor">-</dd>
+                                        <dt class="col-5 text-muted text-uppercase">Status</dt>
+                                        <dd class="col-7" id="modal-status">-</dd>
+                                        <dt class="col-5 text-muted text-uppercase">Tipe</dt>
+                                        <dd class="col-7" id="modal-tipe">-</dd>
+                                    </dl>
                                 </div>
-                                <div class="modal-body">
-                                    <input type="hidden" name="id_request" id="modal-id-request">
-                                    <input type="hidden" name="id_vendor" id="modal-id-vendor">
-                                    <input type="hidden" name="kode_request" id="modal-kode-request">
-                                    <ul class="nav nav-tabs" id="myTab" role="tablist">
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link active" id="informasi-tab" data-bs-toggle="tab" data-bs-target="#informasi" type="button" role="tab" aria-controls="informasi" aria-selected="true">Informasi</button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="rekening-tab" data-bs-toggle="tab" data-bs-target="#rekening" type="button" role="tab" aria-controls="rekening" aria-selected="false">Rekening</button>
-                                        </li>
-                                    </ul>
-                                    <div class="tab-content" id="myTabContent">
-                                        <div class="tab-pane fade show active p-2" id="informasi" role="tabpanel" aria-labelledby="informasi-tab">
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <span class="form-label">Nama Bahan</span>
-                                                <span id="modal-nama-bahan"></span>
-                                            </div>
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <span class="form-label">Vendor</span>
-                                                <span id="modal-vendor"></span>
-                                            </div>
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <span class="form-label">Status</span>
-                                                <span id="modal-status"></span>
-                                            </div>
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <span class="form-label">Tipe</span>
-                                                <span id="modal-tipe"></span>
-                                            </div>
-                                        </div>
-                                        <div class="tab-pane fade p-2" id="rekening" role="tabpanel" aria-labelledby="rekening-tab">
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <span class="form-label">Nomor Rekening 1</span>
-                                                <span id="modal-rekening1"></span>
-                                            </div>
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <span class="form-label">Nomor Rekening 2</span>
-                                                <span id="modal-rekening2"></span>
-                                            </div>
-                                        </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="bg-body-tertiary rounded-3 p-3 h-100">
+                                    <h6 class="fw-semibold mb-3"><i class="bi bi-bank me-2"></i>Informasi Rekening</h6>
+                                    <dl class="row mb-0 small">
+                                        <dt class="col-5 text-muted text-uppercase">Rekening 1</dt>
+                                        <dd class="col-7" id="modal-rekening1">-</dd>
+                                        <dt class="col-5 text-muted text-uppercase">Rekening 2</dt>
+                                        <dd class="col-7" id="modal-rekening2">-</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-body">
+                                <h6 class="fw-semibold mb-3"><i class="bi bi-cash-stack me-2"></i>Rincian Nominal</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label text-uppercase small text-muted">Jumlah</label>
+                                        <input type="text" class="form-control" id="modal-jumlah" readonly>
                                     </div>
-                                    <hr class="my-2">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <h5 class="mb-2">Nominal</h5>
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <div class="mb-2">
-                                                        <label for="modal-jumlah" class="form-label">Jumlah</label>
-                                                        <input type="text" class="form-control form-control-sm" id="modal-jumlah" readonly>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="mb-2">
-                                                        <label for="modal-harga" class="form-label">Harga</label>
-                                                        <input type="text" class="form-control form-control-sm" id="modal-harga" readonly>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="mb-2">
-                                                        <label for="modal-subtotal" class="form-label">Subtotal</label>
-                                                        <input type="text" class="form-control form-control-sm" id="modal-subtotal" readonly>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label text-uppercase small text-muted">Harga</label>
+                                        <input type="text" class="form-control" id="modal-harga" readonly>
                                     </div>
-                                    <hr class="my-2">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <h5 class="mb-2">Bayar</h5>
-                                            <div class="mb-2">
-                                                <label for="modal-nomor-bukti" class="form-label">Input Nomor Bukti Transaksi</label>
-                                                <input type="text" class="form-control form-control-sm" id="modal-nomor-bukti" name="nomor_bukti_transaksi">
-                                            </div>
-                                            <div class="mb-2">
-                                                <label for="modal-bukti-transaksi" class="form-label">Input Bukti Transaksi</label>
-                                                <input type="file" class="form-control form-control-sm" id="modal-bukti-transaksi" name="file_bukti" accept=".jpg">
-                                            </div>
-                                        </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label text-uppercase small text-muted">Subtotal</label>
+                                        <input type="text" class="form-control fw-semibold" id="modal-subtotal" readonly>
                                     </div>
                                 </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" name="update_pembayaran" class="btn btn-primary">Save changes</button>
+                            </div>
+                        </div>
+
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h6 class="fw-semibold mb-3"><i class="bi bi-receipt me-2"></i>Konfirmasi Pembayaran</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Nomor Bukti Transaksi</label>
+                                        <input type="text" class="form-control" id="modal-nomor-bukti" name="nomor_bukti_transaksi" placeholder="Masukkan nomor bukti">
+                                        <div class="form-text">Kosongkan jika belum tersedia.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Upload Bukti (JPG, &le; 1MB)</label>
+                                        <input type="file" class="form-control" id="modal-bukti-transaksi" name="file_bukti" accept=".jpg">
+                                    </div>
                                 </div>
-                            </form>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-            </main>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i>Tutup
+                        </button>
+                        <button type="submit" name="update_pembayaran" class="btn btn-primary">
+                            <i class="bi bi-save me-1"></i>Simpan Pembayaran
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <script src="../js/bootstrap.bundle.min.js"></script>
+    <?php include '_scripts_new.php'; ?>
     <script>
-        function formatNumber(number) {
-            return new Intl.NumberFormat('id-ID').format(number);
-        }
+        document.addEventListener('DOMContentLoaded', function () {
+            const formatter = new Intl.NumberFormat('id-ID');
+            const bayarModalEl = document.getElementById('bayarModal');
+            const formPembayaran = document.getElementById('form-pembayaran');
 
-        var bayarModal = document.getElementById('bayarModal');
-        bayarModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            var id_request = button.getAttribute('data-id-request');
-            var id_vendor = button.getAttribute('data-id-vendor');
-            var kode_request = button.getAttribute('data-kode-request');
-            var namaBahan = button.getAttribute('data-nama-bahan');
-            var vendor = button.getAttribute('data-vendor');
-            var status = button.getAttribute('data-status');
-            var tipe = button.getAttribute('data-tipe');
-            var rekening1 = button.getAttribute('data-rekening1');
-            var rekening2 = button.getAttribute('data-rekening2');
-            var jumlah = button.getAttribute('data-jumlah');
-            var harga = button.getAttribute('data-harga');
-            var subtotal = button.getAttribute('data-subtotal');
+            if (bayarModalEl) {
+                bayarModalEl.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    if (!button) return;
 
-            var modalIdRequest = bayarModal.querySelector('#modal-id-request');
-            var modalIdVendor = bayarModal.querySelector('#modal-id-vendor');
-            var modalKodeRequest = bayarModal.querySelector('#modal-kode-request');
-            var modalNamaBahan = bayarModal.querySelector('#modal-nama-bahan');
-            var modalVendor = bayarModal.querySelector('#modal-vendor');
-            var modalStatus = bayarModal.querySelector('#modal-status');
-            var modalTipe = bayarModal.querySelector('#modal-tipe');
-            var modalRekening1 = bayarModal.querySelector('#modal-rekening1');
-            var modalRekening2 = bayarModal.querySelector('#modal-rekening2');
-            var modalJumlah = bayarModal.querySelector('#modal-jumlah');
-            var modalHarga = bayarModal.querySelector('#modal-harga');
-            var modalSubtotal = bayarModal.querySelector('#modal-subtotal');
-            var saveButton = bayarModal.querySelector('button[name="update_pembayaran"]');
-            var nomorBuktiInput = bayarModal.querySelector('#modal-nomor-bukti');
-            var fileBuktiInput = bayarModal.querySelector('#modal-bukti-transaksi');
+                    const status = button.getAttribute('data-status');
 
-            modalIdRequest.value = id_request;
-            modalIdVendor.value = id_vendor;
-            modalKodeRequest.value = kode_request;
-            modalNamaBahan.textContent = namaBahan;
-            modalVendor.textContent = vendor;
-            modalStatus.textContent = status;
-            modalTipe.textContent = tipe;
-            modalRekening1.textContent = rekening1;
-            modalRekening2.textContent = rekening2;
-            modalJumlah.value = formatNumber(jumlah);
-            modalHarga.value = formatNumber(harga);
-            modalSubtotal.value = formatNumber(subtotal);
+                    document.getElementById('modal-id-request').value = button.getAttribute('data-id-request') || '';
+                    document.getElementById('modal-id-vendor').value = button.getAttribute('data-id-vendor') || '';
+                    document.getElementById('modal-kode-request').value = button.getAttribute('data-kode-request') || '';
+                    document.getElementById('modal-nama-bahan').textContent = button.getAttribute('data-nama-bahan') || '-';
+                    document.getElementById('modal-vendor').textContent = button.getAttribute('data-vendor') || '-';
+                    document.getElementById('modal-status').textContent = status || '-';
+                    document.getElementById('modal-tipe').textContent = button.getAttribute('data-tipe') || '-';
+                    document.getElementById('modal-rekening1').textContent = button.getAttribute('data-rekening1') || '-';
+                    document.getElementById('modal-rekening2').textContent = button.getAttribute('data-rekening2') || '-';
+                    document.getElementById('modal-jumlah').value = formatter.format(button.getAttribute('data-jumlah') || 0);
+                    document.getElementById('modal-harga').value = formatter.format(button.getAttribute('data-harga') || 0);
+                    document.getElementById('modal-subtotal').value = formatter.format(button.getAttribute('data-subtotal') || 0);
 
-            if (status === 'PAID') {
-                saveButton.style.display = 'none';
-                nomorBuktiInput.disabled = true;
-                fileBuktiInput.disabled = true;
-            } else {
-                saveButton.style.display = 'block';
-                nomorBuktiInput.disabled = false;
-                fileBuktiInput.disabled = false;
+                    const nomorBuktiInput = document.getElementById('modal-nomor-bukti');
+                    const fileInput = document.getElementById('modal-bukti-transaksi');
+                    const submitBtn = formPembayaran.querySelector('button[name="update_pembayaran"]');
+
+                    if (status === 'PAID') {
+                        submitBtn.classList.add('d-none');
+                        nomorBuktiInput.disabled = true;
+                        fileInput.disabled = true;
+                    } else {
+                        submitBtn.classList.remove('d-none');
+                        nomorBuktiInput.disabled = false;
+                        fileInput.disabled = false;
+                        nomorBuktiInput.value = '';
+                        fileInput.value = '';
+                    }
+                });
+            }
+
+            if (formPembayaran) {
+                formPembayaran.addEventListener('submit', function (event) {
+                    const fileInput = document.getElementById('modal-bukti-transaksi');
+                    if (fileInput && fileInput.files.length > 0) {
+                        const file = fileInput.files[0];
+                        if (file.type !== 'image/jpeg') {
+                            alert('File harus berupa JPG.');
+                            event.preventDefault();
+                            return;
+                        }
+                        if (file.size > 1024 * 1024) {
+                            alert('Ukuran file tidak boleh lebih dari 1 MB.');
+                            event.preventDefault();
+                            return;
+                        }
+                    }
+                });
             }
         });
-
-        var formPembayaran = document.getElementById('form-pembayaran');
-        formPembayaran.addEventListener('submit', function(event) {
-            var fileInput = document.getElementById('modal-bukti-transaksi');
-            if (fileInput.files.length > 0) {
-                var file = fileInput.files[0];
-                var fileType = file.type;
-                var fileSize = file.size;
-
-                if (fileType !== 'image/jpeg') {
-                    alert('File harus berupa JPG.');
-                    event.preventDefault();
-                    return;
-                }
-
-                if (fileSize > 1024 * 1024) {
-                    alert('Ukuran file tidak boleh lebih dari 1 MB.');
+    </script>
+</body>
+</html>
                     event.preventDefault();
                     return;
                 }
