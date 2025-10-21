@@ -118,6 +118,38 @@ try {
 } catch (Exception $e) {
     $error = 'Terjadi kesalahan saat mengambil data: ' . $e->getMessage();
 }
+
+$produk_rilis_terbaru = [];
+try {
+    $sql_rilis = "
+        SELECT
+            ps.id_produk_sell,
+            ps.id_produk,
+            vp.kode_produk,
+            vp.nama_produk,
+            vp.nama_kategori,
+            ps.harga_jual,
+            ps.stok_awal
+        FROM
+            produk_sell ps
+        INNER JOIN view_produk vp ON ps.id_produk = vp.id_produk
+        WHERE
+            DATE(ps.tgl_release) = (
+                SELECT MAX(DATE(tgl_release)) FROM produk_sell
+            )
+            AND ps.id_produk NOT IN (
+                SELECT id_produk FROM produk_sell WHERE DATE(tgl_release) = CURDATE()
+            )
+        ORDER BY ps.harga_jual ASC
+    ";
+
+    $result_rilis = $conn->query($sql_rilis);
+    if ($result_rilis) {
+        $produk_rilis_terbaru = $result_rilis->fetch_all(MYSQLI_ASSOC);
+    }
+} catch (Exception $e) {
+    $error = 'Terjadi kesalahan saat mengambil data rilis terbaru: ' . $e->getMessage();
+}
 ?>
 
 <!doctype html>
@@ -144,7 +176,7 @@ try {
                     <p class="text-muted mb-0">Kelola harga jual harian, stok, dan status penjualan produk.</p>
                 </div>
 
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#produkTerbaruModal">
                     <i class="bi bi-plus-lg me-2"></i>Tambah Rilis
                 </button>
             </div>
@@ -244,6 +276,62 @@ try {
             </div>
         </div>
     </main>
+
+    <div class="modal fade" id="produkTerbaruModal" tabindex="-1" aria-labelledby="produkTerbaruModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="produkTerbaruModalLabel"><i class="bi bi-clock-history me-2"></i>Produk Rilis Terakhir</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width:5%;" class="text-start">No</th>
+                                    <th style="width:12%;">Kode Produk</th>
+                                    <th class="text-start">Nama Produk</th>
+                                    <th style="width:18%;" class="text-center">Nama Kategori</th>
+                                    <th style="width:15%;" class="text-end">Harga</th>
+                                    <th style="width:10%;" class="text-center">Stok</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($produk_rilis_terbaru)): ?>
+                                    <?php foreach ($produk_rilis_terbaru as $index => $produk): ?>
+                                    <tr>
+                                        <td class="text-start fw-semibold"><?php echo $index + 1; ?></td>
+                                        <td class="text-uppercase fw-medium"><?php echo htmlspecialchars($produk['kode_produk']); ?></td>
+                                        <td class="text-start fw-semibold"><?php echo htmlspecialchars($produk['nama_produk']); ?></td>
+                                        <td class="text-center"><?php echo htmlspecialchars($produk['nama_kategori']); ?></td>
+                                        <td class="text-end">Rp <?php echo number_format((float)$produk['harga_jual'], 0, ',', '.'); ?></td>
+                                        <td class="text-center fw-semibold"><?php echo htmlspecialchars($produk['stok_awal']); ?></td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4">
+                                            <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                            <span class="text-muted">Tidak ada data rilis sebelumnya yang dapat ditampilkan.</span>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>Tutup
+                    </button>
+                    <button type="button" class="btn btn-primary">
+                        <i class="bi bi-upload me-1"></i>Rilis
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="modal fade" id="rilisModal" tabindex="-1" aria-labelledby="rilisModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
