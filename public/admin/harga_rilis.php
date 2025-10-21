@@ -163,6 +163,16 @@ try {
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <link href="../css/newadmin.css?v=3" rel="stylesheet">
+    <style>
+        #produkTerbaruModal .table td,
+        #produkTerbaruModal .table th {
+            vertical-align: middle;
+        }
+        #produkTerbaruModal .stok-input {
+            max-width: 110px;
+            margin-inline: auto;
+        }
+    </style>
 </head>
 <body>
     <?php include '_header_new.php'; ?>
@@ -286,15 +296,15 @@ try {
                 </div>
                 <div class="modal-body">
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width:5%;" class="text-start">No</th>
-                                    <th style="width:12%;">Kode Produk</th>
-                                    <th class="text-start">Nama Produk</th>
-                                    <th style="width:18%;" class="text-center">Nama Kategori</th>
-                                    <th style="width:15%;" class="text-end">Harga</th>
-                                    <th style="width:10%;" class="text-center">Stok</th>
+                                    <th style="width: 5%;" class="text-start">No</th>
+                                    <th style="width: 12%;" class="text-start">Kode Produk</th>
+                                    <th class="text-start" style="width: auto;">Nama Produk</th>
+                                    <th style="width: 18%;" class="text-center">Nama Kategori</th>
+                                    <th style="width: 15%;" class="text-end">Harga</th>
+                                    <th style="width: 12%;" class="text-center">Stok</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -302,17 +312,19 @@ try {
                                     <?php foreach ($produk_rilis_terbaru as $index => $produk): ?>
                                     <tr>
                                         <td class="text-start fw-semibold"><?php echo $index + 1; ?></td>
-                                        <td class="text-uppercase fw-medium"><?php echo htmlspecialchars($produk['kode_produk']); ?></td>
+                                        <td class="text-uppercase fw-medium text-start"><?php echo htmlspecialchars($produk['kode_produk']); ?></td>
                                         <td class="text-start fw-semibold"><?php echo htmlspecialchars($produk['nama_produk']); ?></td>
                                         <td class="text-center"><?php echo htmlspecialchars($produk['nama_kategori']); ?></td>
                                         <td class="text-end">Rp <?php echo number_format((float)$produk['harga_jual'], 0, ',', '.'); ?></td>
-                                        <td class="text-center fw-semibold"><?php echo htmlspecialchars($produk['stok_awal']); ?></td>
+                                        <td class="text-center">
+                                            <input type="number" class="form-control text-center stok-input" name="stok_awal[<?php echo (int)$produk['id_produk_sell']; ?>]" min="0" value="<?php echo (int)$produk['stok_awal']; ?>">
+                                        </td>
                                     </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="6" class="text-center py-4">
-                                            <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                                        <td colspan="6" class="text-center py-5">
+                                            <i class="bi bi-inbox fs-1 d-block mb-3 text-muted"></i>
                                             <span class="text-muted">Tidak ada data rilis sebelumnya yang dapat ditampilkan.</span>
                                         </td>
                                     </tr>
