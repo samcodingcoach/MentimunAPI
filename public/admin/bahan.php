@@ -486,7 +486,35 @@ if (!empty($params)) {
             modal.show();
         }
         
+        function formatCurrency(value) {
+            const numeric = value.replace(/[^\d]/g, '');
+            if (!numeric) {
+                return { formatted: '', raw: '' };
+            }
+            const formatted = numeric.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            return { formatted, raw: numeric };
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            const hargaInput = document.getElementById('harga');
+            const hargaHidden = document.getElementById('harga_hidden');
+
+            const applyFormatting = () => {
+                if (!hargaInput) {
+                    return;
+                }
+                const { formatted, raw } = formatCurrency(hargaInput.value);
+                hargaInput.value = formatted;
+                if (hargaHidden) {
+                    hargaHidden.value = raw;
+                }
+            };
+
+            if (hargaInput) {
+                hargaInput.addEventListener('input', applyFormatting);
+                hargaInput.addEventListener('blur', applyFormatting);
+            }
+
             // Modal reset event
             document.getElementById('bahanModal').addEventListener('hidden.bs.modal', function () {
                 const modalForm = document.querySelector('#bahanModal form');
@@ -523,6 +551,8 @@ if (!empty($params)) {
                     biayaBahan(parseInt(id), nama);
                 }
             });
+
+            applyFormatting();
         });
 
         $(document).ready(function () {
