@@ -37,7 +37,7 @@ $tunai_sql = "
         DATE_FORMAT(proses_pembayaran.tanggal_payment,'%H:%i') AS jam,
         DATE_FORMAT(proses_pembayaran.update_status,'%d %M %Y %H:%i') AS waktu_dibayar,
         pegawai.nama_lengkap as kasir,
-        FORMAT(proses_pembayaran.jumlah_uang, 0) AS nominal,
+        FORMAT(proses_pembayaran.jumlah_dibayarkan, 0) AS nominal,
         CASE
             WHEN proses_pembayaran.`status` = 1 THEN 'DIBAYAR'
             WHEN proses_pembayaran.`status` = 0 THEN 'BELUM DIBAYAR'
@@ -109,7 +109,7 @@ $qris_sql = "
             WHEN proses_pembayaran.`status` = 0 THEN 'PENDING'
         END AS status_bayar,
         pegawai.nama_lengkap as kasir,
-        FORMAT(proses_pembayaran.jumlah_uang, 0) AS nominal,
+        FORMAT(proses_pembayaran.jumlah_dibayarkan, 0) AS nominal,
         DATE_FORMAT(proses_pembayaran.update_status,'%d %M %Y %H:%i') AS waktu_dibayar
     FROM
         proses_pembayaran
@@ -220,7 +220,7 @@ $semua_sql = "
     SELECT
         proses_pembayaran.kode_payment AS kode,
         proses_pembayaran.id_tagihan,
-        proses_pembayaran.jumlah_uang AS total,
+        proses_pembayaran.jumlah_dibayarkan AS total,
         metode_pembayaran.kategori
     FROM
         proses_pembayaran

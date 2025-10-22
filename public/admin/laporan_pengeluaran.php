@@ -219,12 +219,12 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
                                         <thead class="table-light text-center">
                                             <tr>
                                                 <th style="width:5%;">No</th>
-                                                <th style="width:12%;">Tanggal</th>
-                                                <th class="text-end">Cash Paid</th>
-                                                <th class="text-end">Cash Unpaid</th>
-                                                <th class="text-end">Invoice Paid</th>
-                                                <th class="text-end">Invoice Unpaid</th>
-                                                <th class="text-end">Total</th>
+                                                <th style="width:auto;">Tanggal</th>
+                                                <th class="text-end" style="width:15%;">Cash Paid</th>
+                                                <th class="text-end" style="width:15%;">Cash Unpaid</th>
+                                                <th class="text-end" style="width:15%;">Invoice Paid</th>
+                                                <th class="text-end" style="width:15%;">Invoice Unpaid</th>
+                                                <th class="text-end" style="width:20%;">Total</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -252,24 +252,25 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
                                     </table>
                                 </div>
                                 <?php if (!empty($rincianpo)): ?>
-                                <div class="d-flex justify-content-end mt-3">
-                                    <div class="badge bg-danger-subtle text-danger px-3 py-2">
+                                <div class="d-flex justify-content-end mt-3 p-2 y-1">
+                                    <div class="badge bg-info-subtle text-info px-3 py-2">
                                         <i class="bi bi-calculator me-1"></i>Grand Total: Rp <?php echo number_format($sum_po, 0, ',', '.'); ?>
                                     </div>
                                 </div>
                                 <?php endif; ?>
+
                             </div>
                         </div>
 
                         <div class="tab-pane fade" id="section2" role="tabpanel" aria-labelledby="section2-tab">
-                            <div class="px-4 py-4">
-                                <h6 class="fw-semibold mb-3 text-primary">Pengeluaran Produk (Akumulasi Bahan Baku Terpakai)</h6>
+                            <div class="px-0 py-0">
+                                
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle mb-0">
                                         <thead class="table-light text-center">
                                             <tr>
                                                 <th style="width:5%;">No</th>
-                                                <th>Tanggal</th>
+                                                <th style="width:10%;">Tanggal</th>
                                                 <th class="text-end">Total</th>
                                             </tr>
                                         </thead>
@@ -294,8 +295,8 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
                                     </table>
                                 </div>
                                 <?php if (!empty($rincianbahan)): ?>
-                                <div class="d-flex justify-content-end mt-3">
-                                    <div class="badge bg-danger-subtle text-danger px-3 py-2">
+                                <div class="d-flex justify-content-end mt-3 p-2 y-1">
+                                    <div class="badge bg-info-subtle text-info px-3 py-2">
                                         <i class="bi bi-calculator me-1"></i>Grand Total: Rp <?php echo number_format($sum_bahan, 0, ',', '.'); ?>
                                     </div>
                                 </div>
@@ -304,14 +305,14 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
                         </div>
 
                         <div class="tab-pane fade" id="section3" role="tabpanel" aria-labelledby="section3-tab">
-                            <div class="px-4 py-4">
-                                <h6 class="fw-semibold mb-3 text-primary">Penjualan Bruto (Termasuk Penambahan)</h6>
+                            <div class="px-0 py-0">
+                                
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle mb-0">
                                         <thead class="table-light text-center">
                                             <tr>
                                                 <th style="width:5%;">No</th>
-                                                <th>Tanggal</th>
+                                                <th style="width:10%">Tanggal</th>
                                                 <th class="text-end">Total</th>
                                             </tr>
                                         </thead>
@@ -336,7 +337,7 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
                                     </table>
                                 </div>
                                 <?php if (!empty($rincianpenjualanb)): ?>
-                                <div class="d-flex justify-content-end mt-3">
+                                <div class="d-flex justify-content-end mt-3 p-2 y-1">
                                     <div class="badge bg-success-subtle text-success px-3 py-2">
                                         <i class="bi bi-calculator me-1"></i>Grand Total: Rp <?php echo number_format($sum_penjualanb, 0, ',', '.'); ?>
                                     </div>
@@ -346,14 +347,14 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
                         </div>
 
                         <div class="tab-pane fade" id="section4" role="tabpanel" aria-labelledby="section4-tab">
-                            <div class="px-4 py-4">
-                                <h6 class="fw-semibold mb-3 text-primary">Penjualan Neto (Non Biaya Penambahan)</h6>
+                            <div class="px-0 py-0">
+                                
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle mb-0">
                                         <thead class="table-light text-center">
                                             <tr>
                                                 <th style="width:5%;">No</th>
-                                                <th>Tanggal</th>
+                                                <th style="width:10%">Tanggal</th>
                                                 <th class="text-end">Total</th>
                                             </tr>
                                         </thead>
@@ -378,7 +379,7 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
                                     </table>
                                 </div>
                                 <?php if (!empty($rincianpenjualan2)): ?>
-                                <div class="d-flex justify-content-end mt-3">
+                                <div class="d-flex justify-content-end mt-3 p-2 y-1">
                                     <div class="badge bg-success-subtle text-success px-3 py-2">
                                         <i class="bi bi-calculator me-1"></i>Grand Total: Rp <?php echo number_format($sum_penjualan2, 0, ',', '.'); ?>
                                     </div>
@@ -395,8 +396,8 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
                                 $net_profit = $total_penjualan - $total_pengeluaran;
                                 ?>
                                 <div class="row g-4">
-                                    <div class="col-lg-6">
-                                        <div class="summary-card bg-danger-subtle">
+                                    <div class="col-lg-6 ">
+                                        <div class="summary-card bg-danger-subtle px-2 py-2">
                                             <h6 class="text-danger mb-3"><i class="bi bi-arrow-down-circle me-2"></i>Pengeluaran</h6>
                                             <div class="d-flex justify-content-between mb-2">
                                                 <span>Pembelian Bahan (PO)</span>
@@ -414,7 +415,7 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
-                                        <div class="summary-card bg-success-subtle">
+                                        <div class="summary-card bg-success-subtle px-2 py-2">
                                             <h6 class="text-success mb-3"><i class="bi bi-arrow-up-circle me-2"></i>Penjualan</h6>
                                             <div class="d-flex justify-content-between mb-2">
                                                 <span>Penjualan Bruto</span>
