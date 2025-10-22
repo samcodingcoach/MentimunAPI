@@ -50,6 +50,14 @@
     // Rotate arrow on menu collapse
     document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(function (element) {
         element.addEventListener('click', function () {
+            if (window.innerWidth > 768 && sidebar.classList.contains('collapsed')) {
+                sidebar.classList.remove('collapsed');
+                if (mainContent) {
+                    mainContent.classList.remove('expanded');
+                }
+                localStorage.setItem('sidebarCollapsed', 'false');
+            }
+
             const arrow = this.querySelector('.menu-arrow');
             if (arrow) {
                 arrow.classList.toggle('rotated');
