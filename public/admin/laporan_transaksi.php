@@ -177,6 +177,7 @@ if (!empty($selected_kasir)) {
             state_open_closing.manual_total_cash AS cash,
             (state_open_closing.total_qris + state_open_closing.manual_total_bank + state_open_closing.manual_total_cash) + 
             (state_open_closing.first_cash_drawer - state_open_closing.manual_total_cash) AS grand_total,
+            DATE(state_open_closing.tanggal_open) AS tanggal_open_raw,
             COALESCE(SUM(CASE WHEN proses_pembayaran.`status` = 1 THEN proses_pembayaran.total_diskon ELSE 0 END), 0) AS total_diskon,
             state_open_closing.id_user,
             pegawai.nama_lengkap AS kasir
@@ -633,7 +634,7 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
                                                 <tr>
                                                     <td class="text-left fw-semibold"><?php echo $no++; ?></td>
                                                     <td class="text-center text-nowrap">
-                                                        <a href="#" class="text-decoration-none" onclick="showKasirDetail('<?php echo $tanggal_awal; ?>', '<?php echo $tanggal_akhir; ?>', '<?php echo $row['id_user']; ?>', '<?php echo htmlspecialchars($row['kasir']); ?>')" data-bs-toggle="modal" data-bs-target="#kasirDetailModal">
+                                                        <a href="#" class="text-decoration-none" onclick="showKasirDetail('<?php echo htmlspecialchars($row['tanggal_open_raw']); ?>', '<?php echo $row['id_user']; ?>', '<?php echo htmlspecialchars($row['kasir']); ?>')" data-bs-toggle="modal" data-bs-target="#kasirDetailModal">
                                                             <span class="text-primary">
                                                                 <i class="bi bi-calendar3 me-1"></i><?php echo htmlspecialchars($row['tanggal_open']); ?>
                                                             </span>
@@ -788,7 +789,7 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
                             <div class="px-4 py-4">
                                 <div class="row g-4">
                                     <div class="col-lg-4">
-                                        <div class="summary-card bg-success-subtle">
+                                        <div class="summary-card bg-success-subtle px-4 py-4">
                                             <h6 class="text-success mb-3"><i class="bi bi-cash-stack me-2"></i>Tunai</h6>
                                             <div class="d-flex justify-content-between mb-2">
                                                 <span>Total Nominal</span>
@@ -801,7 +802,7 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
                                         </div>
                                     </div>
                                     <div class="col-lg-4">
-                                        <div class="summary-card bg-primary-subtle">
+                                        <div class="summary-card bg-primary-subtle px-4 py-4">
                                             <h6 class="text-primary mb-3"><i class="bi bi-bank me-2"></i>Transfer / EDC</h6>
                                             <div class="d-flex justify-content-between mb-2">
                                                 <span>Total Nominal</span>
@@ -814,7 +815,7 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
                                         </div>
                                     </div>
                                     <div class="col-lg-4">
-                                        <div class="summary-card bg-warning-subtle">
+                                        <div class="summary-card bg-warning-subtle px-4 py-4">
                                             <h6 class="text-warning mb-3"><i class="bi bi-qr-code-scan me-2"></i>QRIS</h6>
                                             <div class="d-flex justify-content-between mb-2">
                                                 <span>Total Nominal</span>
@@ -830,7 +831,7 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
 
                                 <div class="row g-4 mt-3">
                                     <div class="col-lg-6">
-                                        <div class="summary-card bg-secondary-subtle">
+                                        <div class="summary-card bg-secondary-subtle px-4 py-4">
                                             <h6 class="text-secondary mb-3"><i class="bi bi-people me-2"></i>Per Kasir</h6>
                                             <div class="d-flex justify-content-between mb-2">
                                                 <span>Total Grand Total</span>
@@ -847,7 +848,7 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
-                                        <div class="summary-card bg-info-subtle">
+                                        <div class="summary-card bg-info-subtle px-4 py-4">
                                             <h6 class="text-info mb-3"><i class="bi bi-list-check me-2"></i>Semua Transaksi</h6>
                                             <div class="d-flex justify-content-between mb-2">
                                                 <span>Total Halaman Saat Ini</span>
@@ -896,24 +897,47 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
-            <div class="table-responsive">
-              <table class="table table-hover table-sm">
-                <thead class="table-dark">
-                  <tr>
-                    <th>No</th>
-                    <th>Kode Payment</th>
-                    <th>Tanggal</th>
-                    <th>Jam</th>
-                    <th>Kategori</th>
-                    <th>Diskon</th>
-                    <th class="text-end">Total Diskon</th>
-                    <th class="text-end">Total Kotor</th>
-                    <th class="text-end">Total Bersih</th>
+            <div class="mb-3">
+              <div class="row g-3 align-items-end">
+                <div class="col-md-6">
+                  <label for="kasir-detail-search" class="form-label">Cari Kode Payment</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-body-secondary"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="kasir-detail-search" placeholder="Masukkan kode payment">
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <label for="kasir-detail-kategori" class="form-label">Kategori</label>
+                  <select class="form-select" id="kasir-detail-kategori">
+                    <option value="Semua">Semua</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label d-none d-md-block">&nbsp;</label>
+                  <button type="button" class="btn btn-outline-secondary w-100" id="kasir-detail-reset">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-responsive rounded-3 border">
+              <table class="table table-striped table-hover align-middle mb-0" id="kasir-detail-table">
+                <thead class="table-light">
+                  <tr class="text-center text-uppercase small">
+                    <th style="width:6%;">No</th>
+                    <th style="width:20%;" class="text-start">Kode Payment</th>
+                    <th style="width:10%;">Jam</th>
+                    <th style="width:18%;" class="text-start">Kategori</th>
+                    <th style="width:12%;" class="text-start">Diskon</th>
+                    <th style="width:12%;" class="text-end">Total Diskon</th>
+                    <th style="width:12%;" class="text-end">Total Kotor</th>
+                    <th style="width:12%;" class="text-end">Total Bersih</th>
                   </tr>
                 </thead>
                 <tbody id="kasir-detail-tbody">
                   <tr>
-                    <td colspan="9" class="text-center">
+                    <td colspan="8" class="text-center py-4">
                       <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                       </div>
@@ -922,11 +946,14 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
                 </tbody>
               </table>
             </div>
-            
-            <!-- Pagination -->
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-3" id="kasir-detail-summary" style="display:none;">
+              <span class="text-muted" id="kasir-detail-count"></span>
+              <div class="badge bg-success-subtle text-success px-3 py-2" id="kasir-detail-total"></div>
+            </div>
+
             <nav aria-label="Page navigation" class="mt-3">
-              <ul class="pagination justify-content-center" id="kasir-detail-pagination">
-              </ul>
+              <ul class="pagination justify-content-center" id="kasir-detail-pagination"></ul>
             </nav>
           </div>
         </div>
@@ -1116,99 +1143,258 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
         });
       }); // End of DOMContentLoaded
 
-      // Global variables for kasir detail modal
+      // Utility helpers
+      const kasirDetailElements = {
+        tbody: document.getElementById('kasir-detail-tbody'),
+        pagination: document.getElementById('kasir-detail-pagination'),
+        searchInput: document.getElementById('kasir-detail-search'),
+        kategoriSelect: document.getElementById('kasir-detail-kategori'),
+        resetButton: document.getElementById('kasir-detail-reset'),
+        summaryWrap: document.getElementById('kasir-detail-summary'),
+        summaryCount: document.getElementById('kasir-detail-count'),
+        summaryTotal: document.getElementById('kasir-detail-total')
+      };
+
+      const KASIR_DETAIL_PAGE_SIZE = 10;
+      let kasirSearchDebounce;
+
+      function escapeHtml(value) {
+        if (value === null || value === undefined) return '';
+        return String(value).replace(/[&<>"']/g, function(match) {
+          const escape = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+          return escape[match] || match;
+        });
+      }
+
+      function getKategoriBadgeClass(kategori) {
+        if (!kategori) return 'bg-secondary-subtle text-secondary';
+        const normalized = kategori.toLowerCase();
+        if (normalized.includes('tunai')) {
+          return 'bg-success-subtle text-success';
+        }
+        if (normalized.includes('transfer') || normalized.includes('edc')) {
+          return 'bg-primary-subtle text-primary';
+        }
+        if (normalized.includes('qris')) {
+          return 'bg-warning-subtle text-warning';
+        }
+        return 'bg-secondary-subtle text-secondary';
+      }
+
       let currentKasirPage = 1;
       let currentKasirData = {
-        tanggal_awal: '',
-        tanggal_akhir: '',
+        tanggal: '',
         id_user: '',
-        kasir_name: ''
+        kasir_name: '',
+        search: '',
+        kategori: 'Semua'
       };
-      
-      // Function to show kasir detail modal
-      function showKasirDetail(tanggalAwal, tanggalAkhir, idUser, kasirName) {
+
+      if (kasirDetailElements.searchInput) {
+        kasirDetailElements.searchInput.addEventListener('input', function (event) {
+          clearTimeout(kasirSearchDebounce);
+          kasirSearchDebounce = setTimeout(() => {
+            currentKasirData.search = event.target.value.trim();
+            currentKasirPage = 1;
+            loadKasirDetailData();
+          }, 300);
+        });
+      }
+
+      if (kasirDetailElements.kategoriSelect) {
+        kasirDetailElements.kategoriSelect.addEventListener('change', function (event) {
+          currentKasirData.kategori = event.target.value;
+          currentKasirPage = 1;
+          loadKasirDetailData();
+        });
+      }
+
+      if (kasirDetailElements.resetButton) {
+        kasirDetailElements.resetButton.addEventListener('click', function () {
+          if (kasirDetailElements.searchInput) {
+            kasirDetailElements.searchInput.value = '';
+          }
+          if (kasirDetailElements.kategoriSelect) {
+            kasirDetailElements.kategoriSelect.value = 'Semua';
+          }
+          currentKasirData.search = '';
+          currentKasirData.kategori = 'Semua';
+          currentKasirPage = 1;
+          loadKasirDetailData();
+        });
+      }
+
+      function showKasirDetail(tanggal, idUser, kasirName) {
         currentKasirData = {
-          tanggal_awal: tanggalAwal,
-          tanggal_akhir: tanggalAkhir,
+          tanggal: tanggal,
           id_user: idUser,
-          kasir_name: kasirName
+          kasir_name: kasirName,
+          search: '',
+          kategori: 'Semua'
         };
         currentKasirPage = 1;
-        
-        // Set kasir name in modal title
-        document.getElementById('kasir-name').textContent = kasirName;
-        
-        // Load data
+
+        if (kasirDetailElements.searchInput) {
+          kasirDetailElements.searchInput.value = '';
+        }
+        if (kasirDetailElements.kategoriSelect) {
+          kasirDetailElements.kategoriSelect.value = 'Semua';
+        }
+
+        const kasirNameTarget = document.getElementById('kasir-name');
+        if (kasirNameTarget) {
+          kasirNameTarget.textContent = kasirName;
+        }
+
         loadKasirDetailData();
       }
-      
-      // Function to load kasir detail data
+
+      function buildKasirDetailParams() {
+        const params = new URLSearchParams({
+          tanggal: currentKasirData.tanggal,
+          id_user: currentKasirData.id_user,
+          page: currentKasirPage
+        });
+
+        if (currentKasirData.search) {
+          params.append('search', currentKasirData.search);
+        }
+
+        if (currentKasirData.kategori && currentKasirData.kategori !== 'Semua') {
+          params.append('kategori', currentKasirData.kategori);
+        }
+
+        return params.toString();
+      }
+
+      function updateKasirFilters(filterData) {
+        if (!filterData || !Array.isArray(filterData.categories) || !kasirDetailElements.kategoriSelect) {
+          return;
+        }
+
+        const select = kasirDetailElements.kategoriSelect;
+        const previousValue = currentKasirData.kategori || 'Semua';
+        const uniqueCategories = Array.from(new Set(filterData.categories.filter(Boolean)));
+
+        select.innerHTML = '<option value="Semua">Semua</option>';
+        uniqueCategories.forEach(category => {
+          const option = document.createElement('option');
+          option.value = category;
+          option.textContent = category;
+          select.appendChild(option);
+        });
+
+        if (uniqueCategories.includes(previousValue)) {
+          select.value = previousValue;
+        } else {
+          select.value = 'Semua';
+          currentKasirData.kategori = 'Semua';
+        }
+      }
+
+      function updateKasirSummary(summaryData) {
+        if (!kasirDetailElements.summaryWrap || !kasirDetailElements.summaryCount || !kasirDetailElements.summaryTotal) {
+          return;
+        }
+
+        if (!summaryData) {
+          kasirDetailElements.summaryWrap.style.display = 'none';
+          kasirDetailElements.summaryCount.textContent = '';
+          kasirDetailElements.summaryTotal.textContent = '';
+          return;
+        }
+
+        const totalRows = summaryData.total_rows ?? 0;
+        const totalBersihFormatted = summaryData.total_bersih_formatted ?? '0';
+
+        kasirDetailElements.summaryWrap.style.display = 'flex';
+        kasirDetailElements.summaryCount.textContent = `Total transaksi: ${totalRows}`;
+        kasirDetailElements.summaryTotal.innerHTML = `<i class="bi bi-wallet2 me-1"></i>Grand Total Bersih: Rp ${totalBersihFormatted}`;
+      }
+
       function loadKasirDetailData() {
-        const tbody = document.getElementById('kasir-detail-tbody');
-        const pagination = document.getElementById('kasir-detail-pagination');
-        
-        // Show loading
+        const tbody = kasirDetailElements.tbody;
+        const pagination = kasirDetailElements.pagination;
+
+        if (!tbody || !pagination) {
+          return;
+        }
+
         tbody.innerHTML = `
           <tr>
-            <td colspan="9" class="text-center">
+            <td colspan="8" class="text-center py-4">
               <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
             </td>
           </tr>
         `;
-        
-        // Fetch data
-        fetch(`get_kasir_detail.php?tanggal_awal=${currentKasirData.tanggal_awal}&tanggal_akhir=${currentKasirData.tanggal_akhir}&id_user=${currentKasirData.id_user}&page=${currentKasirPage}`)
+        pagination.innerHTML = '';
+        updateKasirSummary(null);
+
+        fetch(`get_kasir_detail.php?${buildKasirDetailParams()}`)
           .then(response => {
             if (!response.ok) {
-              throw new Error('Network response was not ok');
+              throw new Error('Gagal memuat data');
             }
             return response.json();
           })
           .then(result => {
-            // Clear tbody
             tbody.innerHTML = '';
-            
+
+            updateKasirFilters(result.filters);
+            updateKasirSummary(result.summary);
+
             if (result.data && result.data.length > 0) {
-              // Populate table
               result.data.forEach((item, index) => {
                 const row = document.createElement('tr');
-                row.innerHTML = `
-                  <td class="text-center">${((currentKasirPage - 1) * 10) + index + 1}</td>
-                  <td>${item.kode_payment}</td>
-                  <td>${item.tanggal}</td>
-                  <td class="text-center">${item.jam}</td>
-                  <td>${item.kategori}</td>
-                  <td class="text-center">${item.diskon || '-'}</td>
-                  <td class="text-end">Rp ${item.total_diskon_formatted}</td>
-                  <td class="text-end">Rp ${item.total_kotor_formatted}</td>
-                  <td class="text-end fw-bold">Rp ${item.total_bersih_formatted}</td>
-                `;
+                const baseIndex = (currentKasirPage - 1) * KASIR_DETAIL_PAGE_SIZE;
+
+                const cells = [
+                  { text: baseIndex + index + 1, className: 'text-center fw-semibold' },
+                  { text: item.kode_payment || '-', className: 'text-start fw-semibold' },
+                  { text: item.jam || '-', className: 'text-center text-nowrap' },
+                  { category: item.kategori || '-', className: 'text-start' },
+                  { text: item.diskon || '-', className: 'text-start' },
+                  { text: `Rp ${item.total_diskon_formatted || '0'}`, className: 'text-end' },
+                  { text: `Rp ${item.total_kotor_formatted || '0'}`, className: 'text-end' },
+                  { text: `Rp ${item.total_bersih_formatted || '0'}`, className: 'text-end fw-bold text-primary' }
+                ];
+
+                cells.forEach(cellData => {
+                  const td = document.createElement('td');
+                  td.className = cellData.className;
+                  if (cellData.category !== undefined) {
+                    td.innerHTML = `<span class="badge ${getKategoriBadgeClass(cellData.category)} px-3 py-2">${escapeHtml(cellData.category)}</span>`;
+                  } else {
+                    td.textContent = cellData.text;
+                  }
+                  row.appendChild(td);
+                });
+
                 tbody.appendChild(row);
               });
-              
-              // Update pagination
+
               updateKasirPagination(result.pagination);
             } else {
               tbody.innerHTML = `
                 <tr>
-                  <td colspan="9" class="text-center text-muted py-4">
+                  <td colspan="8" class="text-center text-muted py-5">
                     <i class="bi bi-inbox display-4 d-block mb-2"></i>
                     Tidak ada data transaksi
                   </td>
                 </tr>
               `;
-              pagination.innerHTML = '';
             }
           })
           .catch(error => {
             console.error('Error loading kasir detail:', error);
+            updateKasirSummary(null);
             tbody.innerHTML = `
               <tr>
-                <td colspan="9" class="text-center text-danger">
+                <td colspan="8" class="text-center text-danger py-5">
                   <i class="bi bi-exclamation-triangle display-4 d-block mb-2"></i>
-                  Error loading data: ${error.message}
+                  ${escapeHtml(error.message)}
                 </td>
               </tr>
             `;
@@ -1218,9 +1404,13 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
       // Function to update pagination
       function updateKasirPagination(paginationData) {
         const pagination = document.getElementById('kasir-detail-pagination');
+        if (!pagination) {
+          return;
+        }
+
         pagination.innerHTML = '';
-        
-        if (paginationData.total_pages <= 1) {
+
+        if (!paginationData || !paginationData.total_pages || paginationData.total_pages <= 1) {
           return;
         }
         
