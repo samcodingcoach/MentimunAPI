@@ -500,8 +500,8 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
                         </table>
                     </div>
                     <?php if (!empty($transfer_data)): ?>
-                    <div class="d-flex justify-content-end mt-3">
-                        <div class="badge bg-primary-subtle text-primary px-3 py-2">
+                    <div class="d-flex justify-content-end mt-3 px-4 py-2">
+                        <div class="badge bg-primary-subtle text-primary px-4 py-2">
                             <i class="bi bi-calculator me-1"></i>Total Transfer: Rp <?php echo number_format($total_transfer, 0, ',', '.'); ?>
                         </div>
                     </div>
@@ -559,7 +559,7 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
                         </table>
                     </div>
                     <?php if (!empty($qris_data)): ?>
-                    <div class="d-flex justify-content-end mt-3">
+                    <div class="d-flex justify-content-end mt-3 px-4 py-2">
                         <div class="badge bg-warning-subtle text-warning px-3 py-2">
                             <i class="bi bi-calculator me-1"></i>Total QRIS: Rp <?php echo number_format($total_qris, 0, ',', '.'); ?>
                         </div>
