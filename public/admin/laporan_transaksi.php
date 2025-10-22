@@ -177,13 +177,13 @@ if (!empty($selected_kasir)) {
             state_open_closing.manual_total_cash AS cash,
             (state_open_closing.total_qris + state_open_closing.manual_total_bank + state_open_closing.manual_total_cash) + 
             (state_open_closing.first_cash_drawer - state_open_closing.manual_total_cash) AS grand_total,
-            COALESCE(SUM(proses_pembayaran.total_diskon), 0) AS total_diskon,
+            COALESCE(SUM(CASE WHEN proses_pembayaran.`status` = 1 THEN proses_pembayaran.total_diskon ELSE 0 END), 0) AS total_diskon,
             state_open_closing.id_user,
             pegawai.nama_lengkap AS kasir
         FROM
             state_open_closing
         LEFT JOIN proses_pembayaran ON state_open_closing.id_user = proses_pembayaran.id_user
-            AND DATE(tanggal_open) BETWEEN ? AND ?
+            AND DATE(proses_pembayaran.tanggal_payment) = DATE(state_open_closing.tanggal_open)
         INNER JOIN pegawai ON state_open_closing.id_user = pegawai.id_user
         WHERE
             DATE(tanggal_open) BETWEEN ? AND ?
@@ -193,7 +193,7 @@ if (!empty($selected_kasir)) {
     ";
     
     $kasir_stmt = $conn->prepare($kasir_sql);
-    $kasir_stmt->bind_param("sssss", $tanggal_awal, $tanggal_akhir, $tanggal_awal, $tanggal_akhir, $selected_kasir);
+    $kasir_stmt->bind_param("sss", $tanggal_awal, $tanggal_akhir, $selected_kasir);
     $kasir_stmt->execute();
     $kasir_result = $kasir_stmt->get_result();
     $kasir_data = $kasir_result->fetch_all(MYSQLI_ASSOC);
