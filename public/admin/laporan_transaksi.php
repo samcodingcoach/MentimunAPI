@@ -568,6 +568,7 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
             </div>
 
             <!-- Per Kasir Tab -->
+
                         <div class="tab-pane fade" id="kasir" role="tabpanel" aria-labelledby="kasir-tab">
                             <div class="px-0">
                                 
@@ -584,8 +585,8 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
                                                 <input type="text" class="form-control" id="tanggal_akhir" name="tanggal_akhir" value="<?php echo htmlspecialchars($tanggal_akhir); ?>">
                                             </div>
                                             <div class="col-md-4">
-                                                <label for="kasir" class="form-label">Pilih Kasir</label>
-                                                <select class="form-select" id="kasir" name="kasir">
+                                                <label for="kasir_select" class="form-label">Pilih Kasir</label>
+                                                <select class="form-select" id="kasir_select" name="kasir">
                                                     <option value="">-- Pilih Kasir --</option>
                                                     <?php foreach ($kasir_list as $kasir): ?>
                                                         <option value="<?php echo htmlspecialchars($kasir['id_user']); ?>" <?php echo ($selected_kasir == $kasir['id_user']) ? 'selected' : ''; ?>>
@@ -609,14 +610,14 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
                                         <thead class="table-light text-center">
                                             <tr>
                                                 <th style="width:5%; text-align:left;">No</th>
-                                                <th style="width:12%; text-align:center;">Tanggal</th>
-                                                <th style="width:15%; text-align:left;">Kasir</th>
+                                                <th style="width:10%; text-align:center;">Tanggal</th>
+                                                <th style="width:10%; text-align:left;">Kasir</th>
                                                 <th class="text-end" style="width:12%;">Cash Awal</th>
                                                 <th class="text-end" style="width:12%;">QRIS</th>
                                                 <th class="text-end" style="width:12%;">Transfer</th>
                                                 <th class="text-end" style="width:12%;">Cash</th>
                                                 <th class="text-end" style="width:12%;">Total Diskon</th>
-                                                <th class="text-end" style="width:12%;">Grand Total</th>
+                                                <th class="text-end" style="width:auto;">Grand Total</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -638,7 +639,7 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
                                                             </span>
                                                         </a>
                                                     </td>
-                                                    <td><?php echo htmlspecialchars($row['kasir']); ?></td>
+                                                    <td class="text-start"><?php echo htmlspecialchars($row['kasir']); ?></td>
                                                     <td class="text-end">Rp <?php echo number_format($row['cash_awal'], 0, ',', '.'); ?></td>
                                                     <td class="text-end">Rp <?php echo number_format($row['qris'], 0, ',', '.'); ?></td>
                                                     <td class="text-end">Rp <?php echo number_format($row['transfer'], 0, ',', '.'); ?></td>
@@ -1077,7 +1078,7 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
             }
           });
           kasirForm.addEventListener('submit', function(e) {
-            const kasirSelect = document.getElementById('kasir');
+            const kasirSelect = document.getElementById('kasir_select');
             if (kasirSelect && !kasirSelect.value) {
               e.preventDefault();
               const toast = document.getElementById('kasirToast');
