@@ -297,7 +297,7 @@ $end_record = $total_records > 0 ? min($offset + count($promos), $total_records)
                                 <thead> 
                                     <tr>
                                         <th style="width: 5%;" class="text-start">No</th>
-                                        <th style="width: 10%; text-align: left">Kode Promo</th>
+                                        <th style="width: 10%; text-align: left">Kode</th>
                                         <th style="text-align: left">Nama Promo</th>
                                         <th style="width: 10%; text-align: center">Kuota</th>
                                         <th style="width: 15%; text-align: right">Nilai Promo</th>
