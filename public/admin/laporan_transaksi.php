@@ -18,6 +18,15 @@ $selected_date = isset($_GET['tanggal']) ? $_GET['tanggal'] : date('Y-m-d');
 $tanggal_awal = isset($_GET['tanggal_awal']) ? $_GET['tanggal_awal'] : date('Y-m-d');
 $tanggal_akhir = isset($_GET['tanggal_akhir']) ? $_GET['tanggal_akhir'] : date('Y-m-d');
 $selected_kasir = isset($_GET['kasir']) ? $_GET['kasir'] : '';
+$kasir_export_query = '';
+if (!empty($selected_kasir)) {
+    $kasir_export_query = http_build_query([
+        'tab' => 'kasir',
+        'tanggal_awal' => $tanggal_awal,
+        'tanggal_akhir' => $tanggal_akhir,
+        'kasir' => $selected_kasir
+    ]);
+}
 
 // Get parameters for Semua tab
 $semua_tanggal1 = isset($_GET['tanggal1']) ? $_GET['tanggal1'] : date('Y-m-d');
@@ -170,35 +179,35 @@ if (!empty($selected_kasir)) {
 }
 
 // Query for Per Kasir data
+$kasir_sql = "
+    SELECT 
+        state_open_closing.id_open, 
+        DATE_FORMAT(tanggal_open, '%d/%m/%Y') as tanggal_open,
+        (state_open_closing.first_cash_drawer - state_open_closing.manual_total_cash) AS cash_awal,
+        state_open_closing.total_qris AS qris,
+        state_open_closing.manual_total_bank AS transfer,
+        state_open_closing.manual_total_cash AS cash,
+        (state_open_closing.total_qris + state_open_closing.manual_total_bank + state_open_closing.manual_total_cash) + 
+        (state_open_closing.first_cash_drawer - state_open_closing.manual_total_cash) AS grand_total,
+        DATE(state_open_closing.tanggal_open) AS tanggal_open_raw,
+        COALESCE(SUM(CASE WHEN proses_pembayaran.`status` = 1 THEN proses_pembayaran.total_diskon ELSE 0 END), 0) AS total_diskon,
+        state_open_closing.id_user,
+        pegawai.nama_lengkap AS kasir
+    FROM
+        state_open_closing
+    LEFT JOIN proses_pembayaran ON state_open_closing.id_user = proses_pembayaran.id_user
+        AND DATE(proses_pembayaran.tanggal_payment) = DATE(state_open_closing.tanggal_open)
+    INNER JOIN pegawai ON state_open_closing.id_user = pegawai.id_user
+    WHERE
+        DATE(tanggal_open) BETWEEN ? AND ?
+        AND state_open_closing.id_user = ?
+    GROUP BY state_open_closing.id_open
+    ORDER BY tanggal_open DESC
+";
+
 $kasir_data = [];
 $total_kasir = 0;
 if (!empty($selected_kasir)) {
-    $kasir_sql = "
-        SELECT 
-            state_open_closing.id_open, 
-            DATE_FORMAT(tanggal_open, '%d/%m/%Y') as tanggal_open,
-            (state_open_closing.first_cash_drawer - state_open_closing.manual_total_cash) AS cash_awal,
-            state_open_closing.total_qris AS qris,
-            state_open_closing.manual_total_bank AS transfer,
-            state_open_closing.manual_total_cash AS cash,
-            (state_open_closing.total_qris + state_open_closing.manual_total_bank + state_open_closing.manual_total_cash) + 
-            (state_open_closing.first_cash_drawer - state_open_closing.manual_total_cash) AS grand_total,
-            DATE(state_open_closing.tanggal_open) AS tanggal_open_raw,
-            COALESCE(SUM(CASE WHEN proses_pembayaran.`status` = 1 THEN proses_pembayaran.total_diskon ELSE 0 END), 0) AS total_diskon,
-            state_open_closing.id_user,
-            pegawai.nama_lengkap AS kasir
-        FROM
-            state_open_closing
-        LEFT JOIN proses_pembayaran ON state_open_closing.id_user = proses_pembayaran.id_user
-            AND DATE(proses_pembayaran.tanggal_payment) = DATE(state_open_closing.tanggal_open)
-        INNER JOIN pegawai ON state_open_closing.id_user = pegawai.id_user
-        WHERE
-            DATE(tanggal_open) BETWEEN ? AND ?
-            AND state_open_closing.id_user = ?
-        GROUP BY state_open_closing.id_open
-        ORDER BY tanggal_open DESC
-    ";
-    
     $kasir_stmt = $conn->prepare($kasir_sql);
     $kasir_stmt->bind_param("sss", $tanggal_awal, $tanggal_akhir, $selected_kasir);
     $kasir_stmt->execute();
@@ -208,6 +217,225 @@ if (!empty($selected_kasir)) {
 // Calculate total for Per Kasir
     foreach ($kasir_data as $row) {
         $total_kasir += $row['grand_total'];
+    }
+}
+
+if ($active_tab === 'kasir' && isset($_GET['export'])) {
+    $export_type = $_GET['export'];
+
+    if (empty($selected_kasir)) {
+        http_response_code(400);
+        exit('Silakan pilih kasir terlebih dahulu.');
+    }
+
+    $kasir_export_stmt = $conn->prepare($kasir_sql);
+    if (!$kasir_export_stmt) {
+        error_log('Kasir export prepare failed: ' . $conn->error);
+        http_response_code(500);
+        exit('Terjadi kesalahan saat mempersiapkan data.');
+    }
+
+    $kasir_export_stmt->bind_param("sss", $tanggal_awal, $tanggal_akhir, $selected_kasir);
+    if (!$kasir_export_stmt->execute()) {
+        error_log('Kasir export execute failed: ' . $kasir_export_stmt->error);
+        http_response_code(500);
+        exit('Terjadi kesalahan saat mengambil data.');
+    }
+
+    $kasir_export_result = $kasir_export_stmt->get_result();
+    $kasir_export_data = $kasir_export_result->fetch_all(MYSQLI_ASSOC);
+
+    if ($export_type === 'pdf') {
+        require_once __DIR__ . '/../libs/fpdf/fpdf.php';
+
+        $convertText = static function ($text) {
+            $text = (string)$text;
+            if (function_exists('iconv')) {
+                $converted = @iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $text);
+                if ($converted !== false) {
+                    return $converted;
+                }
+            }
+            return preg_replace('/[^\x00-\xFF]/', '', $text);
+        };
+
+        $formatCurrency = static function ($value) use ($convertText) {
+            $amount = is_numeric($value) ? (float)$value : 0.0;
+            return $convertText('Rp ' . number_format($amount, 0, ',', '.'));
+        };
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        try {
+            $pdf = new FPDF('L', 'mm', 'A4');
+            $pdf->AddPage();
+            $pdf->SetFont('Arial', 'B', 16);
+            $pdf->Cell(0, 10, $convertText('Laporan Per Kasir'), 0, 1, 'C');
+            $pdf->SetFont('Arial', '', 11);
+            $pdf->Cell(0, 7, $convertText('Periode: ' . $tanggal_awal . ' s/d ' . $tanggal_akhir), 0, 1, 'C');
+            $pdf->Cell(0, 7, $convertText('Kasir: ' . ($selected_kasir_name ?: '-')), 0, 1, 'C');
+            $pdf->Cell(0, 7, $convertText('Diunduh: ' . date('d M Y H:i')), 0, 1, 'C');
+            $pdf->Ln(4);
+
+            $headers = ['No', 'Tanggal', 'Kasir', 'Cash Awal', 'QRIS', 'Transfer', 'Cash', 'Diskon', 'Grand Total'];
+            $widths = [12, 32, 40, 30, 30, 30, 30, 30, 38];
+            $alignments = ['C', 'L', 'L', 'R', 'R', 'R', 'R', 'R', 'R'];
+
+            $pdf->SetFillColor(230, 230, 230);
+            $pdf->SetFont('Arial', 'B', 11);
+            foreach ($headers as $idx => $header) {
+                $pdf->Cell($widths[$idx], 10, $convertText($header), 1, 0, 'C', true);
+            }
+            $pdf->Ln();
+
+            $pdf->SetFont('Arial', '', 10);
+            $summaryTotals = [
+                'cash_awal' => 0.0,
+                'qris' => 0.0,
+                'transfer' => 0.0,
+                'cash' => 0.0,
+                'total_diskon' => 0.0,
+                'grand_total' => 0.0,
+            ];
+
+            if (!empty($kasir_export_data)) {
+                foreach ($kasir_export_data as $i => $row) {
+                    $cash_awal_value = is_numeric($row['cash_awal']) ? (float)$row['cash_awal'] : 0.0;
+                    $qris_value = is_numeric($row['qris']) ? (float)$row['qris'] : 0.0;
+                    $transfer_value = is_numeric($row['transfer']) ? (float)$row['transfer'] : 0.0;
+                    $cash_value = is_numeric($row['cash']) ? (float)$row['cash'] : 0.0;
+                    $diskon_value = is_numeric($row['total_diskon']) ? (float)$row['total_diskon'] : 0.0;
+                    $grand_total_value = is_numeric($row['grand_total']) ? (float)$row['grand_total'] : 0.0;
+
+                    $summaryTotals['cash_awal'] += $cash_awal_value;
+                    $summaryTotals['qris'] += $qris_value;
+                    $summaryTotals['transfer'] += $transfer_value;
+                    $summaryTotals['cash'] += $cash_value;
+                    $summaryTotals['total_diskon'] += $diskon_value;
+                    $summaryTotals['grand_total'] += $grand_total_value;
+
+                    $cells = [
+                        $i + 1,
+                        $row['tanggal_open'],
+                        $row['kasir'],
+                        $formatCurrency($cash_awal_value),
+                        $formatCurrency($qris_value),
+                        $formatCurrency($transfer_value),
+                        $formatCurrency($cash_value),
+                        $formatCurrency($diskon_value),
+                        $formatCurrency($grand_total_value),
+                    ];
+
+                    foreach ($cells as $idx => $cell) {
+                        $pdf->Cell($widths[$idx], 8, $convertText($cell), 1, 0, $alignments[$idx]);
+                    }
+                    $pdf->Ln();
+                }
+
+                $pdf->SetFont('Arial', 'B', 10);
+                $labelWidth = $widths[0] + $widths[1] + $widths[2];
+                $pdf->Cell($labelWidth, 8, $convertText('Total'), 1, 0, 'R');
+
+                $totalColumns = [
+                    $summaryTotals['cash_awal'],
+                    $summaryTotals['qris'],
+                    $summaryTotals['transfer'],
+                    $summaryTotals['cash'],
+                    $summaryTotals['total_diskon'],
+                    $summaryTotals['grand_total'],
+                ];
+
+                for ($idx = 3; $idx < count($widths); $idx++) {
+                    $valueIndex = $idx - 3;
+                    $pdf->Cell(
+                        $widths[$idx],
+                        8,
+                        $convertText($formatCurrency($totalColumns[$valueIndex])),
+                        1,
+                        $idx === count($widths) - 1 ? 1 : 0,
+                        'R'
+                    );
+                }
+            } else {
+                $pdf->Cell(array_sum($widths), 8, $convertText('Tidak ada data untuk filter ini'), 1, 1, 'C');
+            }
+
+            $filename = 'laporan_kasir_' . date('Ymd_His') . '.pdf';
+            $pdf->Output('D', $filename);
+        } catch (Throwable $e) {
+            error_log('Kasir PDF export failed: ' . $e->getMessage());
+            http_response_code(500);
+            exit('Terjadi kesalahan saat membuat PDF.');
+        }
+        exit;
+    }
+
+    if ($export_type === 'excel') {
+        header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+        header('Content-Disposition: attachment; filename="laporan_kasir_' . date('Ymd_His') . '.xls"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        echo "<table border='1'>";
+        echo '<thead><tr>';
+        echo '<th>No</th><th>Tanggal</th><th>Kasir</th><th>Cash Awal</th><th>QRIS</th><th>Transfer</th><th>Cash</th><th>Diskon</th><th>Grand Total</th>';
+        echo '</tr></thead><tbody>';
+
+        $summaryTotals = [
+            'cash_awal' => 0.0,
+            'qris' => 0.0,
+            'transfer' => 0.0,
+            'cash' => 0.0,
+            'total_diskon' => 0.0,
+            'grand_total' => 0.0,
+        ];
+
+        if (!empty($kasir_export_data)) {
+            foreach ($kasir_export_data as $i => $row) {
+                $cash_awal_value = is_numeric($row['cash_awal']) ? (float)$row['cash_awal'] : 0.0;
+                $qris_value = is_numeric($row['qris']) ? (float)$row['qris'] : 0.0;
+                $transfer_value = is_numeric($row['transfer']) ? (float)$row['transfer'] : 0.0;
+                $cash_value = is_numeric($row['cash']) ? (float)$row['cash'] : 0.0;
+                $diskon_value = is_numeric($row['total_diskon']) ? (float)$row['total_diskon'] : 0.0;
+                $grand_total_value = is_numeric($row['grand_total']) ? (float)$row['grand_total'] : 0.0;
+
+                $summaryTotals['cash_awal'] += $cash_awal_value;
+                $summaryTotals['qris'] += $qris_value;
+                $summaryTotals['transfer'] += $transfer_value;
+                $summaryTotals['cash'] += $cash_value;
+                $summaryTotals['total_diskon'] += $diskon_value;
+                $summaryTotals['grand_total'] += $grand_total_value;
+
+                echo '<tr>';
+                echo '<td>' . ($i + 1) . '</td>';
+                echo '<td>' . htmlspecialchars($row['tanggal_open'], ENT_QUOTES, 'UTF-8') . '</td>';
+                echo '<td>' . htmlspecialchars($row['kasir'], ENT_QUOTES, 'UTF-8') . '</td>';
+                echo '<td>' . $cash_awal_value . '</td>';
+                echo '<td>' . $qris_value . '</td>';
+                echo '<td>' . $transfer_value . '</td>';
+                echo '<td>' . $cash_value . '</td>';
+                echo '<td>' . $diskon_value . '</td>';
+                echo '<td>' . $grand_total_value . '</td>';
+                echo '</tr>';
+            }
+
+            echo '<tr>';
+            echo '<td colspan="3"><strong>Total</strong></td>';
+            echo '<td><strong>' . $summaryTotals['cash_awal'] . '</strong></td>';
+            echo '<td><strong>' . $summaryTotals['qris'] . '</strong></td>';
+            echo '<td><strong>' . $summaryTotals['transfer'] . '</strong></td>';
+            echo '<td><strong>' . $summaryTotals['cash'] . '</strong></td>';
+            echo '<td><strong>' . $summaryTotals['total_diskon'] . '</strong></td>';
+            echo '<td><strong>' . $summaryTotals['grand_total'] . '</strong></td>';
+            echo '</tr>';
+        } else {
+            echo "<tr><td colspan='9'>Tidak ada data untuk filter ini</td></tr>";
+        }
+
+        echo '</tbody></table>';
+        exit;
     }
 }
 
@@ -291,7 +519,7 @@ if ($active_tab === 'semua' && isset($_GET['export'])) {
         }
 
         try {
-            $pdf = new FPDF('P', 'mm', 'A4');
+            $pdf = new FPDF('L', 'mm', 'A4');
             $pdf->AddPage();
             $pdf->SetFont('Arial', 'B', 16);
             $pdf->Cell(0, 10, $convertText('Laporan Semua Transaksi'), 0, 1, 'C');
@@ -305,7 +533,7 @@ if ($active_tab === 'semua' && isset($_GET['export'])) {
             $pdf->Ln(4);
 
             $headers = ['No', 'Kode', 'ID Tagihan', 'Kategori', 'Total'];
-            $widths = [15, 60, 60, 25, 30];
+            $widths = [15, 80, 80, 40, 50];
             $alignments = ['C', 'L', 'L', 'C', 'R'];
 
             $pdf->SetFillColor(230, 230, 230);
@@ -751,15 +979,15 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
                                     <div class="card-body px-0">
                                         <form method="GET" class="row g-3 align-items-end px-4 py-2"  id="kasirFilterForm">
                                             <input type="hidden" name="tab" value="kasir">
-                                            <div class="col-md-3">
+                                            <div class="col-12 col-md-3 col-lg-2">
                                                 <label for="tanggal_awal" class="form-label">Tanggal Awal</label>
                                                 <input type="text" class="form-control" id="tanggal_awal" name="tanggal_awal" value="<?php echo htmlspecialchars($tanggal_awal); ?>">
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="col-12 col-md-3 col-lg-2">
                                                 <label for="tanggal_akhir" class="form-label">Tanggal Akhir</label>
                                                 <input type="text" class="form-control" id="tanggal_akhir" name="tanggal_akhir" value="<?php echo htmlspecialchars($tanggal_akhir); ?>">
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-12 col-md-3 col-lg-3">
                                                 <label for="kasir_select" class="form-label">Pilih Kasir</label>
                                                 <select class="form-select" id="kasir_select" name="kasir">
                                                     <option value="">-- Pilih Kasir --</option>
@@ -770,11 +998,25 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
                                                     <?php endforeach; ?>
                                                 </select>
                                             </div>
-                                            <div class="col-md-2">
+                                            <div class="col-12 col-md-3 col-lg-2">
                                                 <button type="submit" class="btn btn-primary w-100">
                                                     <i class="bi bi-search me-2"></i>Tampilkan
                                                 </button>
                                             </div>
+                                            <?php if (!empty($selected_kasir) && !empty($kasir_data)): ?>
+                                            <div class="col-12 col-md-6 col-lg-3">
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    <a href="?export=pdf&amp;<?php echo htmlspecialchars($kasir_export_query, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-sm border flex-fill d-inline-flex align-items-center justify-content-center gap-2 px-3" style="background:#fff;color:#ff4d8d;font-size:1rem; min-width:120px;">
+                                                        <i class="bi bi-file-earmark-pdf fs-5"></i>
+                                                        <span class="fw-semibold">PDF</span>
+                                                    </a>
+                                                    <a href="?export=excel&amp;<?php echo htmlspecialchars($kasir_export_query, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-sm border flex-fill d-inline-flex align-items-center justify-content-center gap-2 px-3" style="background:#fff;color:#28a745;font-size:1rem; min-width:120px;">
+                                                        <i class="bi bi-file-earmark-excel fs-5"></i>
+                                                        <span class="fw-semibold">Excel</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <?php endif; ?>
                                         </form>
                                     </div>
                                 </div>
