@@ -26,6 +26,12 @@ $semua_kategori = isset($_GET['kategori']) ? $_GET['kategori'] : 'Semua';
 $semua_page = isset($_GET['semua_page']) ? (int)$_GET['semua_page'] : 1;
 $semua_limit = 15;
 $semua_offset = ($semua_page - 1) * $semua_limit;
+$semua_export_query = http_build_query([
+    'tab' => 'semua',
+    'tanggal1' => $semua_tanggal1,
+    'tanggal2' => $semua_tanggal2,
+    'kategori' => $semua_kategori
+]);
 
 // Get active tab
 $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'tunai';
@@ -214,6 +220,174 @@ if ($semua_kategori !== 'Semua') {
     $semua_where .= " AND metode_pembayaran.kategori = ?";
     $semua_params[] = $semua_kategori;
     $semua_types .= "s";
+}
+
+$semua_export_params = $semua_params;
+$semua_export_types = $semua_types;
+
+if ($active_tab === 'semua' && isset($_GET['export'])) {
+    $export_type = $_GET['export'];
+    $semua_export_sql = "
+        SELECT
+            proses_pembayaran.kode_payment AS kode,
+            proses_pembayaran.id_tagihan,
+            proses_pembayaran.jumlah_dibayarkan AS total,
+            metode_pembayaran.kategori
+        FROM
+            proses_pembayaran
+        INNER JOIN
+            metode_pembayaran ON proses_pembayaran.id_bayar = metode_pembayaran.id_bayar
+        WHERE
+            $semua_where
+        ORDER BY proses_pembayaran.tanggal_payment DESC
+    ";
+
+    if (!empty($semua_export_params)) {
+        $semua_export_stmt = $conn->prepare($semua_export_sql);
+        if (!$semua_export_stmt) {
+            error_log('Semua export prepare failed: ' . $conn->error);
+            http_response_code(500);
+            exit('Terjadi kesalahan saat mempersiapkan data.');
+        }
+        $semua_export_stmt->bind_param($semua_export_types, ...$semua_export_params);
+        if (!$semua_export_stmt->execute()) {
+            error_log('Semua export execute failed: ' . $semua_export_stmt->error);
+            http_response_code(500);
+            exit('Terjadi kesalahan saat mengambil data.');
+        }
+        $semua_export_result = $semua_export_stmt->get_result();
+    } else {
+        $semua_export_result = $conn->query($semua_export_sql);
+        if (!$semua_export_result) {
+            error_log('Semua export query failed: ' . $conn->error);
+            http_response_code(500);
+            exit('Terjadi kesalahan saat mengambil data.');
+        }
+    }
+
+    $semua_export_data = $semua_export_result->fetch_all(MYSQLI_ASSOC);
+
+    if ($export_type === 'pdf') {
+        require_once __DIR__ . '/../libs/fpdf/fpdf.php';
+
+        $convertText = static function ($text) {
+            $text = (string)$text;
+            if (function_exists('iconv')) {
+                $converted = @iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $text);
+                if ($converted !== false) {
+                    return $converted;
+                }
+            }
+            return preg_replace('/[^\x00-\xFF]/', '', $text);
+        };
+
+        $formatCurrency = static function ($value) use ($convertText) {
+            $amount = is_numeric($value) ? (float)$value : 0.0;
+            return $convertText('Rp ' . number_format($amount, 0, ',', '.'));
+        };
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        try {
+            $pdf = new FPDF('P', 'mm', 'A4');
+            $pdf->AddPage();
+            $pdf->SetFont('Arial', 'B', 16);
+            $pdf->Cell(0, 10, $convertText('Laporan Semua Transaksi'), 0, 1, 'C');
+            $pdf->SetFont('Arial', '', 11);
+            $subtitle = 'Periode: ' . $semua_tanggal1 . ' s/d ' . $semua_tanggal2;
+            if ($semua_kategori !== 'Semua') {
+                $subtitle .= ' | Kategori: ' . $semua_kategori;
+            }
+            $pdf->Cell(0, 7, $convertText($subtitle), 0, 1, 'C');
+            $pdf->Cell(0, 7, $convertText('Diunduh: ' . date('d M Y H:i')), 0, 1, 'C');
+            $pdf->Ln(4);
+
+            $headers = ['No', 'Kode', 'ID Tagihan', 'Kategori', 'Total'];
+            $widths = [15, 60, 60, 25, 30];
+            $alignments = ['C', 'L', 'L', 'C', 'R'];
+
+            $pdf->SetFillColor(230, 230, 230);
+            $pdf->SetFont('Arial', 'B', 11);
+            foreach ($headers as $idx => $header) {
+                $pdf->Cell($widths[$idx], 10, $convertText($header), 1, 0, 'C', true);
+            }
+            $pdf->Ln();
+
+            $pdf->SetFont('Arial', '', 10);
+            $grand_total_export = 0.0;
+            if (!empty($semua_export_data)) {
+                foreach ($semua_export_data as $i => $row) {
+                    $numeric_total = is_numeric($row['total']) ? (float)$row['total'] : 0.0;
+                    $grand_total_export += $numeric_total;
+                    $cells = [
+                        $i + 1,
+                        $row['kode'],
+                        $row['id_tagihan'],
+                        $row['kategori'],
+                        $formatCurrency($numeric_total) . ' '
+                    ];
+
+                    foreach ($cells as $idx => $cell) {
+                        $pdf->Cell($widths[$idx], 8, $convertText($cell), 1, 0, $alignments[$idx]);
+                    }
+                    $pdf->Ln();
+                }
+
+                $pdf->SetFont('Arial', 'B', 10);
+                $label_width = $widths[0] + $widths[1] + $widths[2] + $widths[3];
+                $pdf->Cell($label_width, 8, $convertText('Grand Total'), 1, 0, 'R');
+                $pdf->Cell($widths[4], 8, $convertText($formatCurrency($grand_total_export) . ' '), 1, 1, 'R');
+            } else {
+                $pdf->Cell(array_sum($widths), 8, $convertText('Tidak ada data untuk filter ini'), 1, 1, 'C');
+            }
+
+            $filename = 'laporan_semua_transaksi_' . date('Ymd_His') . '.pdf';
+            $pdf->Output('D', $filename);
+        } catch (Throwable $e) {
+            error_log('Semua PDF export failed: ' . $e->getMessage());
+            http_response_code(500);
+            exit('Terjadi kesalahan saat membuat PDF.');
+        }
+        exit;
+    }
+
+    if ($export_type === 'excel') {
+        header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+        header('Content-Disposition: attachment; filename="laporan_semua_transaksi_' . date('Ymd_His') . '.xls"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        echo "<table border='1'>";
+        echo '<thead><tr>';
+        echo '<th>No</th><th>Kode</th><th>ID Tagihan</th><th>Kategori</th><th>Total</th>';
+        echo '</tr></thead><tbody>';
+
+        $grand_total_export = 0.0;
+        if (!empty($semua_export_data)) {
+            foreach ($semua_export_data as $i => $row) {
+                $total_value = is_numeric($row['total']) ? (float)$row['total'] : 0;
+                $grand_total_export += $total_value;
+                echo '<tr>';
+                echo '<td>' . ($i + 1) . '</td>';
+                echo '<td>' . htmlspecialchars($row['kode'], ENT_QUOTES, 'UTF-8') . '</td>';
+                echo '<td>' . htmlspecialchars($row['id_tagihan'], ENT_QUOTES, 'UTF-8') . '</td>';
+                echo '<td>' . htmlspecialchars($row['kategori'], ENT_QUOTES, 'UTF-8') . '</td>';
+                echo '<td>' . $total_value . '</td>';
+                echo '</tr>';
+            }
+            echo '<tr>';
+            echo '<td colspan="4"><strong>Grand Total</strong></td>';
+            echo '<td><strong>' . $grand_total_export . '</strong></td>';
+            echo '</tr>';
+        } else {
+            echo "<tr><td colspan='5'>Tidak ada data untuk filter ini</td></tr>";
+        }
+
+        echo '</tbody></table>';
+        exit;
+    }
 }
 
 // Main query for Semua tab
@@ -676,15 +850,15 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
                                 <form method="GET" class="row g-3 align-items-end mb-4 px-4 py-4">
                                     <input type="hidden" name="tab" value="semua">
                                     <input type="hidden" name="semua_page" value="1">
-                                    <div class="col-md-3">
+                                    <div class="col-12 col-md-3 col-lg-2">
                                         <label for="tanggal1" class="form-label">Tanggal Awal</label>
                                         <input type="text" class="form-control" id="tanggal1" name="tanggal1" value="<?php echo htmlspecialchars($semua_tanggal1); ?>">
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-12 col-md-3 col-lg-2">
                                         <label for="tanggal2" class="form-label">Tanggal Akhir</label>
                                         <input type="text" class="form-control" id="tanggal2" name="tanggal2" value="<?php echo htmlspecialchars($semua_tanggal2); ?>">
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-12 col-md-3 col-lg-2">
                                         <label for="kategori" class="form-label">Kategori</label>
                                         <select class="form-select" id="kategori" name="kategori">
                                             <option value="Semua" <?php echo $semua_kategori == 'Semua' ? 'selected' : ''; ?>>Semua</option>
@@ -693,10 +867,23 @@ $total_jenis_transaksi = count($tunai_data) + count($transfer_data) + count($qri
                                             <option value="QRIS" <?php echo $semua_kategori == 'QRIS' ? 'selected' : ''; ?>>QRIS</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-3">
-                                        <button type="submit" class="btn btn-primary w-100">
-                                            <i class="bi bi-search me-2"></i>Tampilkan
-                                        </button>
+                                    <div class="col-12 col-md-3 col-lg-6">
+                                        <div class="d-flex flex-wrap justify-content-end gap-2">
+                                            <button type="submit" class="btn btn-primary d-inline-flex align-items-center gap-2">
+                                                <i class="bi bi-search"></i>
+                                                <span>Tampilkan</span>
+                                            </button>
+                                            <?php if (!empty($semua_data)): ?>
+                                            <a href="?export=pdf&amp;<?php echo htmlspecialchars($semua_export_query . '&semua_page=' . $semua_page, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-sm border d-inline-flex align-items-center justify-content-center gap-2 px-3" style="background:#fff;color:#ff4d8d;font-size:1rem;">
+                                                <i class="bi bi-file-earmark-pdf fs-5"></i>
+                                                <span class="fw-semibold">PDF</span>
+                                            </a>
+                                            <a href="?export=excel&amp;<?php echo htmlspecialchars($semua_export_query . '&semua_page=' . $semua_page, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-sm border d-inline-flex align-items-center justify-content-center gap-2 px-3" style="background:#fff;color:#28a745;font-size:1rem;">
+                                                <i class="bi bi-file-earmark-excel fs-5"></i>
+                                                <span class="fw-semibold">Excel</span>
+                                            </a>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
                                 </form>
 
