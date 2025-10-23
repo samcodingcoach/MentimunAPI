@@ -13,6 +13,10 @@ $error = '';
 // Get date parameters
 $tgl_start = isset($_GET['tgl_start']) ? $_GET['tgl_start'] : date('Y-m-d');
 $tgl_end = isset($_GET['tgl_end']) ? $_GET['tgl_end'] : date('Y-m-d');
+$export_query = http_build_query([
+    'tgl_start' => $tgl_start,
+    'tgl_end' => $tgl_end
+]);
 
 // SQL 1: Pengeluaran Pembelian Bahan (PO)
 $sql_po = "SELECT
@@ -113,6 +117,152 @@ $sum_penjualan2 = 0;
 foreach ($rincianpenjualan2 as $rowpenjualan2) {
     $sum_penjualan2 += str_replace(',', '', $rowpenjualan2['total']);
 }
+
+$total_pengeluaran = $sum_po + $sum_bahan;
+$total_penjualan = $sum_penjualanb + $sum_penjualan2;
+$net_profit = $total_penjualan - $total_pengeluaran;
+
+if (isset($_GET['export']) && $_GET['export'] === 'pdf') {
+    require_once __DIR__ . '/../libs/fpdf/fpdf.php';
+
+    $convertText = static function ($text) {
+        $text = (string)$text;
+        if (function_exists('iconv')) {
+            $converted = @iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $text);
+            if ($converted !== false) {
+                return $converted;
+            }
+        }
+        return preg_replace('/[^\x00-\xFF]/', '', $text);
+    };
+
+    $formatCurrency = static function ($value) use ($convertText) {
+        $amount = is_numeric($value) ? (float)$value : 0.0;
+        return $convertText('Rp ' . number_format($amount, 0, ',', '.'));
+    };
+
+    $chart_data = [
+        'Pengeluaran PO' => $sum_po,
+        'Pengeluaran Produk' => $sum_bahan,
+        'Penjualan Bruto' => $sum_penjualanb,
+        'Penjualan Neto' => $sum_penjualan2,
+    ];
+
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+
+    try {
+        $pdf = new FPDF('L', 'mm', 'A4');
+        $pdf->SetMargins(12, 12, 12);
+        $pdf->AddPage();
+
+        $pdf->SetDrawColor(220, 220, 220);
+        $pdf->SetFont('Arial', 'B', 18);
+        $pdf->Cell(0, 12, $convertText('Ringkasan Laporan Pengeluaran vs Penjualan'), 0, 1, 'C');
+        $pdf->SetFont('Arial', '', 11);
+        $pdf->Cell(0, 7, $convertText('Periode: ' . $tgl_start . ' s/d ' . $tgl_end), 0, 1, 'C');
+        $pdf->Cell(0, 6, $convertText('Diunduh: ' . date('d M Y H:i')), 0, 1, 'C');
+        $pdf->Ln(6);
+
+    $summary_headers = ['Kategori', 'Nominal'];
+    $summary_widths = [190, 83];
+
+        $summary_rows = [
+            ['Pengeluaran - Pembelian Bahan (PO)', $sum_po],
+            ['Pengeluaran - Produk Bahan Terpakai', $sum_bahan],
+            ['Total Pengeluaran', $total_pengeluaran],
+            ['Penjualan - Bruto', $sum_penjualanb],
+            ['Penjualan - Neto', $sum_penjualan2],
+            ['Total Penjualan', $total_penjualan],
+        ];
+
+        $pdf->SetFont('Arial', 'B', 11);
+        $pdf->SetFillColor(230, 230, 230);
+        foreach ($summary_headers as $idx => $header) {
+            $pdf->Cell($summary_widths[$idx], 9, $convertText($header), 1, 0, 'C', true);
+        }
+        $pdf->Ln();
+
+        $pdf->SetFont('Arial', '', 10);
+        foreach ($summary_rows as $row) {
+            $pdf->Cell($summary_widths[0], 8, $convertText($row[0]), 1, 0, 'L');
+            $pdf->Cell($summary_widths[1], 8, $formatCurrency($row[1]), 1, 1, 'R');
+        }
+
+        $pdf->Ln(6);
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(0, 8, $convertText('Net Profit'), 0, 1, 'L');
+
+        $pdf->SetFont('Arial', '', 11);
+        if ($net_profit >= 0) {
+            $pdf->SetFillColor(223, 240, 216);
+            $pdf->SetTextColor(34, 139, 34);
+        } else {
+            $pdf->SetFillColor(250, 218, 221);
+            $pdf->SetTextColor(178, 34, 34);
+        }
+        $pdf->Cell(100, 10, $convertText('Laba Bersih'), 1, 0, 'L', true);
+        $pdf->Cell(70, 10, $formatCurrency($net_profit), 1, 1, 'R', true);
+        $pdf->SetTextColor(0, 0, 0);
+
+    $pdf->AddPage();
+    $pdf->SetAutoPageBreak(false);
+    $pdf->SetFont('Arial', 'B', 14);
+    $pdf->Cell(0, 10, $convertText('Visualisasi Ringkasan'), 0, 1, 'L');
+    $pdf->Ln(2);
+
+    $chart_origin_x = 30;
+    $chart_origin_y = 185;
+    $chart_height = 120;
+    $chart_width = 240;
+    $bar_padding = 20;
+    $bar_count = count($chart_data);
+    $max_value = max(array_map('floatval', $chart_data)) ?: 1;
+    $bar_width = ($chart_width - ($bar_padding * ($bar_count + 1))) / $bar_count;
+
+    $pdf->SetDrawColor(180, 180, 180);
+    $pdf->Line($chart_origin_x, $chart_origin_y - $chart_height, $chart_origin_x, $chart_origin_y);
+    $pdf->Line($chart_origin_x, $chart_origin_y, $chart_origin_x + $chart_width, $chart_origin_y);
+
+    $pdf->SetFont('Arial', '', 10);
+    $index = 0;
+    $bar_colors = [
+        [231, 76, 60],
+        [214, 90, 49],
+        [39, 174, 96],
+        [46, 134, 193],
+    ];
+
+    foreach ($chart_data as $label => $value) {
+        $x = $chart_origin_x + $bar_padding + ($index * ($bar_width + $bar_padding));
+        $bar_height = $max_value > 0 ? ($value / $max_value) * ($chart_height - 20) : 0;
+        $y = $chart_origin_y - $bar_height;
+
+        $color = $bar_colors[$index % count($bar_colors)];
+        $pdf->SetFillColor($color[0], $color[1], $color[2]);
+        $pdf->Rect($x, $y, $bar_width, $bar_height, 'DF');
+
+        $pdf->SetXY($x, $y - 10);
+        $pdf->Cell($bar_width, 6, $formatCurrency($value), 0, 0, 'C');
+
+        $pdf->SetXY($x, $chart_origin_y + 6);
+        $pdf->Cell($bar_width, 6, $convertText($label), 0, 0, 'C');
+
+        $index++;
+    }
+
+    $pdf->SetAutoPageBreak(true, 15);
+
+        $filename = 'ringkasan_pengeluaran_penjualan_' . date('Ymd_His') . '.pdf';
+        $pdf->Output('D', $filename);
+    } catch (Throwable $e) {
+        error_log('Ringkasan pengeluaran PDF export failed: ' . $e->getMessage());
+        http_response_code(500);
+        exit('Terjadi kesalahan saat membuat PDF.');
+    }
+    exit;
+}
 ?>
 
 <!doctype html>
@@ -156,18 +306,24 @@ foreach ($rincianpenjualan2 as $rowpenjualan2) {
                 </div>
                 <div class="card-body">
                     <form method="GET" class="row g-3 align-items-end">
-                        <div class="col-md-4">
+                        <div class="col-12 col-md-3 col-lg-3">
                             <label for="tgl_start" class="form-label">Tanggal Mulai</label>
                             <input type="text" class="form-control" id="tgl_start" name="tgl_start" value="<?php echo htmlspecialchars($tgl_start); ?>" required>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-12 col-md-3 col-lg-3">
                             <label for="tgl_end" class="form-label">Tanggal Selesai</label>
                             <input type="text" class="form-control" id="tgl_end" name="tgl_end" value="<?php echo htmlspecialchars($tgl_end); ?>" required>
                         </div>
-                        <div class="col-md-4">
-                            <button type="submit" class="btn btn-primary">
+                        <div class="col-12 col-md-3 col-lg-2">
+                            <button type="submit" class="btn btn-primary w-100">
                                 <i class="bi bi-search me-2"></i>Tampilkan
                             </button>
+                        </div>
+                        <div class="col-12 col-md-3 col-lg-2">
+                            <a href="?export=pdf&amp;<?php echo htmlspecialchars($export_query, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2">
+                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                                <span>Export PDF</span>
+                            </a>
                         </div>
                     </form>
                 </div>
