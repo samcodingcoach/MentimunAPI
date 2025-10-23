@@ -251,6 +251,10 @@ $limit = 20;
 $offset = ($page - 1) * $limit;
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $filter = isset($_GET['filter']) ? trim($_GET['filter']) : '';
+$export_params = http_build_query([
+    'search' => $search,
+    'filter' => $filter
+]);
 
 // Build WHERE clause for search and filter
 $where_conditions = [];
@@ -273,6 +277,158 @@ if (!empty($filter) && in_array($filter, ['1', '0'])) {
 }
 
 $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+
+if (isset($_GET['export'])) {
+    $export_type = $_GET['export'];
+    $export_sql = "
+        SELECT
+            pm.id_produk,
+            pm.kode_produk,
+            CONCAT('[', km.nama_kategori, '] ', pm.nama_produk) AS nama_produk,
+            COALESCE(hm.nominal, 0) AS harga_nominal,
+            CASE WHEN hm.nominal IS NULL THEN 1 ELSE 0 END AS harga_not_set,
+            DATE_FORMAT(hm.tgl, '%d %M %Y') AS tgl,
+            pm.aktif
+        FROM produk_menu pm
+        INNER JOIN kategori_menu km ON pm.id_kategori = km.id_kategori
+        LEFT JOIN (
+            SELECT id_produk, MAX(tgl) AS max_tgl
+            FROM harga_menu
+            GROUP BY id_produk
+        ) AS lh ON pm.id_produk = lh.id_produk
+        LEFT JOIN harga_menu hm ON pm.id_produk = hm.id_produk AND hm.tgl = lh.max_tgl
+        $where_clause
+        ORDER BY COALESCE(hm.tgl, '1970-01-01') DESC, pm.nama_produk ASC
+    ";
+
+    if (!empty($params)) {
+        $export_stmt = $conn->prepare($export_sql);
+        if (!$export_stmt) {
+            error_log('Export prepare failed: ' . $conn->error);
+            http_response_code(500);
+            exit('Terjadi kesalahan saat mempersiapkan data.');
+        }
+        $export_stmt->bind_param($types, ...$params);
+        if (!$export_stmt->execute()) {
+            error_log('Export execute failed: ' . $export_stmt->error);
+            http_response_code(500);
+            exit('Terjadi kesalahan saat mengambil data.');
+        }
+        $export_result = $export_stmt->get_result();
+    } else {
+        $export_result = $conn->query($export_sql);
+        if (!$export_result) {
+            error_log('Export query failed: ' . $conn->error);
+            http_response_code(500);
+            exit('Terjadi kesalahan saat mengambil data.');
+        }
+    }
+
+    $export_data = $export_result->fetch_all(MYSQLI_ASSOC);
+
+    if ($export_type === 'pdf') {
+        require_once __DIR__ . '/../libs/fpdf/fpdf.php';
+
+        $convertText = static function ($text) {
+            $text = (string)$text;
+            if (function_exists('iconv')) {
+                $converted = @iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $text);
+                if ($converted !== false) {
+                    return $converted;
+                }
+            }
+            return preg_replace('/[^\x00-\xFF]/', '', $text);
+        };
+
+        $formatCurrency = static function ($value) use ($convertText) {
+            $amount = is_numeric($value) ? (float)$value : 0.0;
+            return $convertText('Rp ' . number_format($amount, 0, ',', '.'));
+        };
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        try {
+            $pdf = new FPDF('L', 'mm', 'A4');
+            $pdf->AddPage();
+            $pdf->SetFont('Arial', 'B', 16);
+            $pdf->Cell(0, 10, $convertText('Laporan Produk Menu'), 0, 1, 'C');
+            $pdf->SetFont('Arial', '', 11);
+            $pdf->Cell(0, 7, $convertText('Tanggal: ' . date('d M Y H:i')), 0, 1, 'C');
+            $pdf->Ln(4);
+
+            $headers = ['No', 'Kode', 'Nama Produk', 'Harga', 'Tanggal', 'Status'];
+            $widths = [15, 30, 120, 40, 40, 30];
+
+            $pdf->SetFillColor(230, 230, 230);
+            $pdf->SetFont('Arial', 'B', 11);
+            foreach ($headers as $idx => $header) {
+                $pdf->Cell($widths[$idx], 10, $convertText($header), 1, 0, 'C', true);
+            }
+            $pdf->Ln();
+
+            $pdf->SetFont('Arial', '', 10);
+            if (!empty($export_data)) {
+                foreach ($export_data as $i => $row) {
+                    $cells = [
+                        $i + 1,
+                        $row['kode_produk'],
+                        $row['nama_produk'],
+                        $row['harga_not_set'] ? $convertText('Not Set') : $formatCurrency($row['harga_nominal']),
+                        $row['tgl'] ?? '-',
+                        $row['aktif'] == '1' ? 'Aktif' : 'Nonaktif',
+                    ];
+
+                    foreach ($cells as $idx => $cell) {
+                        $pdf->Cell($widths[$idx], 8, $convertText($cell), 1, 0, $idx === 2 ? 'L' : 'C');
+                    }
+                    $pdf->Ln();
+                }
+            } else {
+                $pdf->Cell(array_sum($widths), 8, $convertText('Tidak ada data'), 1, 1, 'C');
+            }
+
+            $filename = 'laporan_menu_' . date('Ymd_His') . '.pdf';
+            $pdf->Output('D', $filename);
+        } catch (Throwable $e) {
+            error_log('PDF export failed: ' . $e->getMessage());
+            http_response_code(500);
+            exit('Terjadi kesalahan saat membuat PDF.');
+        }
+        exit;
+    }
+
+    if ($export_type === 'excel') {
+        header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+        header('Content-Disposition: attachment; filename="laporan_menu_' . date('Ymd_His') . '.xls"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        echo "<table border='1'>";
+        echo '<thead><tr>';
+        echo '<th>No</th><th>Kode</th><th>Nama Produk</th><th>Harga</th><th>Tanggal</th><th>Status</th>';
+        echo '</tr></thead><tbody>';
+
+        if (!empty($export_data)) {
+            foreach ($export_data as $i => $row) {
+                echo '<tr>';
+                echo '<td>' . ($i + 1) . '</td>';
+                echo '<td>' . htmlspecialchars($row['kode_produk'], ENT_QUOTES, 'UTF-8') . '</td>';
+                echo '<td>' . htmlspecialchars($row['nama_produk'], ENT_QUOTES, 'UTF-8') . '</td>';
+                $harga_nominal = is_numeric($row['harga_nominal']) ? (float)$row['harga_nominal'] : 0;
+                echo '<td>' . $harga_nominal . '</td>';
+                echo '<td>' . htmlspecialchars($row['tgl'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>';
+                echo '<td>' . ($row['aktif'] == '1' ? 'Aktif' : 'Nonaktif') . '</td>';
+                echo '</tr>';
+            }
+        } else {
+            echo "<tr><td colspan='6'>Tidak ada data</td></tr>";
+        }
+
+        echo '</tbody></table>';
+        exit;
+    }
+}
 
 // Complex query with UNION as specified in gemini.md
 $base_query = "
@@ -428,6 +584,16 @@ $categories = $categories_result->fetch_all(MYSQLI_ASSOC);
                             <option value="1" <?php echo $filter === '1' ? 'selected' : ''; ?>>Aktif</option>
                             <option value="0" <?php echo $filter === '0' ? 'selected' : ''; ?>>Tidak Aktif</option>
                         </select>
+                        <div class="d-flex gap-2">
+                            <a href="?export=pdf&amp;<?php echo htmlspecialchars($export_params, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-sm border d-inline-flex align-items-center justify-content-center gap-2 px-3" style="background:#fff;color:#ff4d8d;font-size:1rem;">
+                                <i class="bi bi-file-earmark-pdf fs-5"></i>
+                                <span class="fw-semibold">PDF</span>
+                            </a>
+                            <a href="?export=excel&amp;<?php echo htmlspecialchars($export_params, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-sm border d-inline-flex align-items-center justify-content-center gap-2 px-3" style="background:#fff;color:#28a745;font-size:1rem;">
+                                <i class="bi bi-file-earmark-excel fs-5"></i>
+                                <span class="fw-semibold">Excel</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
