@@ -66,10 +66,7 @@
                                 </span>
 <h2 class="text-xl font-bold leading-tight tracking-[-0.015em]">FoodCo</h2>
 </div>
-<div class="hidden md:flex items-center gap-6">
-<a class="text-sm font-medium hover:text-primary dark:hover:text-primary" href="#">All</a>
-<a class="text-sm font-medium hover:text-primary dark:hover:text-primary" href="#">Food</a>
-<a class="text-sm font-medium hover:text-primary dark:hover:text-primary" href="#">Beverages</a>
+<div id="category-filters" class="hidden md:flex items-center gap-6">
 </div>
 </div>
 <div class="flex flex-1 justify-end items-center gap-4">
@@ -141,43 +138,22 @@
 let allProducts = []; // Store all products for filtering
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Fetch products from API using the current origin to ensure correct path
-    const apiUrl = window.location.origin + '/_resto007/api/produk/list_produk.php';
-    
-    fetch(apiUrl)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            // Check if the response is JSON
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Response is not JSON');
-            }
-            return response.json();
-        })
-        .then(products => {
-            allProducts = products; // Store for filtering
+    const productApiUrl = window.location.origin + '/_resto007/api/produk/list_produk.php';
+    const categoryApiUrl = window.location.origin + '/_resto007/api/kategori_menu/list_kategori.php';
+
+    // Fetch products and categories
+    Promise.all([fetch(productApiUrl).then(res => res.json()), fetch(categoryApiUrl).then(res => res.json())])
+        .then(([products, categories]) => {
+            allProducts = products;
             displayProducts(products);
             displayRecommendations(products);
-            
-            // Optional: Scroll to products section after loading
-            setTimeout(() => {
-                const productGrid = document.getElementById('product-grid');
-                if (productGrid && productGrid.children.length > 0) {
-                    productGrid.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
-                    });
-                }
-            }, 500); // Delay slightly to ensure DOM has updated
+            displayCategoryFilters(categories);
         })
         .catch(error => {
-            console.error('Error fetching products:', error);
+            console.error('Error fetching data:', error);
             document.getElementById('product-grid').innerHTML = '<div class="text-center py-8 col-span-full text-red-500">Failed to load products. Please check if the API is working properly.</div>';
-            document.getElementById('recommendation-grid').innerHTML = '<div class="text-center py-8 col-span-full text-gray-600 dark:text-gray-400">No recommendations available</div>';
         });
-    
+
     // Setup search functionality
     const searchInput = document.querySelector('input[placeholder="Search products..."]');
     searchInput.addEventListener('input', function() {
@@ -187,49 +163,65 @@ document.addEventListener('DOMContentLoaded', function() {
         );
         displayProducts(filteredProducts);
     });
-    
-    // Setup sort functionality
-    const sortButtons = document.querySelectorAll('main button');
-    sortButtons.forEach(button => {
-        if (button.textContent.includes('Sort by')) {
-            button.addEventListener('click', function() {
-                const sortType = this.textContent.trim();
-                let sortedProducts = [...allProducts];
-                
-                if (sortType.includes('Name')) {
-                    sortedProducts.sort((a, b) => a.nama_produk.localeCompare(b.nama_produk));
-                } else if (sortType.includes('Stock')) {
-                    sortedProducts.sort((a, b) => b.stok - a.stok);
-                }
-                
-                displayProducts(sortedProducts);
+
+    // Function to display category filters
+    function displayCategoryFilters(categories) {
+        const filtersContainer = document.getElementById('category-filters');
+        if (!filtersContainer) return;
+
+        filtersContainer.innerHTML = ''; // Clear static filters
+
+        // Add 'All' filter
+        const allButton = document.createElement('a');
+        allButton.className = 'text-sm font-medium text-primary dark:text-primary'; // Active by default
+        allButton.href = '#';
+        allButton.textContent = 'All';
+        filtersContainer.appendChild(allButton);
+
+        // Add filters from API
+        categories.forEach(category => {
+            const categoryButton = document.createElement('a');
+            categoryButton.className = 'text-sm font-medium hover:text-primary dark:hover:text-primary';
+            categoryButton.href = '#';
+            categoryButton.textContent = category;
+            filtersContainer.appendChild(categoryButton);
+        });
+
+        // Add event listener for filtering
+        filtersContainer.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (e.target.tagName !== 'A') return;
+
+            const selectedCategory = e.target.textContent;
+
+            // Update active state
+            Array.from(filtersContainer.children).forEach(child => {
+                child.className = 'text-sm font-medium hover:text-primary dark:hover:text-primary';
             });
-        }
-    });
+            e.target.className = 'text-sm font-medium text-primary dark:text-primary';
+
+            // Filter products
+            if (selectedCategory === 'All') {
+                displayProducts(allProducts);
+            } else {
+                const filteredProducts = allProducts.filter(product => product.nama_kategori === selectedCategory);
+                displayProducts(filteredProducts);
+            }
+        });
+    }
     
     // Function to display products in the grid
     function displayProducts(products) {
         const productGrid = document.getElementById('product-grid');
         
         if (products.length > 0) {
-            // Clear loading message
             productGrid.innerHTML = '';
-            
-            // Create product cards for each item
             products.forEach(product => {
                 const productCard = createProductCard(product);
                 productGrid.appendChild(productCard);
             });
         } else {
-            // Show message if no products found
-            productGrid.innerHTML = '<div class="text-center py-8 col-span-full text-gray-600 dark:text-gray-400">No products found</div>';
-        }
-        
-        // Scroll to products section if needed
-        if (products.length > 0) {
-            // Optional: Smooth scroll to products section after loading
-            // Uncomment the next line if you want to auto-scroll to products
-            // productGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            productGrid.innerHTML = '<div class="text-center py-8 col-span-full text-gray-600 dark:text-gray-400">No products found for this category.</div>';
         }
     }
     
@@ -238,14 +230,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const recommendationGrid = document.getElementById('recommendation-grid');
         
         if (products.length > 0) {
-            // Take a random sample of products for recommendations
-            const sampleSize = Math.min(2, products.length);
+            const sampleSize = Math.min(5, products.length);
             const sampleProducts = [...products].sort(() => 0.5 - Math.random()).slice(0, sampleSize);
             
             recommendationGrid.innerHTML = '';
             
             sampleProducts.forEach(product => {
-                const productCard = createProductCard(product, true); // Mark as recommendation
+                const productCard = createProductCard(product, true);
                 recommendationGrid.appendChild(productCard);
             });
         } else {
@@ -255,7 +246,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to create product cards
     function createProductCard(product, isRecommendation = false) {
-        // Determine stock status and color
         let stockStatus = '';
         let stockColor = '';
         
@@ -270,23 +260,16 @@ document.addEventListener('DOMContentLoaded', function() {
             stockColor = 'bg-accent-red text-accent-red dark:text-red-400';
         }
         
-        // Format price with thousands separator
-        const formattedPrice = new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR'
-        }).format(product.harga_jual);
+        const formattedPrice = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(product.harga_jual);
         
-        // Create the product card element
         const card = document.createElement('div');
         card.className = 'flex flex-col gap-3 pb-3 rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-sm hover:shadow-lg transition-shadow duration-300 group';
         
-        // Check if image exists, fallback to noimage.jpg if not
         const imageUrl = `images/${product.kode_produk}.jpg`;
         
         card.innerHTML = `
             <div class="relative w-full aspect-square">
                 <div class="w-full h-full bg-center bg-no-repeat bg-cover" 
-                     data-alt="${product.nama_produk}" 
                      style="background-image: url('${imageUrl}');"
                      onerror="this.style.backgroundImage='url(images/noimage.jpg)'; this.onerror=null;">
                     <button class="absolute top-2 right-2 flex items-center justify-center h-8 w-8 rounded-full bg-white/70 dark:bg-black/50 text-secondary group-hover:text-accent-red transition-colors">
@@ -299,43 +282,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p class="text-secondary text-sm font-normal leading-normal">${formattedPrice}</p>
                 <div class="flex items-center gap-2 mt-1">
                     <span class="w-2.5 h-2.5 rounded-full ${stockColor.split(' ')[0]}"></span>
-                    <p class="${stockColor} text-sm font-medium leading-normal">${stockStatus}</p>
+                    <p class="${stockColor.split(' ')[1]} text-sm font-medium leading-normal">${stockStatus}</p>
                 </div>
             </div>
         `;
-        
-        
         return card;
-    }
-    
-    // Function to update stock indicator when product quantity changes
-    function updateStockIndicator(card, stock) {
-        const stockElement = card.querySelector('[class*="w-2.5 h-2.5 rounded-full"]');
-        const statusElement = card.querySelector('[class*="text-sm font-medium leading-normal"]');
-        
-        let stockStatus = '';
-        let stockColor = '';
-        
-        if (stock > 5) {
-            stockStatus = 'In Stock';
-            stockColor = 'bg-green-500 text-green-600 dark:text-green-400';
-        } else if (stock > 0) {
-            stockStatus = 'Low Stock';
-            stockColor = 'bg-accent-yellow text-amber-600 dark:text-amber-400';
-        } else {
-            stockStatus = 'Out of Stock';
-            stockColor = 'bg-accent-red text-accent-red dark:text-red-400';
-        }
-        
-        if (stockElement) {
-            stockElement.className = stockElement.className.replace(/bg-\w*-\d*/, stockColor.split(' ')[0]);
-            stockElement.className = stockElement.className.replace(/bg-\w*-\w*/, stockColor.split(' ')[0]);
-        }
-        
-        if (statusElement) {
-            statusElement.className = statusElement.className.replace(/text-\w*-\d*/g, stockColor.split(' ')[1]);
-            statusElement.textContent = stockStatus;
-    }
     }
 });
 </script>

@@ -10,8 +10,10 @@ SELECT
     ps.id_produk, 
     vp.kode_produk, 
     vp.nama_produk, 
+    vp.nama_kategori,
     ps.stok, 
-    ps.harga_jual
+    ps.harga_jual,
+    vp.nama_kategori
 FROM
     produk_sell ps
 INNER JOIN
