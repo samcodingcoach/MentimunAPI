@@ -38,10 +38,59 @@ else {
         $insert_stmt->bind_param("sss", $email, $nomor_hp, $token);
         
         if ($insert_stmt->execute()) {
-            $response = [
-                'status' => 'success',
-                'message' => 'Password reset token has been generated successfully.'
-            ];
+            
+            require_once '../../config/PHPMailer/src/Exception.php';
+            require_once '../../config/PHPMailer/src/PHPMailer.php';
+            require_once '../../config/PHPMailer/src/SMTP.php';
+
+            $stmt_smtp = $conn->prepare("SELECT email, password FROM smtp LIMIT 1");
+            $stmt_smtp->execute();
+            $smtp_result = $stmt_smtp->get_result();
+
+            if ($smtp_result->num_rows > 0) {
+                $smtp_data = $smtp_result->fetch_assoc();
+                $smtp_email = $smtp_data['email'];
+                $smtp_password = $smtp_data['password'];
+
+                $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+
+                try {
+                    //Server settings
+                    $mail->isSMTP();
+                    $mail->Host       = 'smtp.gmail.com';
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = $smtp_email;
+                    $mail->Password   = $smtp_password;
+                    $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port       = 587;
+
+                    //Recipients
+                    $mail->setFrom($smtp_email, 'Password Reset');
+                    $mail->addAddress($email);
+
+                    // Content
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Password Reset Token';
+                    $mail->Body    = 'Your password reset token is: ' . $token;
+
+                    $mail->send();
+                    $response = [
+                        'status' => 'success',
+                        'message' => 'Password reset token has been sent to your email.'
+                    ];
+                } catch (Exception $e) {
+                    $response = [
+                        'status' => 'error',
+                        'message' => "Message could not be sent. Mailer Error: {$mail->ErrorInfo}"
+                    ];
+                }
+            } else {
+                $response = [
+                    'status' => 'error',
+                    'message' => 'SMTP settings not found.'
+                ];
+            }
+            $stmt_smtp->close();
         } else {
             $response = [
                 'status' => 'error',
